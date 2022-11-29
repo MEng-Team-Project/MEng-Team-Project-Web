@@ -129,5 +129,8 @@ dist
 .yarn/install-state.gz
 .pnp.*
 
-# Ignore "/videos" directory
+# Ignore "/streams" directory
 streams/
+
+# Ignore main.db - SQLite3
+main.db
