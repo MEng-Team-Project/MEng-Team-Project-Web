@@ -1,0 +1,26 @@
+{
+  "name": "traffic-web",
+  "version": "1.0.0",
+  "description": "(Industrial Project) React Frontend and Node.js Backend for Traffic Analysis.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server/index.js",
+    "server": "nodemon server/index.js",
+    "client": "npm start --prefix client",
+    "dev": "concurrently \"npm run server\" \"npm run client\""
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MiscellaneousStuff/traffic-web.git"
+  },
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/MiscellaneousStuff/traffic-web/issues"
+  },
+  "homepage": "https://github.com/MiscellaneousStuff/traffic-web#readme",
+  "dependencies": {
+    "express": "^4.18.2"
+  }
+}
