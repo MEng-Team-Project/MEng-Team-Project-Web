@@ -1,11 +1,13 @@
 import {
     LOADING_STREAMS,
-    GET_STREAMS
+    GET_STREAMS,
+    SET_STREAM
 } from "../actions/types";
 
 const initialState = {
     streams: [],
-    streamsLoading: false
+    streamsLoading: false,
+    stream: ""
 };
 
 export default (state=initialState, action) => {
@@ -20,6 +22,11 @@ export default (state=initialState, action) => {
                 ...state,
                 streamsLoading: true
             };
+        case SET_STREAM:
+            return {
+                ...state,
+                stream: action.payload
+            }
         default:
             return state;
     }

@@ -1,0 +1,131 @@
+/* Custom properties */
+:root {
+    --button-green: rgb(15, 150, 104);
+    --button-green-hover: rgb(19, 177, 123);
+    --button-grey: rgb(106, 116, 133);
+    --button-grey-hover: rgb(160, 167, 180);
+    --button-transparent: rgb(160, 167, 180);
+    --button-transparent-hover: rgb(202, 209, 221);
+}
+
+.button {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    font-size: 0.8rem;
+    padding: 0.5rem;
+    border-radius: 3px;
+    width: 100px;
+    justify-content: space-between;
+    cursor: pointer;
+    user-select: none;
+}
+
+.button-transparent {
+    color: var(--button-transparent);
+}
+
+.button-transparent:hover {
+    color: var(--button-transparent-hover);
+}
+
+.button-green {
+    color: white;
+    background-color: var(--button-green);
+}
+
+.button-green:hover {
+    color: white;
+    background-color: var(--button-green-hover);
+}
+
+.button-grey {
+    background-color: var(--button-grey);
+}
+
+.button-grey:hover {
+    background-color: var(--button-grey-hover);
+}
+
+.button__icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.button__icon svg {
+    flex-grow: 0;
+    width: 1.2rem;
+    height: 1.2rem;
+}
+
+.button__label {
+    flex-grow: 1;
+    justify-content: center;
+    text-align: center;
+}/* Custom properties */
+:root {
+    --button-green: rgb(15, 150, 104);
+    --button-green-hover: rgb(19, 177, 123);
+    --button-grey: rgb(106, 116, 133);
+    --button-grey-hover: rgb(160, 167, 180);
+    --button-transparent: rgb(160, 167, 180);
+    --button-transparent-hover: rgb(202, 209, 221);
+}
+
+.button {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    font-size: 0.8rem;
+    padding: 0.5rem;
+    border-radius: 3px;
+    width: 100px;
+    justify-content: space-between;
+    cursor: pointer;
+    user-select: none;
+}
+
+.button-transparent {
+    color: var(--button-transparent);
+}
+
+.button-transparent:hover {
+    color: var(--button-transparent-hover);
+}
+
+.button-green {
+    color: white;
+    background-color: var(--button-green);
+}
+
+.button-green:hover {
+    color: white;
+    background-color: var(--button-green-hover);
+}
+
+.button-grey {
+    background-color: var(--button-grey);
+}
+
+.button-grey:hover {
+    background-color: var(--button-grey-hover);
+}
+
+.button__icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.button__icon svg {
+    flex-grow: 0;
+    width: 1.2rem;
+    height: 1.2rem;
+}
+
+.button__label {
+    flex-grow: 1;
+    justify-content: center;
+    text-align: center;
+}

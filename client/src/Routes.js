@@ -2,7 +2,8 @@ import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 
 import {
-    Main as MainView
+    Main as MainView,
+    Guide as GuideView
 } from './views';
 
 const AllRoutes = () => {
@@ -13,6 +14,10 @@ const AllRoutes = () => {
                     <Route
                         element={<MainView/>}
                         path="/"
+                        />
+                    <Route
+                        element={<GuideView/>}
+                        path="/guide"
                         />
                 </Routes>
             </div>

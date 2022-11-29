@@ -4,7 +4,8 @@ import axios from "axios";
 // Redux Action Types
 import {
     LOADING_STREAMS,
-    GET_STREAMS
+    GET_STREAMS,
+    SET_STREAM
 } from "./types";
 
 // Get Streams
@@ -25,6 +26,14 @@ export const getStreams = () => dispatch => {
                 payload: null
             })
         );
+};
+
+// Set Stream
+export const setStream = stream => dispatch => {
+    dispatch({
+        type: SET_STREAM,
+        payload: stream
+    });
 };
 
 // Streams Loading

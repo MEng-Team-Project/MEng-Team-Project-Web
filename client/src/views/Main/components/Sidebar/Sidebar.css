@@ -1,0 +1,251 @@
+/*
+GLOBAL
+*/
+
+.sidebar-outermost {
+    position: fixed;
+    top: 0;
+    display: flex;
+    flex-direction: row;
+}
+
+.sidebar-outer {
+    padding: 1rem;
+    padding-right: 0;
+    background-color: rgba(0, 0, 0, 0);
+    height: 100%;
+    box-sizing: border-box;
+}
+
+.sidebar {
+    width: 300px;
+    height: 100%;
+    background-color: rgb(36, 39, 48);
+    color: white;
+}
+
+.sidebar-outer-toggle {
+    background-color: rgba(0, 0, 0, 1);
+    width: fit-content;
+    height: fit-content;
+    cursor: pointer;
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    margin-top: 1rem;
+    margin-left: 1rem;
+}
+
+.sidebar-outer-toggle__icon:hover {
+    background-color: rgb(160, 167, 180);
+}
+  
+.sidebar-outer-toggle__icon {
+    background-color: rgb(106, 116, 133);
+}
+
+/*
+SIDEBAR TOP
+*/
+
+.sidebar-top_outer {
+    background-color: rgb(41, 50, 60);
+    padding-bottom: 0rem;
+    margin-bottom: 0.5rem;
+}
+
+.sidebar-top_inner {
+    padding: 1rem;
+}
+
+.sidebar-top {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+.sidebar-top__title {
+    font-weight: 400;
+}
+
+.sidebar-top__subtitle {
+    font-size: 0.9rem;
+    color: rgb(200, 200, 200);
+}
+
+.sidebar-top__tabs {
+    box-sizing: border-box;
+    padding-left: 0.5rem;
+}
+
+.sidebar-top__options svg {
+    width: 1.2rem;
+    height: 1.2rem;
+}
+
+.sidebar-top__tabs svg {
+    width: 1.2rem;
+    height: 1.2rem;
+}
+
+.sidebar-top__icon {
+    margin-left: 0.25rem;
+    margin-right: 0.25rem;
+}
+
+/*
+SIDEBAR TABS
+*/
+
+.tab {
+    margin-right: 0.5rem;
+    margin-left: 0.5rem;
+}
+
+.sidebar-tab {
+    padding: 1rem;
+}
+
+.sidebar-tab__header {
+    display: flex;
+    align-items: center;
+    font-size: 1.2rem;
+}
+
+.sidebar-tab__top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-direction: row;
+}
+
+.sidebar-separator {
+    width: 100%;
+    height: 1px;
+    background-color: rgb(58, 65, 76);
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+}
+
+/*
+STREAMS
+*/
+
+.sidebar-tab__streams {
+    display: flex;
+    flex-direction: column;
+}
+
+.sidebar-tab__streams-stream_outer {
+  display: flex;
+  flex-direction: row;
+  align-items: baseline;
+}
+
+.sidebar-tab__streams-stream_left {
+    flex-grow: 0;
+}
+
+.sidebar-tab__streams-stream_right {
+    padding: 0.5rem;
+    flex-grow: 1;
+}
+
+.sidebar-tab__streams-stream_title {
+    font-size: 0.8rem;
+    color:rgb(193, 200, 209);
+    cursor: pointer;
+    margin-bottom: 0.2rem;
+}
+
+.sidebar-tab__streams-stream_title:hover {
+    color:rgb(221, 228, 240);
+}
+
+.sidebar-tab__streams-stream_info {
+    font-size: 0.8rem;
+    color:rgb(121, 129, 141);
+}
+
+.sidebar-tab__streams-stream_square {
+    width: 10px;
+    height: 10px;
+    background-color: rgb(60, 97, 174);
+}
+
+.sidebar-tab__text {
+    font-size: 0.8rem;
+    color: rgb(121, 129, 141);
+    margin-bottom: 0.5rem;
+    margin-top: 1rem;
+}
+
+/*
+FILTERS
+*/
+
+.sidebar-filter {
+    display: flex;
+    flex-direction: column;
+    background-color: rgb(41, 50, 60);
+    margin-bottom: 1rem;
+}
+
+.sidebar-filter__field {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    box-sizing: border-box;
+    border-left: 4px solid rgb(60, 97, 174);
+    padding: 0.5rem;
+    padding-left: 1rem;
+    padding-right: 0.5rem;
+}
+
+.sidebar-filter__data-source {
+    padding: 1rem;
+    background-color: rgb(41, 46, 54);
+}
+
+.sidebar-filter-text {
+    font-size: 0.8rem;
+    color: rgb(121, 129, 141);
+    margin-bottom: 0.5rem;
+}
+
+/*
+LIVE VIDEO
+*/
+
+.sidebar-tab__map-layers {
+    background-color: rgb(41, 50, 60);
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+}
+
+.live-video__layer {
+    display: flex;
+    box-sizing: border-box;
+    align-items: center;
+    padding: 1rem;
+    padding-bottom: 0.5rem;
+    padding-top: 0.5rem;
+    background-color: rgb(41, 50, 60);
+}
+  
+.live-video__layer-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+  
+.live-video__layer-label {
+    margin-left: 1rem;
+    color: rgb(121, 129, 141);
+    font-size: 0.8rem;
+}
+  
+.live-video__layer-label-selected {
+    color: rgb(193, 200, 209);
+}

@@ -21,8 +21,11 @@
   },
   "homepage": "https://github.com/MiscellaneousStuff/traffic-web#readme",
   "dependencies": {
+    "@emotion/react": "^11.10.5",
+    "@emotion/styled": "^11.10.5",
     "@mui/icons-material": "^5.10.16",
     "@mui/material": "^5.10.16",
+    "@mui/styled-engine": "^5.10.16",
     "axios": "^1.2.0",
     "better-sqlite3": "^8.0.0",
     "cors": "^2.8.5",
