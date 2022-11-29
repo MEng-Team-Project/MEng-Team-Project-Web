@@ -8,7 +8,7 @@ import {
 const AllRoutes = () => {
     return (
         <Router>
-            <div className="app">
+            <div className="App">
                 <Routes>
                     <Route
                         element={<MainView/>}
