@@ -1,25 +1,32 @@
-import logo from './logo.svg';
 import './App.css';
 
-function App() {
+import AllRoutes from './Routes.js';
+
+const testUrl = "/streams/00001.06585.mp4";
+
+/*
+const App = props => {
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <div className="feed-outer">
+        <video
+          className="feed"
+          src={testUrl}
+          autoPlay
+          muted
+          onContextMenu={e => e.preventDefault()}>
+          Error retrieving video stream data.
+        </video>
+      </div>
     </div>
   );
 }
+*/
+
+const App = () => {
+  return (
+    <AllRoutes/>
+  )
+};
 
 export default App;
