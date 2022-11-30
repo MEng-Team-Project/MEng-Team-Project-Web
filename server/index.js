@@ -2,10 +2,11 @@
 const express = require("express");
 const app = express();
 const path = require("path");
+const fileUpload = require('express-fileupload');
 
 // Middleware
 app.use(express.json());
-console.log(__dirname + "/streams")
+app.use(fileUpload());
 app.use("/streams", express.static(__dirname + "/streams"))
 
 // Routes

@@ -15,7 +15,8 @@ import "./Main.css";
 // Components
 import {
     Sidebar,
-    ExportModal
+    ExportModal,
+    ImportModal
 } from "./components";
 
 // x1, y1, x2, y2
@@ -66,11 +67,16 @@ const BoundingBox = props => {
 
 const Main = props => {
     const [openExport, setOpenExport] = useState(false);
+    const [openImport, setOpenImport] = useState(false);
     const { streams, stream, ...rest } = props;
     const videoRef = useRef(null);
 
     const exportClose = () => {
         setOpenExport(false);
+    };
+
+    const importClose = () => {
+        setOpenImport(false);
     };
 
     useEffect(() => {
@@ -109,10 +115,15 @@ const Main = props => {
             <Sidebar
                 streams={streams}
                 setOpenExport={setOpenExport}
+                setOpenImport={setOpenImport}
                 />
             <ExportModal
                 open={openExport}
                 exportClose={exportClose}
+                streams={streams} />
+            <ImportModal
+                open={openImport}
+                importClose={importClose}
                 streams={streams} />
         </div>
     );

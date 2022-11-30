@@ -22,4 +22,35 @@ router.get("/all", (_, res) => {
     }
 });
 
+/** 
+ * @route GET api/streams/upload
+ * @desc Receives a video recording from the user and uploads it to local storage
+ * @param {files} Stream - Video Stream File
+ * @access Public
+*/
+router.put('/upload', (req, res) => {
+    console.log("req.files", req.files);
+
+    if (!req.files || Object.keys(req.files).length === 0) {
+        return res.status(400).send('No files were uploaded.');
+    } else if (!req.files.stream) {
+        return res.status(400).send('No video files were uploaded.');
+    }
+
+    // Get Upload Path for Stream File
+    const streamFile = req.files.stream;
+    const fileExt = streamFile.name.split('.').pop();
+    if (fileExt != "mp4") {
+        return res.status(400).send('Uploaded file is not an mp4 file.');
+    }
+    const uploadPath = "./server/streams/" + streamFile.name;
+
+    // Use mv() method to place the file in the server
+    streamFile.mv(uploadPath, (err) => {
+        if (err)
+            return res.status(500).send(err);
+        res.send("Video stream file uploaded!");
+    })
+});
+
 module.exports = router;

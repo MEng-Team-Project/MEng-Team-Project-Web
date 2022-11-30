@@ -83,7 +83,7 @@ const ExportModal = props => {
             <Box sx={style}>
                 <div className="modal-title">
                     <div className="modal-title__left">
-                        Export Data
+                        Export Analytics
                     </div>
                     <div className="modal-title__right">
                         <CloseOutlinedIcon

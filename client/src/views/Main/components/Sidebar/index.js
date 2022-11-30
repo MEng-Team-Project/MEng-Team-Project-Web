@@ -21,6 +21,7 @@ import NearMeOutlinedIcon from '@mui/icons-material/NearMeOutlined';
 import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
 import VisibilityOffOutlinedIcon from '@mui/icons-material/VisibilityOffOutlined';
 import FileDownloadOutlinedIcon from '@mui/icons-material/FileDownloadOutlined';
+import FileUploadOutlinedIcon from '@mui/icons-material/FileUploadOutlined';
 
 // Global Components
 import {
@@ -215,7 +216,7 @@ const SidebarStreams = props => {
 };
 
 const Sidebar = props => {
-    const { streams, setStream, setOpenExport } = props;
+    const { streams, setStream, setOpenExport, setOpenImport } = props;
 
     const [tab, setTab] = useState("STREAMS");
     const [visible, setVisible] = useState(true);
@@ -239,7 +240,13 @@ const Sidebar = props => {
                                             className="icon sidebar-top__icon"
                                         />
                                     </Tooltip>
-                                    <Tooltip content="Export" direction="bottom">
+                                    <Tooltip content="Import Video" direction="bottom">
+                                        <FileUploadOutlinedIcon
+                                            onClick={() => setOpenImport(true)}
+                                            className="icon sidebar-top__icon"
+                                        />
+                                    </Tooltip>
+                                    <Tooltip content="Export Analytics" direction="bottom">
                                         <FileDownloadOutlinedIcon
                                             onClick={() => setOpenExport(true)}
                                             className="icon sidebar-top__icon"
