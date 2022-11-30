@@ -20,6 +20,7 @@ import FilterAltOutlinedIcon from '@mui/icons-material/FilterAltOutlined';
 import NearMeOutlinedIcon from '@mui/icons-material/NearMeOutlined';
 import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
 import VisibilityOffOutlinedIcon from '@mui/icons-material/VisibilityOffOutlined';
+import FileDownloadOutlinedIcon from '@mui/icons-material/FileDownloadOutlined';
 
 // Global Components
 import {
@@ -158,8 +159,7 @@ const SidebarFilters = props => {
                 </div>
                 <Button title="Add Filter" color="green" />
             </div>
-            <SidebarStreamList streams={streams} />
-            <div className="sidebar-separator" />
+            <div className="sidebar-spacing" />
             {filters.map((values, i) =>
                 <SidebarFilter
                     key={i}
@@ -215,7 +215,7 @@ const SidebarStreams = props => {
 };
 
 const Sidebar = props => {
-    const { streams, setStream } = props;
+    const { streams, setStream, setOpenExport } = props;
 
     const [tab, setTab] = useState("STREAMS");
     const [visible, setVisible] = useState(true);
@@ -236,6 +236,12 @@ const Sidebar = props => {
                                             onClick={() => {
                                                 window.open("/guide");
                                             }}
+                                            className="icon sidebar-top__icon"
+                                        />
+                                    </Tooltip>
+                                    <Tooltip content="Export" direction="bottom">
+                                        <FileDownloadOutlinedIcon
+                                            onClick={() => setOpenExport(true)}
                                             className="icon sidebar-top__icon"
                                         />
                                     </Tooltip>

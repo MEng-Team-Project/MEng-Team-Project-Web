@@ -134,3 +134,6 @@ streams/
 
 # Ignore main.db - SQLite3
 main.db
+
+# Ignore testing analysis files
+analysis/
