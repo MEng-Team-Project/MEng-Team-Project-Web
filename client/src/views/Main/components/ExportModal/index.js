@@ -61,9 +61,18 @@ const ExportModal = props => {
     }, [streams]);
 
     const downloadStream = (id) => {
-        console.log("downloadStream:", id)
-        if (id)
-            window.open(`http://localhost:5000/api/analysis/download?stream=${id}`);
+        if (id) {
+            const fnameToId = s => {
+                s = s.split("/")
+                s = s[s.length - 1]
+                s = s.split(".")
+                s = s.slice(0, s.length - 1)
+                s = s.join(".");
+                return s;
+            }
+            const downloadId = fnameToId(id);
+            window.open(`http://localhost:5000/api/analysis/download?stream=${downloadId}`);
+        }
     };
 
     return (
