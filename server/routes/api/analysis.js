@@ -1,6 +1,7 @@
 // Express
 const express = require("express");
 const router = express.Router();
+const fs = require("fs");
 
 /**
  * @route GET api/analysis/download
@@ -12,7 +13,11 @@ const router = express.Router();
     try {
         let stream = req.query.stream;
         const downloadPath = `./server/analysis/${stream}.csv`;
-        res.download(downloadPath);
+        if (fs.existsSync(downloadPath)) {
+            return res.download(downloadPath);
+        } else {
+            return res.status(400).send(`Error: Analytics file for ${stream} doesn't exist.`)
+        }
     } catch (err) {
         console.error(err);
         return res.status(424).send("Error downloading video stream analysis file");
