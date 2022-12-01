@@ -129,8 +129,8 @@ const ExportModal = props => {
                         </div>
                         <div className="modal-export-option__fields">
                             <select>
-                                <option value="csv">
-                                    CSV
+                                <option value="json">
+                                    JSON
                                 </option>
                             </select>
                         </div>

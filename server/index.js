@@ -19,7 +19,7 @@ const port = process.env.PORT || 5000;
 
 // Routes
 app.use("/api/analysis", analysis);
-app.use("/api/streams", streams);
+app.use("/api/streams",  streams);
 
 // Init
 app.listen(port, host, () => {
