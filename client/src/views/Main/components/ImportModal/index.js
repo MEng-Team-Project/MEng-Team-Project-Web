@@ -46,7 +46,7 @@ const ImportModal = props => {
             <Box sx={style}>
                 <div className="modal-title">
                     <div className="modal-title__left">
-                        Import a Video Recording.
+                        Import a Video Recording
                     </div>
                     <div className="modal-title__right">
                         <CloseOutlinedIcon
@@ -56,7 +56,7 @@ const ImportModal = props => {
                 </div>
                 <div className="modal-content">
                     <div className="modal-content__upload-msg">
-                        Upload a <b>MP4</b> stream recording.
+                        Upload an <b>MP4</b> stream recording.
                     </div>
                     <FileUpload
                         handleUploadSuccessful={handleUploadSuccessful}

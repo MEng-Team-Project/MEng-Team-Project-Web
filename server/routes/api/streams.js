@@ -14,7 +14,7 @@ router.get("/all", (_, res) => {
         fs.readdir("./server/streams", (err, files) => {
             console.log(err)
             if (err) return res.status(400).send("Error: Can't read local streams.");
-            const data = files.map(file => "/streams/" + path.basename(file));
+            const data = files.map(file => path.basename(file));
             res.send(data);
         });
     } catch (err) {

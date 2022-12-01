@@ -22,6 +22,7 @@ import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
 import VisibilityOffOutlinedIcon from '@mui/icons-material/VisibilityOffOutlined';
 import FileDownloadOutlinedIcon from '@mui/icons-material/FileDownloadOutlined';
 import FileUploadOutlinedIcon from '@mui/icons-material/FileUploadOutlined';
+import StorageOutlinedIcon from '@mui/icons-material/StorageOutlined';
 
 // Global Components
 import {
@@ -216,7 +217,7 @@ const SidebarStreams = props => {
 };
 
 const Sidebar = props => {
-    const { streams, setStream, setOpenExport, setOpenImport } = props;
+    const { streams, setStream, setOpenExport, setOpenImport, setOpenAnalysis } = props;
 
     const [tab, setTab] = useState("STREAMS");
     const [visible, setVisible] = useState(true);
@@ -239,6 +240,11 @@ const Sidebar = props => {
                                             }}
                                             className="icon sidebar-top__icon"
                                         />
+                                    </Tooltip>
+                                    <Tooltip content="Stream Analysis" direction="bottom">
+                                        <StorageOutlinedIcon
+                                            onClick={() => setOpenAnalysis(true)}
+                                            className="icon sidebar-top__icon" />
                                     </Tooltip>
                                     <Tooltip content="Import Video" direction="bottom">
                                         <FileUploadOutlinedIcon

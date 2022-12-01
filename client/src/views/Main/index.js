@@ -16,9 +16,11 @@ import "./Main.css";
 import {
     Sidebar,
     ExportModal,
-    ImportModal
+    ImportModal,
+    AnalysisModal
 } from "./components";
 
+/*
 // x1, y1, x2, y2
 const boundingBoxes = [
     [266.0, 74.0, 275.0, 99.0],
@@ -29,8 +31,6 @@ const boundingBoxes = [
     [157.0, 73.0, 169.0, 104.0],
     [290.0, 150.0, 309.0, 193.0],
 ];
-
-/*
 <video src={stream + "#t=0.04"} />
 style={{
     top:    videoRef.current.offsetLeft + (bbox[1] * videoRef.current.clientHeight / height),
@@ -63,13 +63,27 @@ const BoundingBox = props => {
         />
     )
 };
+
+/*
+style={{
+    width: 352,
+    height: 288
+}}
+const width  = 352;
+const height = 288;
 */
 
+
 const Main = props => {
-    const [openExport, setOpenExport] = useState(false);
-    const [openImport, setOpenImport] = useState(false);
+    const [openExport,   setOpenExport]   = useState(false);
+    const [openImport,   setOpenImport]   = useState(false);
+    const [openAnalysis, setOpenAnalysis] = useState(false);
     const { streams, stream, ...rest } = props;
     const videoRef = useRef(null);
+
+    const analysisClose = () => {
+        setOpenAnalysis(false);
+    }
 
     const exportClose = () => {
         setOpenExport(false);
@@ -82,15 +96,6 @@ const Main = props => {
     useEffect(() => {
         props.getStreams();
     }, []);
-
-    /*
-    style={{
-        width: 352,
-        height: 288
-    }}
-    const width  = 352;
-    const height = 288;
-    */
 
     useEffect(() => {
         console.log(videoRef.current.offsetWidth, videoRef.current.offsetHeight);
@@ -116,6 +121,7 @@ const Main = props => {
                 streams={streams}
                 setOpenExport={setOpenExport}
                 setOpenImport={setOpenImport}
+                setOpenAnalysis={setOpenAnalysis}
                 />
             <ExportModal
                 open={openExport}
@@ -124,6 +130,10 @@ const Main = props => {
             <ImportModal
                 open={openImport}
                 importClose={importClose}
+                streams={streams} />
+            <AnalysisModal
+                open={openAnalysis}
+                analysisClose={analysisClose}
                 streams={streams} />
         </div>
     );
