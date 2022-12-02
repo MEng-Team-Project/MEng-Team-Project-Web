@@ -23,6 +23,14 @@ import {
 // HLS Player
 import ReactHlsPlayer from 'react-hls-player';
 
+// Polygon Modules
+import DeckGL from "deck.gl";
+import {
+  EditableGeoJsonLayer,
+  DrawLineStringMode,
+  DrawPolygonMode
+} from "nebula.gl";
+
 /*
 // x1, y1, x2, y2
 const boundingBoxes = [
@@ -76,11 +84,39 @@ const width  = 352;
 const height = 288;
 */
 
-
+const initialViewState = {
+    longitude: -122.43,
+    latitude: 37.775,
+    zoom: 12
+};
+ 
 const Main = props => {
     const [openExport,   setOpenExport]   = useState(false);
     const [openImport,   setOpenImport]   = useState(false);
     const [openAnalysis, setOpenAnalysis] = useState(false);
+
+    const [features, setFeatures] = useState({
+        type: "FeatureCollection",
+        features: []
+    });
+    // const [mode, setMode] = useState(() => DrawLineStringMode);
+    const [mode, setMode] = useState(() => DrawPolygonMode);
+    const [selectedFeatureIndexes] = useState([]);
+
+    const layer = new EditableGeoJsonLayer({
+        // id: "geojson-layer",
+        data: features,
+        mode,
+        selectedFeatureIndexes,
+
+        onEdit: ({ updatedData }) => {
+            setFeatures(updatedData);
+        },
+        //getFillColor: (feature) => [255, 0, 0],
+        getLineColor: (feature) => [255, 0, 0]
+         
+    });
+
     const { streams, stream, ...rest } = props;
     const videoRef = useRef(null);
 
@@ -100,35 +136,28 @@ const Main = props => {
         props.getStreams();
     }, []);
 
-    /*
-    useEffect(() => {
-        console.log(videoRef.current.offsetWidth, videoRef.current.offsetHeight);
-    });
-    */
-   
-    /*
-    <video
-        autoPlay
-        ref={videoRef}
-        className="feed"
-        src={stream}
-        muted
-        loop
-        onContextMenu={e => e.preventDefault()}
-    >
-        Error retrieving video stream data.
-    </video>
-    */
     console.log("videoRef:", videoRef, videoRef==true)
     return (
         <div className="main-root">
             <div className="feed-outer">
-                <ReactHlsPlayer
-                    src="./livestream/output.m3u8"
-                    autoPlay={false}
-                    controls={true}
-                    width="100%"
-                    height="auto"
+                <video
+                    autoPlay
+                    ref={videoRef}
+                    className="feed"
+                    src={stream}
+                    muted
+                    loop
+                    onContextMenu={e => e.preventDefault()}
+                >
+                    Error retrieving video stream data.
+                </video>
+                <DeckGL
+                    initialViewState={initialViewState}
+                    controller={{
+                        doubleClickZoom: false
+                    }}
+                    layers={[layer]}
+                    getCursor={layer.getCursor.bind(layer)}
                 />
             </div>
             <Sidebar
