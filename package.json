@@ -34,6 +34,7 @@
     "moment": "^2.29.4",
     "node-fetch": "^2.6.7",
     "path": "^0.12.7",
+    "react-hls-player": "^3.0.7",
     "react-redux": "^8.0.5",
     "react-router-dom": "^6.4.3",
     "redux": "^4.2.0",

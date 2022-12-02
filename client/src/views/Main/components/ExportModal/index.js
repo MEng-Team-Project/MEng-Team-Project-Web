@@ -71,7 +71,7 @@ const ExportModal = props => {
                 return s;
             }
             const downloadId = fnameToId(id);
-            window.open(`http://147.189.199.122:5000/api/analysis/download?stream=${downloadId}`);
+            window.open(`http://localhost:5000/api/analysis/download?stream=${downloadId}`);
         }
     };
 

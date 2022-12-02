@@ -20,6 +20,9 @@ import {
     AnalysisModal
 } from "./components";
 
+// HLS Player
+import ReactHlsPlayer from 'react-hls-player';
+
 /*
 // x1, y1, x2, y2
 const boundingBoxes = [
@@ -97,25 +100,36 @@ const Main = props => {
         props.getStreams();
     }, []);
 
+    /*
     useEffect(() => {
         console.log(videoRef.current.offsetWidth, videoRef.current.offsetHeight);
     });
-
+    */
+   
+    /*
+    <video
+        autoPlay
+        ref={videoRef}
+        className="feed"
+        src={stream}
+        muted
+        loop
+        onContextMenu={e => e.preventDefault()}
+    >
+        Error retrieving video stream data.
+    </video>
+    */
     console.log("videoRef:", videoRef, videoRef==true)
     return (
         <div className="main-root">
             <div className="feed-outer">
-                <video
-                    autoPlay
-                    ref={videoRef}
-                    className="feed"
-                    src={stream}
-                    muted
-                    loop
-                    onContextMenu={e => e.preventDefault()}
-                >
-                    Error retrieving video stream data.
-                </video>
+                <ReactHlsPlayer
+                    src="https://bitdash-a.akamaihd.net/content/sintel/hls/playlist.m3u8"
+                    autoPlay={false}
+                    controls={true}
+                    width="100%"
+                    height="auto"
+                />
             </div>
             <Sidebar
                 streams={streams}

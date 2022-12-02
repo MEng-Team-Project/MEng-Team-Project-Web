@@ -94,6 +94,10 @@ const SidebarLiveVideo = props => {
                     title="Vector Tracking"
                     selected={true}
                 />
+                <SidebarLiveVideoLayer
+                    title="View Routes"
+                    selected={false}
+                />
             </div>
         </div>
     );

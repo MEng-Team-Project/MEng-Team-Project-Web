@@ -21,7 +21,7 @@ const fetch = require("node-fetch");
         if (fs.existsSync(downloadPath)) {
             return res.download(downloadPath);
         } else {
-            const response = await fetch(`http://147.189.199.122:6000/api/download`+
+            const response = await fetch(`http://localhost:6000/api/download`+
                   `?stream=${stream}` +
                   `&destination=${destination}`);
             if (response.status == 400) {
