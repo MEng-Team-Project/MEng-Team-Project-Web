@@ -137,3 +137,6 @@ main.db
 
 # Ignore testing analysis files
 analysis/
+
+# Ignore "/livestream" directory
+livestream/
