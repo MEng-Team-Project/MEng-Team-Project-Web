@@ -17,7 +17,8 @@ import {
     Sidebar,
     ExportModal,
     ImportModal,
-    AnalysisModal
+    AnalysisModal,
+    Controls
 } from "./components";
 
 // HLS Player
@@ -26,9 +27,15 @@ import ReactHlsPlayer from 'react-hls-player';
 // Polygon Modules
 import DeckGL from "deck.gl";
 import {
+  SelectionLayer,
   EditableGeoJsonLayer,
   DrawLineStringMode,
-  DrawPolygonMode
+  DrawPolygonMode,
+  MeasureAngleMode,
+  MeasureAreaMode,
+  ViewMode,
+  ModifyMode,
+  TransformMode
 } from "nebula.gl";
 
 /*
@@ -94,19 +101,48 @@ const Main = props => {
     const [openExport,   setOpenExport]   = useState(false);
     const [openImport,   setOpenImport]   = useState(false);
     const [openAnalysis, setOpenAnalysis] = useState(false);
+    const [showEditor,   setShowEditor]   = useState(false);
 
     const [features, setFeatures] = useState({
         type: "FeatureCollection",
         features: []
     });
     // const [mode, setMode] = useState(() => DrawLineStringMode);
-    const [mode, setMode] = useState(() => DrawPolygonMode);
-    const [selectedFeatureIndexes] = useState([]);
+    // const [mode, setMode] = useState(() => ViewMode);
+    const [mode, setMode] = useState(() => ViewMode);
+    const [selectedFeatureIndexes, setSelectedFeatureIndexes] = useState([]);
+
+    /*
+    const selectLayer = new SelectionLayer({
+        id: 'selection',
+        selectionType: 'rectangle',
+        mode: ViewMode,
+        pickable: true,
+        onSelect: ({ pickingInfos }) => {
+            console.log("SELECT:", pickingInfos)
+            // use pickingInfos to set the SelectedFeatureIndexes
+            setSelectedFeatureIndexes(pickingInfos.map((pi) => pi.index));
+        
+            // any other functionality for selecting, like adding id's to state
+        },
+        layerIds: ['geojson'],
+    });
+    */
 
     const layer = new EditableGeoJsonLayer({
         // id: "geojson-layer",
+        // selectionType: "rectangle",
         data: features,
+        pickable: true,
         mode,
+        onClick: (info, event) => console.log('Clicked:', info, event),
+        onSelect: ({ pickingInfos }) => {
+            console.log("SELECT:", pickingInfos)
+            // use pickingInfos to set the SelectedFeatureIndexes
+            setSelectedFeatureIndexes(pickingInfos.map((pi) => pi.index));
+        
+            // any other functionality for selecting, like adding id's to state
+        },
         selectedFeatureIndexes,
 
         onEdit: ({ updatedData }) => {
@@ -151,14 +187,18 @@ const Main = props => {
                 >
                     Error retrieving video stream data.
                 </video>
-                <DeckGL
-                    initialViewState={initialViewState}
-                    controller={{
-                        doubleClickZoom: false
-                    }}
-                    layers={[layer]}
-                    getCursor={layer.getCursor.bind(layer)}
-                />
+                {(showEditor) && (
+                    <DeckGL
+                        initialViewState={initialViewState}
+                        controller={{
+                            doubleClickZoom: false,
+                            scrollZoom: false,
+                            dragPan: false
+                        }}
+                        layers={[layer]}
+                        getCursor={layer.getCursor.bind(layer)}
+                    />
+                )}
             </div>
             <Sidebar
                 streams={streams}
@@ -178,6 +218,11 @@ const Main = props => {
                 open={openAnalysis}
                 analysisClose={analysisClose}
                 streams={streams} />
+            <Controls
+                setMode={setMode}
+                mode={mode}
+                setShowEditor={setShowEditor}
+                showEditor={showEditor} />
         </div>
     );
 };
