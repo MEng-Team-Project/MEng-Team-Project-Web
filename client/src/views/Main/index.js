@@ -124,7 +124,7 @@ const Main = props => {
         <div className="main-root">
             <div className="feed-outer">
                 <ReactHlsPlayer
-                    src="https://bitdash-a.akamaihd.net/content/sintel/hls/playlist.m3u8"
+                    src="./streams/output.m3u8"
                     autoPlay={false}
                     controls={true}
                     width="100%"
