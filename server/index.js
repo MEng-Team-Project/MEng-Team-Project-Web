@@ -10,6 +10,7 @@ const hls = require("hls-server");
 app.use(express.json());
 app.use(fileUpload());
 app.use("/streams", express.static(__dirname + "/streams"))
+app.use("/livestream", express.static(__dirname + "/livestream"))
 
 // Routes
 const streams = require("./routes/api/streams");
@@ -49,6 +50,11 @@ new hls(server, {
         },
         getSegmentStream: (req, cb) => {
             const stream = fs.createReadStream(__dirname + req.url);
+            try {
+                console.log(req.filePath);
+            } catch (err) {
+                
+            }
             cb(null, stream);
         },
     }
