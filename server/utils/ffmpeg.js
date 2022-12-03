@@ -21,8 +21,8 @@ const createTestRecordedStream = stream => {
 }
 
 const createTestLiveStream = (host, port, path) => {
-    // const url = `rtmp://${host}:${port}${path}`;
-    const url = `rtmp://${host}${path}`;
+    const url = `rtmp://${host}:${port}${path}`;
+    // const url = `rtmp://${host}${path}`;
     console.log(url)
     ffmpeg(url, { timeout: 432000 }).addOptions([
         '-c:v libx264',
