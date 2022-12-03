@@ -107,29 +107,29 @@ const Main = props => {
     */
    
     /*
-    <video
-        autoPlay
-        ref={videoRef}
-        className="feed"
-        src={stream}
-        muted
-        loop
-        onContextMenu={e => e.preventDefault()}
-    >
-        Error retrieving video stream data.
-    </video>
+    <ReactHlsPlayer
+        src="./livestream/output.m3u8"
+        autoPlay={false}
+        controls={true}
+        width="100%"
+        height="auto"
+    />
     */
     console.log("videoRef:", videoRef, videoRef==true)
     return (
         <div className="main-root">
             <div className="feed-outer">
-                <ReactHlsPlayer
-                    src="./livestream/output.m3u8"
-                    autoPlay={false}
-                    controls={true}
-                    width="100%"
-                    height="auto"
-                />
+                <video
+                    autoPlay
+                    ref={videoRef}
+                    className="feed"
+                    src={stream}
+                    muted
+                    loop
+                    onContextMenu={e => e.preventDefault()}
+                >
+                    Error retrieving video stream data.
+                </video>
             </div>
             <Sidebar
                 streams={streams}
