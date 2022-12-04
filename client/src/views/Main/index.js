@@ -17,11 +17,26 @@ import {
     Sidebar,
     ExportModal,
     ImportModal,
-    AnalysisModal
+    AnalysisModal,
+    Controls
 } from "./components";
 
 // HLS Player
 import ReactHlsPlayer from 'react-hls-player';
+
+// Polygon Modules
+import DeckGL from "deck.gl";
+import {
+  SelectionLayer,
+  EditableGeoJsonLayer,
+  DrawLineStringMode,
+  DrawPolygonMode,
+  MeasureAngleMode,
+  MeasureAreaMode,
+  ViewMode,
+  ModifyMode,
+  TransformMode
+} from "nebula.gl";
 
 /*
 // x1, y1, x2, y2
@@ -76,11 +91,68 @@ const width  = 352;
 const height = 288;
 */
 
-
+const initialViewState = {
+    longitude: -122.43,
+    latitude: 37.775,
+    zoom: 12
+};
+ 
 const Main = props => {
     const [openExport,   setOpenExport]   = useState(false);
     const [openImport,   setOpenImport]   = useState(false);
     const [openAnalysis, setOpenAnalysis] = useState(false);
+    const [showEditor,   setShowEditor]   = useState(false);
+
+    const [features, setFeatures] = useState({
+        type: "FeatureCollection",
+        features: []
+    });
+    // const [mode, setMode] = useState(() => DrawLineStringMode);
+    // const [mode, setMode] = useState(() => ViewMode);
+    const [mode, setMode] = useState(() => ViewMode);
+    const [selectedFeatureIndexes, setSelectedFeatureIndexes] = useState([]);
+
+    /*
+    const selectLayer = new SelectionLayer({
+        id: 'selection',
+        selectionType: 'rectangle',
+        mode: ViewMode,
+        pickable: true,
+        onSelect: ({ pickingInfos }) => {
+            console.log("SELECT:", pickingInfos)
+            // use pickingInfos to set the SelectedFeatureIndexes
+            setSelectedFeatureIndexes(pickingInfos.map((pi) => pi.index));
+        
+            // any other functionality for selecting, like adding id's to state
+        },
+        layerIds: ['geojson'],
+    });
+    */
+
+    const layer = new EditableGeoJsonLayer({
+        // id: "geojson-layer",
+        // selectionType: "rectangle",
+        data: features,
+        pickable: true,
+        mode,
+        onClick: (info, event) => console.log('Clicked:', info, event),
+        onSelect: ({ pickingInfos }) => {
+            console.log("SELECT:", pickingInfos)
+            // use pickingInfos to set the SelectedFeatureIndexes
+            setSelectedFeatureIndexes(pickingInfos.map((pi) => pi.index));
+        
+            // any other functionality for selecting, like adding id's to state
+        },
+        selectedFeatureIndexes,
+
+        onEdit: ({ updatedData }) => {
+            setFeatures(updatedData);
+        },
+        //getFillColor: (feature) => [255, 0, 0],
+        getLineColor: (feature) => [255, 0, 0]
+         
+    });
+
     const { streams, stream, ...rest } = props;
     const videoRef = useRef(null);
 
@@ -100,21 +172,6 @@ const Main = props => {
         props.getStreams();
     }, []);
 
-    /*
-    useEffect(() => {
-        console.log(videoRef.current.offsetWidth, videoRef.current.offsetHeight);
-    });
-    */
-   
-    /*
-    <ReactHlsPlayer
-        src="./livestream/output.m3u8"
-        autoPlay={false}
-        controls={true}
-        width="100%"
-        height="auto"
-    />
-    */
     console.log("videoRef:", videoRef, videoRef==true)
     return (
         <div className="main-root">
@@ -130,6 +187,18 @@ const Main = props => {
                 >
                     Error retrieving video stream data.
                 </video>
+                {(showEditor) && (
+                    <DeckGL
+                        initialViewState={initialViewState}
+                        controller={{
+                            doubleClickZoom: false,
+                            scrollZoom: false,
+                            dragPan: false
+                        }}
+                        layers={[layer]}
+                        getCursor={layer.getCursor.bind(layer)}
+                    />
+                )}
             </div>
             <Sidebar
                 streams={streams}
@@ -149,6 +218,11 @@ const Main = props => {
                 open={openAnalysis}
                 analysisClose={analysisClose}
                 streams={streams} />
+            <Controls
+                setMode={setMode}
+                mode={mode}
+                setShowEditor={setShowEditor}
+                showEditor={showEditor} />
         </div>
     );
 };

@@ -1,0 +1,78 @@
+/*
+GLOBAL
+*/
+
+.controls-outermost {
+    position: fixed;
+    top: 0;
+    right: 0;
+    display: flex;
+    flex-direction: row;
+}
+
+.controls-outer {
+    display: flex;
+    flex-direction: column;
+    padding: 1rem;
+    padding-left: 0;
+    height: 100%;
+    box-sizing: border-box;
+}
+
+.controls {
+    height: 100%;
+    color: white;
+}
+
+.controls-icon {
+    background-color: rgb(36, 39, 48);
+    padding: 0.2rem;
+}
+
+/*
+EDITOR CONTROLS
+*/
+
+.controls-editor {
+    position: fixed;
+    background-color: white;
+    right: 4rem;
+}
+
+.controls-editor__option {
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 1rem;
+    background-color: rgb(36, 39, 48);
+    color: rgb(36, 39, 48);
+    user-select: none;
+}
+
+.controls-editor__option-selected {
+    background-color: rgb(58, 69, 82);
+}
+
+.controls-editor__option-selected svg {
+    color: white;
+}
+
+.controls-editor__option:hover {
+    background-color: rgb(58, 69, 82);
+}
+
+.controls-editor__option-label {
+    font-size: 0.8rem;
+    color: white;
+}
+
+.controls-editor__option-icon {
+    color: rgb(121, 129, 141);
+}
+
+.controls-editor__option-icon svg {
+    width:  1.2rem;
+    height: 1.2rem;
+}
