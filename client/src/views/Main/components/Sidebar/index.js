@@ -1,3 +1,22 @@
+/*
+Advanced <Sidebar /> component which provides most of the functions which interact
+with out backend for the end user. Assumed to contain the following along the top:
+- View the general user guide and fine tuning instructions
+- Video analytics listing and dispatching
+- Export video in JSON format
+- Import video in MP4 format
+
+As for the tabs, these are assumed to contain:
+1) Stream list, switching and colour coding
+2) Composible filter page which allows the user to create complex data filters in
+   a simple way by relying on the custom dropdown component to search for their
+   desired streams / analytical data targets (e.g. time, object type - person/vehicle,
+   object sub-type - HGV, car, bike, bus, etc.)
+3) (Optional) Live video attribute togging. Allows the user to disable any default
+   live stream overlay (i.e. object label, object instance segment or bounding box,
+   route tracking, view the route which the system is using)
+*/
+
 // React
 import React, { useState } from 'react';
 

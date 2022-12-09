@@ -1,3 +1,8 @@
+/*
+<ImportModal /> which uses the <FileUpload /> component to upload .mp4
+video recordings for testing.
+*/
+
 // React
 import React from 'react';
 

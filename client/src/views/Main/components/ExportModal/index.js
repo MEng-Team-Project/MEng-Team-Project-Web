@@ -1,3 +1,13 @@
+/*
+As per the clients requirements, our system is also to be designed for
+engineers who would like to extract analytical information. This endpoint
+relies on calling an endpoint on the backend which then retrieves an existing
+JSON file from a directory on the sever called "./server/analytics/{id}.json" which
+it assumes the microservice has already populated (i.e. performed the analysis and
+stored it inside of "./server/analytics/{id}.json"). This may well change in the future,
+this is entirely up to the backend team.
+*/
+
 // React
 import React, { useEffect, useState } from 'react';
 

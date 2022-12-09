@@ -1,3 +1,10 @@
+/*
+Unfinished modal which displays all streams to the user and allows
+them to select which streams the microservice needs to perform live analysis
+on. Maybe we can also include recorded videos as well for the end user maintenance
+testing. Need to discuss this further / decide as a group / ask the client.
+*/
+
 // React
 import React, { useState, useEffect } from 'react';
 

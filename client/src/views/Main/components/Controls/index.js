@@ -1,3 +1,13 @@
+/*
+This is the top-right widget on the <MainView /> which controls the state
+of the route editing tool. Currently relies on Deck.GL in a very scuffed way.
+Deck.GL's GeoJSON editing tool provides lat, lng co-ordinates based on the drawn
+line / polygon. My idea here was to translate this into the relative screen
+co-ordinates and get the route polygon co-ordinates like this, however it will
+probably be better to use Gary's idea of figuring out where people actually go
+most of the time based on the predicted routes from the ML model. We'll see.
+*/
+
 // React
 import React, { useState } from 'react';
 
