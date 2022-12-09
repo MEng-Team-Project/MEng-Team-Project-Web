@@ -1,3 +1,10 @@
+/*
+api/streams - Endpoint
+
+Provides endpoints related to providing existing recorded videos via the
+backend to the frontend or possibly also the ML microservice in the future.
+*/
+
 // Express
 const express = require("express");
 const router = express.Router();
@@ -6,7 +13,7 @@ const path = require("path");
 
 /**
  * @route GET api/streams/all
- * @desc List all streams
+ * @desc Returns all existing recorded video streams
  * @access Public
  */
 router.get("/all", (_, res) => {
