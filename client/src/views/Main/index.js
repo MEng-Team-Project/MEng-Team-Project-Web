@@ -1,3 +1,13 @@
+/*
+Main frontend page the end user will interact with our client with.
+Provides the main maintenance screen to view any stream (live or recorded),
+live analytical information, top-down map view, etc.
+
+Also provides the user with ways to interact with our backend through modals
+(i.e. pop-up windows) such as uploaded test recorded video, choosing which
+livestreams to process for analysis, etc.
+*/
+
 // React
 import React, { useState, useEffect, useRef } from 'react';
 
@@ -98,11 +108,15 @@ const initialViewState = {
 };
  
 const Main = props => {
+    // Modal toggles
     const [openExport,   setOpenExport]   = useState(false);
     const [openImport,   setOpenImport]   = useState(false);
     const [openAnalysis, setOpenAnalysis] = useState(false);
+
+    // Route editor toggle
     const [showEditor,   setShowEditor]   = useState(false);
 
+    // Deck.GL parameters
     const [features, setFeatures] = useState({
         type: "FeatureCollection",
         features: []
@@ -129,6 +143,7 @@ const Main = props => {
     });
     */
 
+    // Deck.GL editor layer
     const layer = new EditableGeoJsonLayer({
         // id: "geojson-layer",
         // selectionType: "rectangle",
@@ -172,7 +187,6 @@ const Main = props => {
         props.getStreams();
     }, []);
 
-    console.log("videoRef:", videoRef, videoRef==true)
     return (
         <div className="main-root">
             <div className="feed-outer">
