@@ -35,7 +35,7 @@ mkdir livestream
 
 ## Usage
 
-To run both the frontend and backend only (and have them update every time
+To run both the frontend and backend (and have them update every time
 you save either one of them, handy for fast development!) just run:
 
 ```bash
