@@ -9,7 +9,13 @@ const hls = require("hls-server");
 // Middleware
 app.use(express.json());
 app.use(fileUpload());
-app.use("/streams", express.static(__dirname + "/streams"))
+
+// NOTE: This directly provides HLS livestreams and recorded MP4 streams
+// via this endpoint as it is easier to host it as an endpoint which can
+// be preprocessed in future if needed, especially for the livestreams
+
+// Static Video Delivery
+app.use("/streams",    express.static(__dirname + "/streams"))
 app.use("/livestream", express.static(__dirname + "/livestream"))
 
 // Routes
