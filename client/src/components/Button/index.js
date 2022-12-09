@@ -1,3 +1,8 @@
+/*
+Generic and nice-looking <Button /> which thematically matches the
+current front-end design.
+*/
+
 import React, { useState } from 'react';
 
 import AddOutlinedIcon from '@mui/icons-material/AddOutlined';

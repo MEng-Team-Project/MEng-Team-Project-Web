@@ -1,3 +1,8 @@
+/*
+Custom <Dropdown /> component which supports searching through items
+and providing what the type of each item is.
+*/
+
 import React, { useState } from 'react'; 
 
 import './Dropdown.css';

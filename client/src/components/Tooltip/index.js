@@ -1,3 +1,9 @@
+/*
+Generic <Tooltip /> component which you can wrap around any other element.
+Nice looking Tooltip which notifies the user what an action does, especially useful
+for icon based buttons which don't have labels telling the user what they do.
+*/
+
 // Source
 // https://codesandbox.io/s/how-to-make-an-extremely-reusable-tooltip-component-with-react-and-nothing-else-7opo3?from-embed=&file=/src/App.js
 

@@ -1,3 +1,12 @@
+/*
+<FileUpload /> component which handles accepting a file (currently only accepts
+.mp4 files). Does not currently support drag and drop. Does currently support
+displaying the progress of the file upload, and exiting once it's successful,
+but if it's unsuccessful will notify the user that it was unsuccesful and
+the returned failure message from the server. User is expected to exit the modal
+and try again.
+*/
+
 // React
 import React, { useState } from 'react';
 
@@ -7,6 +16,10 @@ import './FileUpload.css';
 import FileUploadOutlinedIcon from '@mui/icons-material/FileUploadOutlined';
 import axios from 'axios';
 
+/*
+SVG based FileIcon. Very fiddly expects to be the only element along the horizontal
+axis, would suggest leaving this as it is.
+*/
 const FileIcon = () => {
     return (
         <div className="modal-file-icon" height="70px">
