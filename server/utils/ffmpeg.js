@@ -1,8 +1,20 @@
+/*
+Utility file which uses ffmpeg wrapped around a node module to provide
+a livestream of either:
+1) a pre-recorded video
+2) an OBS or other RTMP livestream
+*/
+
 const ffmpeg = require("fluent-ffmpeg");
 const ffmpegInstaller = require("@ffmpeg-installer/ffmpeg");
 
 ffmpeg.setFfmpegPath(ffmpegInstaller.path);
 
+/** 
+ * Runs ffmpeg to continuously transcribe a recorded video as a HLS livestream
+ * 
+ * @param {string} stream VideoID in the backend to host as a livestream
+*/
 const createTestRecordedStream = stream => {
     ffmpeg(`./streams/${stream}`, { timeout: 432000 }).addOptions([
         "-profile:v baseline",
@@ -20,6 +32,13 @@ const createTestRecordedStream = stream => {
     }).run();
 }
 
+/** 
+ * Runs ffmpeg to continuously transcribe a running RTMP stream as a HLS livestream
+ * 
+ * @param {string} host Host IP address of RTMP stream
+ * @param {number} port Host IP address port of RTMP stream
+ * @param {path}   path Sub directory within RTMP server to transcribe to HLS livestream
+*/
 const createTestLiveStream = (host, port, path) => {
     const url = `rtmp://${host}:${port}${path}`;
     // const url = `rtmp://${host}${path}`;
