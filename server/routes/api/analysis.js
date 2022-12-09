@@ -1,3 +1,10 @@
+/*
+api/analysis - Endpoint
+
+Provides endpoints related to accepting video analysis related requests
+and returning video analysis information.
+*/
+
 // Express
 const express = require("express");
 const router = express.Router();
