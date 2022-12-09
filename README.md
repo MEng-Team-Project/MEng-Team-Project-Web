@@ -56,6 +56,18 @@ npm run client
 
 ## Livestream Testing
 
+### Local Test
+
+For local testing only, you can use a pre-recorded video and livestream it
+from the backend to the frontend. To do this, make sure the bottom
+line of `./server/utils/ffmpeg.js` is
+```js
+createTestRecordedStream("SEM_ID_TRAFFIC_TEST_TILTON_TINY.mp4");
+```
+and run `node ./server/utils/ffmpeg.js`;
+
+### Production Test
+
 To test the livestream, you need to host a local rtmp server. The instructions
 for how to do so are below:
 
