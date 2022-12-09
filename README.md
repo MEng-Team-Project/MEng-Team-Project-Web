@@ -1,8 +1,58 @@
-# traffic-web
+# MEng-Team-Project-Web
 
 ## About
 
 (Industrial Project) React Frontend and Node.js Backend for Traffic Analysis.
+
+## Setup
+
+To setup this repository, you need to run the following steps:
+
+Firstly, you need to install the node modules required by the backend
+server by running the following command:
+
+```bash
+npm i
+```
+
+Then you need to install the ReactJS modules required by the client. To do this,
+run the following commmands:
+
+```bash
+cd client
+npm i
+```
+
+Finally, the backend server is dependent on 3 directories being present to
+work properly. To do this, run the following code:
+
+```bash
+cd server
+mkdir streams
+mkdir analysis
+mkdir livestream
+```
+
+## Usage
+
+To run both the frontend and backend only (and have them update every time
+you save either one of them, handy for fast development!) just run:
+
+```bash
+npm run dev
+```
+
+If you only want to run the backend server, run:
+
+```bash
+npm run server
+```
+
+If you only want to run the client without the server, run:
+
+```bash
+npm run client
+```
 
 ## Livestream Testing
 
