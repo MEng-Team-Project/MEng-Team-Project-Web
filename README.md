@@ -4,6 +4,20 @@
 
 (Industrial Project) React Frontend and Node.js Backend for Traffic Analysis.
 
+## Docker
+
+Build the docker image locally.
+
+```bash
+docker build -t traffic-web .
+```
+
+Run the frontend and backend simultaneously.
+
+```bash
+docker run -p 3000:3000 -p 5000:5000 traffic-web
+```
+
 ## Setup
 
 To setup this repository, you need to run the following steps:

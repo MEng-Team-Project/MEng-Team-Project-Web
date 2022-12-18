@@ -1,10 +1,25 @@
+// Argparse Module (Commandline Arguments)
+const { ArgumentParser } = require('argparse');
+const { version } = require('../package.json');
+const parser = new ArgumentParser({
+    description: 'Backend for Traffic Analysis. Uses port 5000.'
+});
+parser.add_argument('-v', '--version', { action: 'version', version });
+parser.add_argument('--host', {
+    help: "Change IP address backend is hosted",
+    default: "0.0.0.0" });
+parser.add_argument('--port', {
+    help: "Change port of IP address where backend is hosted",
+    default: "5000" });
+const args = parser.parse_args();
+
 // Modules
-const express = require("express");
-const app = express();
-const path = require("path");
+const express    = require("express");
+const app        = express();
+const path       = require("path");
 const fileUpload = require('express-fileupload');
-const fs  = require("fs");
-const hls = require("hls-server");
+const fs         = require("fs");
+const hls        = require("hls-server");
 
 // Middleware
 app.use(express.json());
@@ -15,16 +30,16 @@ app.use(fileUpload());
 // be preprocessed in future if needed, especially for the livestreams
 
 // Static Video Delivery
-app.use("/streams",    express.static(__dirname + "/streams"))
-app.use("/livestream", express.static(__dirname + "/livestream"))
+app.use("/streams",    express.static(__dirname + "/streams"));
+app.use("/livestream", express.static(__dirname + "/livestream"));
 
 // Routes
-const streams = require("./routes/api/streams");
+const streams  = require("./routes/api/streams");
 const analysis = require("./routes/api/analysis");
 
 // Host and Port
-const host = "0.0.0.0";
-const port = process.env.PORT || 5000;
+const host = args.host; // "0.0.0.0";
+const port = args.port; // 5000;
 
 // Routes
 app.use("/api/analysis", analysis);
