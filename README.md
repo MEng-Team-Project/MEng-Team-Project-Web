@@ -6,17 +6,53 @@
 
 ## Docker
 
+Create a new Docker volume for `node_modules`.
+This will allow us to use
+Node.js modules installed within the Docker container but still allow us
+to live-reload our code from the git repo stored outside of Docker during development.
+This is required as you might be running a different OS (e.g. Windows, MacOS, etc.) or config, etc. than the container.
+
+```bash
+docker volume create --name nodemodules
+```
+
 Build the docker image locally.
 
 ```bash
 docker build -t traffic-web .
 ```
 
-Run the frontend and backend simultaneously.
+Run the frontend and backend simultaneously (Powershell)
 
+<!--Powershell-->
+
+```bash
+docker run `
+    --name traffic-web `
+    -p 3000:3000 `
+    -p 5000:5000 `
+    -v ${pwd}/:/usr/src/app `
+    -v nodemodules:/usr/src/app/node_modules `
+    traffic-web npm run dev
+```
+<!--
+Bash
+
+```bash
+docker run \
+    --name traffic-web \
+    -p 3000:3000 \
+    -p 5000:5000 \
+    -v `pwd`/:/usr/src/app \
+    -v nodemodules:/usr/src/app/node_modules \
+    traffic-web npm run dev
+```
+-->
+<!--
 ```bash
 docker run -p 3000:3000 -p 5000:5000 traffic-web
 ```
+-->
 
 ## Setup
 

@@ -6,15 +6,13 @@ WORKDIR /usr/src/app
 
 # Image comes with Node.js and NPM already installed
 # Install app dependencies
-COPY package*.json ./
-RUN npm i
+ADD package*.json ./
+RUN npm cache clean -force && npm i
 # PRODUCTION CODE ONLY # RUN npm ci --only=production
 
 # Bundle app source code
-COPY . .
+# COPY . .
+# ADD . .
 
 # Expose React port (3000) and Express port (5000)
 EXPOSE 3000 5000
-
-# Run server
-CMD ["npm", "run", "dev"]
