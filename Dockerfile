@@ -7,7 +7,9 @@ WORKDIR /usr/src/app
 # Image comes with Node.js and NPM already installed
 # Install app dependencies
 ADD package*.json ./
+RUN npm config set cache /tmp --global
 RUN npm cache clean -force && npm i
+
 # PRODUCTION CODE ONLY # RUN npm ci --only=production
 
 # Bundle app source code
