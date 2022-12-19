@@ -24,11 +24,11 @@ docker build -t traffic-web .
 
 Run the frontend and backend simultaneously (Powershell)
 
+<!-- NOTE: Add `--name traffic-web \` if you want to only use one container>
 <!--Powershell-->
 
 ```bash
 docker run `
-    --name traffic-web `
     -p 3000:3000 `
     -p 5000:5000 `
     -v ${pwd}/:/usr/src/app `
@@ -36,11 +36,11 @@ docker run `
     traffic-web npm run dev
 ```
 
+<!-- Bash -->
 Run the frontend and backend simultaneously (Bash, etc.)
 
 ```bash
 docker run \
-    --name traffic-web \
     -p 3000:3000 \
     -p 5000:5000 \
     -v `pwd`/:/usr/src/app \
