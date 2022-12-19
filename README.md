@@ -35,8 +35,8 @@ docker run `
     -v nodemodules:/usr/src/app/node_modules `
     traffic-web npm run dev
 ```
-<!--
-Bash
+
+Run the frontend and backend simultaneously (Bash, etc.)
 
 ```bash
 docker run \
@@ -47,7 +47,7 @@ docker run \
     -v nodemodules:/usr/src/app/node_modules \
     traffic-web npm run dev
 ```
--->
+
 <!--
 ```bash
 docker run -p 3000:3000 -p 5000:5000 traffic-web
