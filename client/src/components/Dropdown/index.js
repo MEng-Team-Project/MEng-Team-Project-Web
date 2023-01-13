@@ -12,14 +12,23 @@ import SearchOutlinedIcon from '@mui/icons-material/SearchOutlined';
 const Dropdown = props => {
     const [active, setActive] = useState(false);
     const [selectedValue, setSelectedValue] = useState(null);
+    const [query, setQuery] = useState("");
+
     const { values, placeholder, type, ...rest } = props;
 
     console.log("selectedValue:", selectedValue);
     console.log("values:", values);
 
+    const filterValues = (values, query) => {
+        return values.filter(value => {
+            return value.data.trim().toLowerCase().includes(query.toLowerCase());
+        });
+    };
+
     const init = (props.init) 
                ? props.init
                : -1;
+
     return (
         <div
             className="dropdown-outer"
@@ -75,6 +84,9 @@ const Dropdown = props => {
                                 type="text"
                                 className="dropdown-options__search"
                                 placeholder="Search"
+                                onChange={e => {
+                                    setQuery(e.target.value);
+                                }}
                             />
                             <SearchOutlinedIcon
                                 className="dropdown-options__search-icon"
@@ -86,7 +98,7 @@ const Dropdown = props => {
                         </div>
                     </div>
                     <div className="dropdown-separator" />
-                    {values.map((value, i) => (
+                    {filterValues(values, query).map((value, i) => (
                         <div
                             key={i}
                             className="dropdown-options__option"
