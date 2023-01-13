@@ -66,5 +66,5 @@ const createTestLiveStream = (host, port, path) => {
     }).run();
 };
 
-// createTestRecordedStream("SEM_ID_TRAFFIC_TEST_TILTON_TINY.mp4");
-createTestLiveStream("127.0.0.1", "1935", "/temp/test");
+createTestRecordedStream("00001.01350_2022-12-07T15-35-24.000Z.mp4");
+// createTestLiveStream("127.0.0.1", "1935", "/temp/test");

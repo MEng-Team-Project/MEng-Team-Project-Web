@@ -6,6 +6,12 @@ This document provides context relating to how the front-end should
 display either recorded video streams (mp4) or livestreams (HLS format
 videos, .m3u8 for playlist and .ts for video segment).
 
+## Default
+
+Until adding streams is properly implemented as a feature, the streams section of
+the sidebar currently contains a hardcoded streams function (hard-coded in
+the backend), which contains the url of a livestream.
+
 ## Format
 
 Frontend expects livestream files to be in the format "./livestream/output.m3u8".
