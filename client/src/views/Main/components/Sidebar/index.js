@@ -223,14 +223,14 @@ const SidebarStreamList = props => {
 };
 
 const SidebarStreams = props => {
-    const { streams, setStream } = props;
+    const { streams, setStream, setOpenAddStream} = props;
     return (
         <div className="sidebar-tab">
             <div className="sidebar-tab__top">
                 <div className="sidebar-tab__header">
                     Streams
                 </div>
-                <Button title="Add Stream" color="grey" />
+                <Button title="Add Stream" color="grey"  onClick={() => setOpenAddStream(true)} />
             </div>
             <SidebarStreamList
                 streams={streams}
@@ -240,7 +240,7 @@ const SidebarStreams = props => {
 };
 
 const Sidebar = props => {
-    const { streams, setStream, setOpenExport, setOpenImport, setOpenAnalysis } = props;
+    const { streams, setStream, setOpenExport, setOpenImport, setOpenAnalysis, setOpenAddStream } = props;
 
     const [tab, setTab] = useState("STREAMS");
     const [visible, setVisible] = useState(true);
@@ -312,7 +312,8 @@ const Sidebar = props => {
                         {(tab == "STREAMS") && (
                             <SidebarStreams
                                 streams={streams}
-                                setStream={setStream} />
+                                setStream={setStream}
+                                setOpenAddStream = {setOpenAddStream} />    
                         )}
                         {(tab == "FILTERS") && (
                             <SidebarFilters streams={streams} />
