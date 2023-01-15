@@ -4,7 +4,7 @@ video recordings for testing.
 */
 
 // React
-import React from 'react';
+import React, { useState } from "react";
 
 // Material UI
 import Modal from '@mui/material/Modal';
@@ -18,7 +18,8 @@ import DirectoryInput from '../DirectoryInput';
 
 // File Upload Component
 import {
-    FileUpload
+    FileUpload,
+    Button
 } from '../../../../components';
 
 // CSS
@@ -39,11 +40,34 @@ const style = {
 
 const AddStreamModal = props => {
     const { open, addStreamClose } = props;
+    const [directoryValue, setDirectoryValue] = useState("");
+    const [ipValue, setIpValue] = useState("");
+    const [numericValue, setNumericValue] = useState("");
     
-    const handleUploadSuccessful = () => {
-        setTimeout(
-            addStreamClose,
-            2000);
+    const handleInputIPChange = (value) => {
+        setIpValue(value);
+    };
+    
+    const handleNumericChange = (value) => {
+        setNumericValue(value);
+    };
+    
+    const handleDirectoryChange = (value) => {
+        setDirectoryValue(value);
+    }
+    
+    const handleSubmit = () => {
+        if (directoryValue && ipValue && numericValue ) {
+            console.log("Directory value:", directoryValue);
+            console.log("IP value:", ipValue);
+            console.log("Numeric value:", numericValue);
+            setTimeout(
+                addStreamClose,
+                1000);
+        } else {
+            console.log("one or more invalid fields");
+        }
+        
     };
 
     return (
@@ -64,9 +88,12 @@ const AddStreamModal = props => {
                 </div>
                 <div className="modal-content">
                     <div className="modal-content__upload-msg">
-                        <div><b>Port:  </b> <RestrictedNumericInput/> </div>
-                        <div><b>Stream IP Address:  </b> <InputIPAddress/> </div>
-                        <div><b>Directory:  </b> <DirectoryInput/> </div>
+                        <div><b>Port:  </b> <RestrictedNumericInput onValueChange={(value) => handleNumericChange(value)}/> </div>
+                        <div><b>Stream IP Address:  </b> <InputIPAddress onValueChange={(value) => handleInputIPChange(value)}/> </div>
+                        <div><b>Directory:  </b> <DirectoryInput onValueChange={(value) => handleDirectoryChange(value)}/> </div>
+                    </div>
+                    <div>
+                    <Button title="Add" color="grey"  onClick={() => handleSubmit()} />
                     </div>
                 </div>
             </Box>

@@ -1,10 +1,11 @@
 import React, { useState } from "react";
 
-function DirectoryInput() {
+function DirectoryInput(props) {
     const [value, setValue] = useState("");
 
     const handleChange = (event) => {
       setValue(event.target.value.replace(/\s/g, ''))
+      props.onValueChange(value);
     };
   
     return (
@@ -14,6 +15,6 @@ function DirectoryInput() {
         onChange={handleChange}
       />
     );
-}
+  }
   
 export default DirectoryInput;

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 
-function RestrictedNumericInput() {
+function RestrictedNumericInput(props) {
     const [value, setValue] = useState("");
     const regex = /^\d*$/;
   
@@ -11,6 +11,7 @@ function RestrictedNumericInput() {
       } else {
         setValue(value.slice(0, 5));
       }
+      props.onValueChange(value);
     };
   
     return (

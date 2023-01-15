@@ -1,7 +1,14 @@
-import React from "react";
+import React, { useState } from "react";
 const InputMask = require("react-input-mask");
 
 function InputIPAddress(props) {
+  const [value, setValue] = useState("");
+
+  const handleChange = (event) => {
+    setValue(event.target.value); 
+    props.onValueChange(value);
+  };
+
   function checkIpValue(value) {
     const subips = value.split('.')
     if (subips.length > 4) {
@@ -34,6 +41,8 @@ function InputIPAddress(props) {
       mask="999999999999999"
       maskChar={null}
       alwaysShowMask={false}
+      value={value}
+      onChange={handleChange}
       beforeMaskedValueChange={(newState, oldState, userInput) => {
         let value = newState.value;
         const oldValue = oldState.value;
