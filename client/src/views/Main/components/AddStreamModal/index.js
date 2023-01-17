@@ -67,7 +67,7 @@ const AddStreamModal = props => {
         if (directoryValue && ipValue && numericValue && streamName) {
             const liveStreamDetails = {"directory": directoryValue, "ip": ipValue, "port": numericValue, "streamName": streamName};
             axios
-            .post("/api/livestream/add", liveStreamDetails)
+            .post("/api/streams/add", liveStreamDetails)
             .then(res => {
                 setIpValue("");
                 setNumericValue("");
