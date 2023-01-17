@@ -193,20 +193,36 @@ const Main = props => {
         props.getStreams();
     }, []);
 
+    console.log("stream: ", stream);
+    const isLivestream = (stream == "livestream")
+
     return (
         <div className="main-root">
             <div className="feed-outer">
-                <video
-                    autoPlay
-                    ref={videoRef}
-                    className="feed"
-                    src={stream}
-                    muted
-                    loop
-                    onContextMenu={e => e.preventDefault()}
-                >
-                    Error retrieving video stream data.
-                </video>
+                {
+                    (isLivestream) ? ( 
+                        <ReactHlsPlayer
+                        src="./livestream/output.m3u8"
+                        autoPlay={true}
+                        controls={true}
+                        width="100%"
+                        height="auto"
+                    />
+                    ) : (
+                        <video
+                        autoPlay
+                        ref={videoRef}
+                        className="feed"
+                        src={stream}
+                        muted
+                        loop
+                        onContextMenu={e => e.preventDefault()}
+                    >
+                        Error retrieving video stream data.
+                    </video>
+                  
+                    )
+                }
                 {(showEditor) && (
                     <DeckGL
                         initialViewState={initialViewState}

@@ -6,7 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node server/index.js",
-    "server": "nodemon server/index.js",
+    "server": "nodemon --legacy-watch server/index.js",
     "client": "npm start --prefix client",
     "dev": "concurrently \"npm run server\" \"npm run client\""
   },
@@ -15,7 +15,7 @@
     "url": "git+https://github.com/MiscellaneousStuff/traffic-web.git"
   },
   "author": "",
-  "license": "MIT",
+  "license": "MIT", 
   "bugs": {
     "url": "https://github.com/MiscellaneousStuff/traffic-web/issues"
   },

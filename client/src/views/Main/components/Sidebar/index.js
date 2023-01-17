@@ -253,7 +253,6 @@ const Sidebar = props => {
                         <div className="sidebar-top_inner">
                             <div className="sidebar-top">
                                 <div className="sidebar-top__title">
-                                    Traffic Analysis
                                 </div>
                                 <div className="sidebar-top__options">
                                     <Tooltip content="User Guide" direction="bottom">

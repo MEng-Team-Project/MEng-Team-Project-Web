@@ -5,6 +5,7 @@ video recordings for testing.
 
 // React
 import React, { useState } from "react";
+import axios from "axios";
 
 // Material UI
 import Modal from '@mui/material/Modal';
@@ -40,6 +41,7 @@ const style = {
 
 const AddStreamModal = props => {
     const { open, addStreamClose } = props;
+
     const [directoryValue, setDirectoryValue] = useState("");
     const [ipValue, setIpValue] = useState("");
     const [numericValue, setNumericValue] = useState("");
@@ -58,16 +60,25 @@ const AddStreamModal = props => {
     
     const handleSubmit = () => {
         if (directoryValue && ipValue && numericValue ) {
-            console.log("Directory value:", directoryValue);
-            console.log("IP value:", ipValue);
-            console.log("Numeric value:", numericValue);
+            const liveStreamDetails = {"directory": directoryValue, "ip": ipValue, "port": numericValue};
+            axios
+            .put("/api/livestream/upload", liveStreamDetails)
+            .then(res => {
+                console.log(res.data);
+                handleInputIPChange("");
+                handleNumericChange("");
+                handleDirectoryChange("");
+            })
+            .catch(err => {
+                console.log(err.response.data);
+            })
+        
             setTimeout(
                 addStreamClose,
-                1000);
+                500);
         } else {
-            console.log("one or more invalid fields");
+            window.alert("One or more invalid fields");
         }
-        
     };
 
     return (
