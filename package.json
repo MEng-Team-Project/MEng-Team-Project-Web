@@ -15,7 +15,7 @@
     "url": "git+https://github.com/MiscellaneousStuff/traffic-web.git"
   },
   "author": "",
-  "license": "MIT", 
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/MiscellaneousStuff/traffic-web/issues"
   },
@@ -29,7 +29,6 @@
     "@mui/styled-engine": "^5.10.16",
     "argparse": "^2.0.1",
     "axios": "^1.2.0",
-    "better-sqlite3": "^8.0.0",
     "concurrently": "^7.6.0",
     "cors": "^2.8.5",
     "deck.gl": "^8.8.20",
@@ -46,6 +45,7 @@
     "react-redux": "^8.0.5",
     "react-router-dom": "^6.4.3",
     "redux": "^4.2.0",
-    "redux-thunk": "^2.4.2"
+    "redux-thunk": "^2.4.2",
+    "sqlite3": "^5.1.4"
   }
 }

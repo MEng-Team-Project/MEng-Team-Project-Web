@@ -25,6 +25,10 @@ const hls        = require("hls-server");
 app.use(express.json());
 app.use(fileUpload());
 
+//init databse
+const createTables = require('./utils/create_tables.js');
+createTables('main.db');
+
 // NOTE: This directly provides HLS livestreams and recorded MP4 streams
 // via this endpoint as it is easier to host it as an endpoint which can
 // be preprocessed in future if needed, especially for the livestreams

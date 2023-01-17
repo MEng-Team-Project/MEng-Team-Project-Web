@@ -13,7 +13,7 @@ router.get("/all", (_, res) => {
 /** 
  * @desc Receives livestream details and stores them in database
 */
-router.put('/upload', (req, res) => {
+router.post('/add', (req, res) => {
     console.log(req.body);
     res.send("Deets recieved!");
 });

@@ -194,7 +194,7 @@ const Main = props => {
     }, []);
 
     console.log("stream: ", stream);
-    const isLivestream = (stream == "livestream")
+    const isLivestream = (stream == "livestream") //check /livestream or /stream
 
     return (
         <div className="main-root">
@@ -203,10 +203,10 @@ const Main = props => {
                     (isLivestream) ? ( 
                         <ReactHlsPlayer
                         src="./livestream/output.m3u8"
-                        autoPlay={true}
+                        autoPlay={false}
                         controls={true}
-                        width="100%"
-                        height="auto"
+                        onContextMenu={e => e.preventDefault()}
+                        className="feed"
                     />
                     ) : (
                         <video

@@ -43,6 +43,7 @@ const AddStreamModal = props => {
     const { open, addStreamClose } = props;
 
     const [directoryValue, setDirectoryValue] = useState("");
+    const [streamName, setStreamName] = useState("");
     const [ipValue, setIpValue] = useState("");
     const [numericValue, setNumericValue] = useState("");
     
@@ -57,22 +58,25 @@ const AddStreamModal = props => {
     const handleDirectoryChange = (value) => {
         setDirectoryValue(value);
     }
+
+    const handleStreamNameChange = (value) => {
+        setStreamName(value);
+    }
     
     const handleSubmit = () => {
-        if (directoryValue && ipValue && numericValue ) {
-            const liveStreamDetails = {"directory": directoryValue, "ip": ipValue, "port": numericValue};
+        if (directoryValue && ipValue && numericValue && streamName) {
+            const liveStreamDetails = {"directory": directoryValue, "ip": ipValue, "port": numericValue, "streamName": streamName};
             axios
-            .put("/api/livestream/upload", liveStreamDetails)
+            .post("/api/livestream/add", liveStreamDetails)
             .then(res => {
-                console.log(res.data);
-                handleInputIPChange("");
-                handleNumericChange("");
-                handleDirectoryChange("");
+                setIpValue("");
+                setNumericValue("");
+                setDirectoryValue("");
+                setStreamName("");
             })
             .catch(err => {
                 console.log(err.response.data);
             })
-        
             setTimeout(
                 addStreamClose,
                 500);
@@ -102,6 +106,7 @@ const AddStreamModal = props => {
                         <div><b>Port:  </b> <RestrictedNumericInput onValueChange={(value) => handleNumericChange(value)}/> </div>
                         <div><b>Stream IP Address:  </b> <InputIPAddress onValueChange={(value) => handleInputIPChange(value)}/> </div>
                         <div><b>Directory:  </b> <DirectoryInput onValueChange={(value) => handleDirectoryChange(value)}/> </div>
+                        <div><b>Name:  </b> <DirectoryInput onValueChange={(value) => handleStreamNameChange(value)}/> </div>
                     </div>
                     <div>
                     <Button title="Add" color="grey"  onClick={() => handleSubmit()} />
