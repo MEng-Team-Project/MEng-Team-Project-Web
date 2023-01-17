@@ -18,8 +18,8 @@ router.post('/add', (req, res) => {
     console.log(req.body);
     const db = new sqlite3.Database('main.db');
     const stmt = db.prepare(`INSERT INTO streams VALUES (?, ?, ?, ?);`);
-    const name = req.body.name;
-    const source =`rtmp://${req.body.ip}:${req.body.port}/${req.body.dir}`;
+    const name = req.body.streamName;
+    const source =`rtmp://${req.body.ip}:${req.body.port}/${req.body.directory}`;
     const isRunning = Number(0); 
     const isLivestream = Number(1);
     stmt.run(name, source, isRunning, isLivestream);
