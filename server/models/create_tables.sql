@@ -2,6 +2,7 @@ CREATE TABLE IF NOT EXISTS "streams" (
 	"name"	TEXT NOT NULL UNIQUE,
 	"source"	TEXT NOT NULL UNIQUE,
 	"running"	INTEGER NOT NULL,
+    "is_livestream" INTEGER NOT NULL,
 	PRIMARY KEY("name","source")
 );
 

@@ -39,7 +39,7 @@ const createTestRecordedStream = stream => {
  * @param {number} port Host IP address port of RTMP stream
  * @param {path}   path Sub directory within RTMP server to transcribe to HLS livestream
 */
-const createTestLiveStream = (host, port, path) => {
+const createTestLiveStream = (host, port, path, subdir = "") => {  
     const url = `rtmp://${host}:${port}${path}`;
     // const url = `rtmp://${host}${path}`;
     console.log(url)
@@ -57,7 +57,7 @@ const createTestLiveStream = (host, port, path) => {
         '-hls_list_size 6',
         '-hls_wrap 10',
         '-start_number 1'
-    ]).output("./livestream/output.m3u8")
+    ]).output(`./livestream/${subdir}output.m3u8`)
     .on('error', function (err, stdout, stderr) {
         console.log('An error occurred: ' + err.message, err, stderr);
     })

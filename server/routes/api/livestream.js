@@ -4,6 +4,7 @@ const express = require("express");
 const router = express.Router();
 const fs = require("fs");
 const path = require("path");
+const sqlite3 = require('sqlite3').verbose();
 
 
 router.get("/all", (_, res) => {
@@ -15,6 +16,14 @@ router.get("/all", (_, res) => {
 */
 router.post('/add', (req, res) => {
     console.log(req.body);
+    const db = new sqlite3.Database('main.db');
+    const stmt = db.prepare(`INSERT INTO streams VALUES (?, ?, ?, ?);`);
+    const name = req.body.name;
+    const source =`rtmp://${req.body.ip}:${req.body.port}/${req.body.dir}`;
+    const isRunning = Number(0); 
+    const isLivestream = Number(1);
+    stmt.run(name, source, isRunning, isLivestream);
+    stmt.finalize();
     res.send("Deets recieved!");
 });
 
