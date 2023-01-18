@@ -4,7 +4,7 @@ function DirectoryInput(props) {
     const [value, setValue] = useState("");
 
     const handleChange = (event) => {
-      setValue(event.target.value.replace(/\s/g, ''))
+      setValue(event.target.value)
       props.onValueChange(value);
     };
   

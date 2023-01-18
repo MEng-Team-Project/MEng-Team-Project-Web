@@ -7,3 +7,4 @@ export {default as AddStreamModal} from './AddStreamModal';
 export {default as InputIPAddress} from './InputIPAddress';
 export {default as RestrictedNumericInput} from './RestrictedNumericInput';
 export {default as DirectoryInput} from './DirectoryInput';
+export {default as Dropdown} from './Dropdown';

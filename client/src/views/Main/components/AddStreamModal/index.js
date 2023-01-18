@@ -16,6 +16,7 @@ import CloseOutlinedIcon from '@mui/icons-material/CloseOutlined';
 import InputIPAddress from '../InputIPAddress';
 import RestrictedNumericInput from '../RestrictedNumericInput';
 import DirectoryInput from '../DirectoryInput';
+import Dropdown from "../Dropdown";
 
 // File Upload Component
 import {
@@ -46,6 +47,8 @@ const AddStreamModal = props => {
     const [streamName, setStreamName] = useState("");
     const [ipValue, setIpValue] = useState("");
     const [numericValue, setNumericValue] = useState("");
+    const [protocolValue, setProtocolValue] = useState("");
+    const protocolOptions = ["rtmp", "rstp"];
     
     const handleInputIPChange = (value) => {
         setIpValue(value);
@@ -62,10 +65,15 @@ const AddStreamModal = props => {
     const handleStreamNameChange = (value) => {
         setStreamName(value);
     }
+
+    const handleProtocolChange = (e) => {
+        setProtocolValue(e.target.value);
+        console.log(e);
+    }
     
     const handleSubmit = () => {
         if (directoryValue && ipValue && numericValue && streamName) {
-            const liveStreamDetails = {"directory": directoryValue, "ip": ipValue, "port": numericValue, "streamName": streamName};
+            const liveStreamDetails = {"directory": directoryValue, "ip": ipValue, "port": numericValue, "streamName": streamName, "protocol": protocolValue};
             axios
             .post("/api/streams/add", liveStreamDetails)
             .then(res => {
@@ -73,6 +81,7 @@ const AddStreamModal = props => {
                 setNumericValue("");
                 setDirectoryValue("");
                 setStreamName("");
+                setProtocolValue("");
             })
             .catch(err => {
                 console.log(err.response.data);
@@ -103,10 +112,20 @@ const AddStreamModal = props => {
                 </div>
                 <div className="modal-content">
                     <div className="modal-content__upload-msg">
+                        <div><b>Stream Name:  </b> <DirectoryInput onValueChange={(value) => handleStreamNameChange(value)}/> </div>
+                        <div><b>Protocol:  </b>
+                        <select onChange= {handleProtocolChange}>
+                            {protocolOptions.map((protocol, i) => (
+                                 <option
+                                 selected = {(i == 0) ? "selected": ""} 
+                                 key={i} value={protocol}>
+                                    {protocol.toUpperCase()}
+                                 </option>
+                            ))}    
+                        </select></div>
                         <div><b>Port:  </b> <RestrictedNumericInput onValueChange={(value) => handleNumericChange(value)}/> </div>
                         <div><b>Stream IP Address:  </b> <InputIPAddress onValueChange={(value) => handleInputIPChange(value)}/> </div>
                         <div><b>Directory:  </b> <DirectoryInput onValueChange={(value) => handleDirectoryChange(value)}/> </div>
-                        <div><b>Name:  </b> <DirectoryInput onValueChange={(value) => handleStreamNameChange(value)}/> </div>
                     </div>
                     <div>
                     <Button title="Add" color="grey"  onClick={() => handleSubmit()} />
