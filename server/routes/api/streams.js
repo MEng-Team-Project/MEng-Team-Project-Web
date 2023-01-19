@@ -12,24 +12,76 @@ const fs = require("fs");
 const path = require("path");
 const sqlite3 = require('sqlite3').verbose();
 
+let livestreams = {"testStream": null}
+
+const updateLiveStreams = async () => {
+    const dbPath = path.join(__dirname, "../../..", 'main.db');
+    try {
+        const db = new sqlite3.Database(dbPath);
+        const stmt = `SELECT * FROM streams;`
+        const getRows = new Promise((resolve, reject) => {
+            db.all(stmt, [], (err, rows) => {
+                if (err) reject(err);
+                resolve(rows);
+              });
+            });
+        const rows = await getRows
+        const runningLivestreams = Object.keys(livestreams)
+        console.log(rows);
+        const runningRows = rows.filter((livestream) => 
+          Boolean (livestream.running)
+          
+        ) 
+        console.log(livestreams);
+        console.log(runningRows);
+        runningRows.forEach((livestream) => {
+            console.log("livestream", livestream)
+            if (!runningLivestreams.includes(livestream.name)){
+                livestreams[livestream.name] = livestream.source; 
+            }
+        })
+        console.log(livestreams);
+        db.close();
+    } catch (err) {
+        console.log("Server side error retrieving streams." + err);
+    }
+}
+
+updateLiveStreams();
+
 /**
  * @route GET api/streams/all
  * @desc Returns all existing recorded video streams
  * @access Public
  */
+router.get("/all", async(_, res) => {
+    console.log(__dirname);
+    const dbPath = path.join(__dirname, "../../..", 'main.db');
+    //console.log(dbPath)
 
-
-router.get("/all", (_, res) => {
     try {
-        fs.readdir("./server/streams", (err, files) => {
-            console.log(err)
-            if (err) return res.status(400).send("Error: Can't read local streams.");
-            const data = files.map(file => path.basename(file));
-            const tmpData =data.concat("livestream");//TODO: hardcoded livestream option
-            res.send(tmpData);
-        });
+        const files = await fs.promises.readdir("./server/streams")
+        const db = new sqlite3.Database(dbPath);
+        let data = files.map(file => ({
+            "name": path.basename(file), 
+            "source" : path.basename(file),
+            "running": 0,
+            "is_livestream": 0,
+        }));
+        const stmt = `SELECT * FROM streams;`
+        const rows = await new Promise((resolve, reject) => {
+            db.all(stmt, [], (err, rows) => {
+                if (err) reject(err);
+                resolve(rows);
+              });
+            });
+        console.log("rows: ", rows);
+        rows.forEach(i => data = data.concat(i));
+        console.log("data: ", data);
+        res.send(data);
+        db.close();
     } catch (err) {
-        return res.status(400).send("Server side error retrieving streams." + err);
+        res.status(400).send("Server side error retrieving streams." + err);
     }
 });
 
@@ -72,13 +124,13 @@ router.post('/add', (req, res) => {
     const db = new sqlite3.Database('main.db');
     const stmt = db.prepare(`INSERT INTO streams VALUES (?, ?, ?, ?);`);
     const name = req.body.streamName;
-    const source =`${req.body.protocol}://${req.body.ip}:${req.body.port}/${req.body.directory}`;
-    const isRunning = Number(0); 
+    const port = (req.body.port)? `:${req.body.port}` : ""
+    const source =`${req.body.protocol}://${req.body.ip}${port}/${req.body.directory}`;
+    const isRunning = Number(1); 
     const isLivestream = Number(1);
     stmt.run(name, source, isRunning, isLivestream);
     stmt.finalize();
     res.send("Deets recieved!");
 });
-
 
 module.exports = router;

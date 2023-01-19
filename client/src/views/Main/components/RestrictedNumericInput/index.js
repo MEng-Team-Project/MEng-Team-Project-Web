@@ -5,8 +5,8 @@ function RestrictedNumericInput(props) {
     const regex = /^\d*$/;
   
     const handleChange = (event) => {
-      const input = event.target.value;
-      if (input.match(regex) && input.length <= 5) {
+      const input = event.target.value.trim();
+      if (input.match(regex) && input.length <= 5 || input.length == 0) {
         setValue(input);
       } else {
         setValue(value.slice(0, 5));

@@ -30,16 +30,10 @@ export const getStreams = () => dispatch => {
 
 // Set Stream
 export const setStream = stream => dispatch => {
-    let fullStream;
-    if (stream === "livestream"){
-        fullStream = `livestream`;
-    } else {
-        fullStream = `/streams/${stream}`;
-    }
-    console.log("setStream:", fullStream);
+    
     dispatch({
         type: SET_STREAM,
-        payload: fullStream
+        payload: stream
     });
 };
 

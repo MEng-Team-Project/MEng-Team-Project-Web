@@ -23,7 +23,7 @@ const createTestRecordedStream = stream => {
         "-hls_time 5",
         "-hls_list_size 0",
         "-f hls",
-    ]).output("./streams/output.m3u8")
+    ]).output("./livestreams/output.m3u8")
     .on('error', function (err, stdout, stderr) {
         console.log('An error occurred: ' + err.message, err, stderr);
     })
@@ -62,7 +62,8 @@ const createTestLiveStream = (host, port, path, subdir = "") => {
         console.log('An error occurred: ' + err.message, err, stderr);
     })
     .on("end", () => {
-        console.log(`Finished converting recording to livestream: ${stream}`);
+        //console.log(`Finished converting recording to livestream: ${stream}`);
+        console.log("Stream Ended")
     }).run();
 };
 

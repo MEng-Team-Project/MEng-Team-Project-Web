@@ -16,7 +16,6 @@ import CloseOutlinedIcon from '@mui/icons-material/CloseOutlined';
 import InputIPAddress from '../InputIPAddress';
 import RestrictedNumericInput from '../RestrictedNumericInput';
 import DirectoryInput from '../DirectoryInput';
-import Dropdown from "../Dropdown";
 
 // File Upload Component
 import {
@@ -60,19 +59,20 @@ const AddStreamModal = props => {
     
     const handleDirectoryChange = (value) => {
         setDirectoryValue(value);
-    }
+    };
 
     const handleStreamNameChange = (value) => {
         setStreamName(value);
-    }
+    };
 
     const handleProtocolChange = (e) => {
         setProtocolValue(e.target.value);
         console.log(e);
-    }
+    };
     
     const handleSubmit = () => {
-        if (directoryValue && ipValue && numericValue && streamName) {
+        console.log(directoryValue, ipValue, streamName);
+        if (directoryValue && ipValue && streamName) {
             const liveStreamDetails = {"directory": directoryValue, "ip": ipValue, "port": numericValue, "streamName": streamName, "protocol": protocolValue};
             axios
             .post("/api/streams/add", liveStreamDetails)
@@ -117,7 +117,7 @@ const AddStreamModal = props => {
                         <select onChange= {handleProtocolChange}>
                             {protocolOptions.map((protocol, i) => (
                                  <option
-                                 selected = {(i == 0) ? "selected": ""} 
+                                 selected = {(i == 0) ? "selected": ""}
                                  key={i} value={protocol}>
                                     {protocol.toUpperCase()}
                                  </option>

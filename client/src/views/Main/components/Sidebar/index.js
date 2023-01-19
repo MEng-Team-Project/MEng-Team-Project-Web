@@ -197,9 +197,10 @@ const SidebarFilters = props => {
 
 const SidebarStreamList = props => {
     const { streams, setStream } = props;
+    console.log(streams)
     return (
         <div className="sidebar-tab__streams">
-            {streams.map((stream, i) => (
+            {streams.map((stream, i) => ( 
                 <div key={i} className="sidebar-tab__streams-stream_outer">
                     <div className="sidebar-tab__streams-stream_left">
                         <Tooltip content="Change Colour" direction="right">
@@ -210,7 +211,7 @@ const SidebarStreamList = props => {
                         <div
                             className="sidebar-tab__streams-stream_title"
                             onClick={() => setStream(stream)}>
-                            {stream}
+                            {stream.source}
                         </div>
                         <div className="sidebar-tab__streams-stream_info">
                             Recorded
@@ -228,7 +229,7 @@ const SidebarStreams = props => {
         <div className="sidebar-tab">
             <div className="sidebar-tab__top">
                 <div className="sidebar-tab__header">
-                    Streams
+                    Streams or Feeds? (under each it could say recorded or live?)
                 </div>
                 <Button title="Add Stream" color="grey"  onClick={() => setOpenAddStream(true)} />
             </div>

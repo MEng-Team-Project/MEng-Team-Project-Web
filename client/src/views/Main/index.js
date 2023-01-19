@@ -194,7 +194,7 @@ const Main = props => {
     }, []);
 
     console.log("stream: ", stream);
-    const isLivestream = (stream == "livestream") //check /livestream or /stream
+    const isLivestream = (stream.is_livestream) //check /livestream or /stream
 
     return (
         <div className="main-root">
@@ -203,7 +203,7 @@ const Main = props => {
                     (isLivestream) ? ( 
                         <ReactHlsPlayer
                         src="./livestream/output.m3u8"
-                        autoPlay={false}
+                        autoPlay={true}
                         controls={true}
                         onContextMenu={e => e.preventDefault()}
                         className="feed"
@@ -213,14 +213,13 @@ const Main = props => {
                         autoPlay
                         ref={videoRef}
                         className="feed"
-                        src={stream}
+                        src={`/streams/${stream.source}`}
                         muted
                         loop
                         onContextMenu={e => e.preventDefault()}
                     >
                         Error retrieving video stream data.
                     </video>
-                  
                     )
                 }
                 {(showEditor) && (
