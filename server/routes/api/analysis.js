@@ -28,12 +28,26 @@ const fetch = require("node-fetch");
         if (fs.existsSync(downloadPath)) {
             return res.download(downloadPath);
         } else {
-            const response = await fetch(`http://localhost:6000/api/download`+
-                  `?stream=${stream}` +
-                  `&destination=${destination}`);
+            const response = await fetch(`http://localhost:6000/api/analysis`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({
+                    "stream": stream,
+                    "trk_fmt": "entire",
+                })
+            });
+            const data = await response.json();
+            console.log(response);
             if (response.status == 400) {
                 return res.status(400).send("Can't download file.")
             } else {
+                fs.writeFileSync(
+                    destination,
+                    JSON.stringify(data, null, 4),
+                    "utf8");
                 if (fs.existsSync(downloadPath)) {
                     return res.download(downloadPath);
                 }
