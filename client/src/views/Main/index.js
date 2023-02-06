@@ -28,7 +28,8 @@ import {
     ExportModal,
     ImportModal,
     AnalysisModal,
-    Controls
+    Controls,
+    Analytics
 } from "./components";
 
 // HLS Player
@@ -116,6 +117,9 @@ const Main = props => {
     // Route editor toggle
     const [showEditor,   setShowEditor]   = useState(false);
 
+    // Video player tracking
+    const [currentTime,  setCurrentTime]  = useState(0);
+
     // Deck.GL parameters
     const [features, setFeatures] = useState({
         type: "FeatureCollection",
@@ -171,6 +175,10 @@ const Main = props => {
     const { streams, stream, ...rest } = props;
     const videoRef = useRef(null);
 
+    const handleTimeUpdate = () => {
+        setCurrentTime(videoRef.current.currentTime);
+    };
+
     const analysisClose = () => {
         setOpenAnalysis(false);
     }
@@ -198,6 +206,7 @@ const Main = props => {
                     muted
                     loop
                     onContextMenu={e => e.preventDefault()}
+                    onTimeUpdate={handleTimeUpdate}
                 >
                     Error retrieving video stream data.
                 </video>
@@ -233,6 +242,8 @@ const Main = props => {
                 analysisClose={analysisClose}
                 streams={streams} />
             <Controls
+                stream={stream}
+                currentTime={currentTime}
                 setMode={setMode}
                 mode={mode}
                 setShowEditor={setShowEditor}

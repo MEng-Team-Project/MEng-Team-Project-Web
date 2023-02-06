@@ -15,6 +15,39 @@ const path = require("path");
 const fetch = require("node-fetch");
 
 /**
+ * @route POST api/analysis/
+ * @desc Get analytical information for a stream between frames and with classes
+ * @access Public
+ */
+router.post("/", async (req, res) => {
+    console.log("POST /api/analysis/");
+    try {
+        let stream = req.body.stream;
+        stream = path.basename(stream, path.extname(stream));
+        let body = req.body;
+        body.stream = stream;
+        console.log("stream, body:", stream, body);
+        const response = await fetch(`http://localhost:6000/api/analysis`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify(body)
+        });
+        const data = await response.json();
+        if (response.status == 400) {
+            return res.status(400).send(data);
+        } else {
+            return res.send(data);
+        }
+    } catch (err) {
+        console.error(err);
+        return res.status(424).send("Error retrieving analytical data:", err);
+    }
+})
+
+/**
  * @route GET api/analysis/download
  * @desc Download the analytical data for a video stream
  * @access Public
