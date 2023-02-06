@@ -28,8 +28,12 @@ import {
     ExportModal,
     ImportModal,
     AnalysisModal,
-    Controls
+    Controls,
+    Map
 } from "./components";
+
+//locations for map
+import * as Locations from '../../locations'
 
 // HLS Player
 import ReactHlsPlayer from 'react-hls-player';
@@ -47,6 +51,7 @@ import {
   ModifyMode,
   TransformMode
 } from "nebula.gl";
+import { listItemSecondaryActionClasses } from '@mui/material';
 
 /*
 // x1, y1, x2, y2
@@ -187,6 +192,10 @@ const Main = props => {
         props.getStreams();
     }, []);
 
+    //mapgl hook for storing state
+    const [viewState, setViewState] = React.useState(Locations.neutral)
+    const handleViewStateChange = ({viewState}) => setViewState
+
     return (
         <div className="main-root">
             <div className="feed-outer">
@@ -237,6 +246,12 @@ const Main = props => {
                 mode={mode}
                 setShowEditor={setShowEditor}
                 showEditor={showEditor} />
+            <Map 
+                width="100vw"
+                height="100vh"
+                viewState={viewState}
+                changedViewState={handleViewStateChange}
+                />
         </div>
     );
 };
