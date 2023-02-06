@@ -29,7 +29,7 @@ import {
     ImportModal,
     AnalysisModal,
     Controls,
-    Analytics
+    AnalysisMap
 } from "./components";
 
 // HLS Player
@@ -107,7 +107,7 @@ const initialViewState = {
     latitude: 37.775,
     zoom: 12
 };
- 
+
 const Main = props => {
     // Modal toggles
     const [openExport,   setOpenExport]   = useState(false);
@@ -248,6 +248,7 @@ const Main = props => {
                 mode={mode}
                 setShowEditor={setShowEditor}
                 showEditor={showEditor} />
+            <AnalysisMap />
         </div>
     );
 };

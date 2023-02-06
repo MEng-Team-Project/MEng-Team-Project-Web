@@ -137,7 +137,8 @@ const Analytics = props => {
         })
             .then(res => res.json())
             .then(data => setMetadata(data["metadata"]))
-    }, []);
+            .catch(err => {setMetadata({}) ; console.log(err)})
+    }, [stream]);
 
     // NOTE: This calls the microservice instead of the backend for performance reasons
     const getData = async () => {
@@ -158,8 +159,12 @@ const Analytics = props => {
                     "end":     end
                 })
             });
-            const json_data = await response.json();
-            setData(json_data["counts"]);
+            if (response.ok) {
+                const json_data = await response.json();
+                setData(json_data["counts"]);
+            } else {
+                setData({});
+            }
             setLastTime(currentTime);
         }
     };
