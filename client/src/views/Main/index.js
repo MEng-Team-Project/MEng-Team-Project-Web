@@ -48,6 +48,7 @@ import {
   ModifyMode,
   TransformMode
 } from "nebula.gl";
+import {WebMercatorViewport} from '@deck.gl/core';
 
 /*
 // x1, y1, x2, y2
@@ -108,6 +109,65 @@ const initialViewState = {
     zoom: 12
 };
 
+const geoToVid = (width, height, videoWidth, videoHeight, data) => {
+    // Get Orientation (landscape/square, portrait)
+    const orientation = (width >= height) ? "landscape" : "portrait";
+
+    // Get Ratio Between Source Video Width and Displayed Width (and same for Height)
+    let widthFactor=1, heightFactor=1;
+    if (orientation == "landscape") {
+        if (videoWidth > width) {
+            widthFactor  = width / videoWidth;
+            heightFactor = widthFactor;
+        }
+    } else {
+        if (videoHeight > height) {
+            heightFactor = height / videoHeight;
+            widthFactor  = heightFactor;
+        }
+    }
+
+    // Step 1. Get Map to Screen Viewport Calculator
+    const viewport = new WebMercatorViewport({
+        width: width,
+        height: height,
+        longitude: -122.43,
+        latitude: 37.775,
+        zoom: 12
+    });
+
+    // Step 2. Project Map Points to Screen Points
+    let screenPoints = data[0].map(point => viewport.project(point));
+
+    // Step 3. Translate Screen Coordinates to Video Container-Relative Coordinates
+    const videoElemContentWidth  = videoWidth  * widthFactor;
+    const videoElemContentHeight = videoHeight * heightFactor;
+    const videoXoffset = (width  - videoElemContentWidth) / 2;
+    const videoYoffset = (height - videoElemContentHeight) / 2;
+    const videoPoints  = screenPoints.map(point => [
+        (point[0] - (videoXoffset)) / widthFactor,
+        (point[1] - (videoYoffset)) / heightFactor]);
+
+    /*
+    console.log(`CONV:
+        orientation: ${orientation},
+        data: ${data},
+        screenPoints: ${screenPoints},
+        width: ${width},
+        videoWidth: ${videoWidth},
+        videoWidth: ${videoHeight},
+        videoElemContentWidth: ${videoElemContentWidth},
+        videoElemContentHeight: ${videoElemContentHeight},
+        videoXoffset: ${videoXoffset},
+        videoYoffset: ${videoYoffset},
+        widthFactor: ${widthFactor},
+        heightFactor: ${heightFactor},
+        videoPoints: ${videoPoints}`);
+    */
+
+    return videoPoints;
+}
+
 const Main = props => {
     // Modal toggles
     const [openExport,   setOpenExport]   = useState(false);
@@ -116,6 +176,7 @@ const Main = props => {
 
     // Route editor toggle
     const [showEditor,   setShowEditor]   = useState(false);
+    const [showMap,      setShowMap]      = useState(false);
 
     // Video player tracking
     const [currentTime,  setCurrentTime]  = useState(0);
@@ -125,8 +186,6 @@ const Main = props => {
         type: "FeatureCollection",
         features: []
     });
-    // const [mode, setMode] = useState(() => DrawLineStringMode);
-    // const [mode, setMode] = useState(() => ViewMode);
     const [mode, setMode] = useState(() => ViewMode);
     const [selectedFeatureIndexes, setSelectedFeatureIndexes] = useState([]);
 
@@ -195,6 +254,19 @@ const Main = props => {
         props.getStreams();
     }, []);
 
+    if (features.features.length > 0) {
+        console.log(
+            features.features[0].geometry.coordinates,
+            geoToVid(
+                window.innerWidth,
+                window.innerHeight,
+                videoRef.current.videoWidth,
+                videoRef.current.videoHeight,
+                features.features[0].geometry.coordinates
+            )
+        )
+    }
+
     return (
         <div className="main-root">
             <div className="feed-outer">
@@ -247,8 +319,10 @@ const Main = props => {
                 setMode={setMode}
                 mode={mode}
                 setShowEditor={setShowEditor}
-                showEditor={showEditor} />
-            <AnalysisMap />
+                showEditor={showEditor}
+                showMap={showMap}
+                setShowMap={setShowMap} />
+            {(showMap) && (<AnalysisMap />)}
         </div>
     );
 };

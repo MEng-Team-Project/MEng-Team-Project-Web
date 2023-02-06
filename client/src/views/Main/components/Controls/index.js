@@ -19,6 +19,7 @@ import ShapeLineOutlinedIcon from '@mui/icons-material/ShapeLineOutlined';
 import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
 import VisibilityOffOutlinedIcon from '@mui/icons-material/VisibilityOffOutlined';
 import AnalyticsOutlinedIcon from '@mui/icons-material/AnalyticsOutlined';
+import MapOutlinedIcon from '@mui/icons-material/MapOutlined';
 
 // Global Components
 import {
@@ -163,7 +164,7 @@ const Analytics = props => {
                 const json_data = await response.json();
                 setData(json_data["counts"]);
             } else {
-                setData({});
+                setData([]);
             }
             setLastTime(currentTime);
         }
@@ -195,18 +196,20 @@ const Analytics = props => {
 }
 
 const Controls = props => {
-    const { stream, currentTime, setMode, mode, showEditor, setShowEditor } = props;
+    const { stream, currentTime, setMode, mode, showEditor, setShowEditor, showMap, setShowMap } = props;
     const [showEditorControls, setShowEditorControls] = useState(false);
     const [showAnalytics, setShowAnalytics] = useState(false);
 
     const toggleEdit = () => {
         setShowEditorControls(!showEditorControls);
-        setShowAnalytics(false);
     }
 
     const toggleAnalytics = () => {
         setShowAnalytics(!showAnalytics);
-        setShowEditorControls(false);
+    }
+
+    const toggleMap = () => {
+        setShowMap(!showMap);
     }
 
     return (
@@ -229,12 +232,20 @@ const Controls = props => {
                                 color: (showEditor) ? "white" : "rgb(106, 116, 133)"
                             }}/>
                     </Tooltip>
+                    <Tooltip content="Toggle Map" direction="left">
+                        <MapOutlinedIcon
+                            onClick={toggleMap}
+                            className="icon controls-icon"
+                            sx={{
+                                color: (showMap) ? "white" : "rgb(106, 116, 133)"
+                            }}/>
+                    </Tooltip>
                     <Tooltip content="Analytics" direction="left">
                         <AnalyticsOutlinedIcon
                             onClick={toggleAnalytics}
                             className="icon controls-icon"
                             sx={{
-                                color: (showEditor) ? "white" : "rgb(106, 116, 133)"
+                                color: (showAnalytics) ? "white" : "rgb(106, 116, 133)"
                             }}/>
                     </Tooltip>
                 </div>
