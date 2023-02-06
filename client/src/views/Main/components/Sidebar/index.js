@@ -144,7 +144,7 @@ const SidebarFilter = props => {
                 <DeleteOutlineOutlinedIcon
                     className="delete-icon"
                     onClick={() => {
-                        deleteFilter(values)
+                        deleteFilter(values.id);
                     }}
                     style={{
                         width: 15,
@@ -169,11 +169,23 @@ const SidebarFilter = props => {
 const SidebarFilters = props => {
     const { streams } = props;
     const [filters, setFilters] = useState([
-        0
+        {
+            "id": 0,
+            "value": null,
+            "dataSrc": null
+        }
     ]);
     
-    const deleteFilter = values => {
-        setFilters(filters.filter(val => val != values))
+    const deleteFilter = deletionId => {
+        setFilters(filters.filter(filterItem => filterItem.id !== deletionId));
+    };
+
+    const addFilter = () => {
+        setFilters((filters) => [...filters,             {
+            "id": Math.max(0, ...filters.map(o => o.id)) + 1, // id is always greater than any existing filter id
+            "value": null,
+            "dataSrc": null
+        }]);
     };
 
     return (
@@ -182,12 +194,12 @@ const SidebarFilters = props => {
                 <div className="sidebar-tab__header">
                     Filters
                 </div>
-                <Button title="Add Filter" color="green" />
+                <Button title="Add Filter" color="green" onClick={() => addFilter()}/>
             </div>
             <div className="sidebar-spacing" />
-            {filters.map((values, i) =>
+            {filters.map((values) =>
                 <SidebarFilter
-                    key={i}
+                    key={values.id}
                     values={values}
                     datasources={streams}
                     deleteFilter={deleteFilter} /> )}
