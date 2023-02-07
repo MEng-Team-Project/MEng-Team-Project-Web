@@ -92,10 +92,10 @@ const AnalysisMap = props => {
                         <Marker
                             key={i}
                             position={position}
-                            label={routes[routes.indexOf(selected)]}
+                            label={routes[i]}
                         >
                             <Popup>
-                                <div>{routes[routes.indexOf(selected)]}</div>
+                                <div>{routes[i]}</div>
                             </Popup>
                         </Marker>
                     ))}

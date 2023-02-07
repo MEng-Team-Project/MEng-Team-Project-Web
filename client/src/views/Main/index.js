@@ -276,19 +276,21 @@ const Main = props => {
 
     /*
     if (features.features.length > 0) {
-        console.log(
-            features.features[0].geometry.coordinates,
-            geoToVid(
-                window.innerWidth,
-                window.innerHeight,
-                videoRef.current.videoWidth,
-                videoRef.current.videoHeight,
-                features.features[0].geometry.coordinates
-            )
-        )
+        for (let i=0; i<features.features.length; i++) {
+            console.log(
+                //features.features[0].geometry.coordinates,
+                routes[i],
+                geoToVid(
+                    window.innerWidth,
+                    window.innerHeight,
+                    videoRef.current.videoWidth,
+                    videoRef.current.videoHeight,
+                    features.features[i].geometry.coordinates
+                )
+            );
+        }
     }
     */
-
     return (
         <div className="main-root">
             <div className="feed-outer">
