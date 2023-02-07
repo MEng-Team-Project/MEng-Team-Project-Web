@@ -4,9 +4,11 @@ import DeckGL from '@deck.gl/react';
 import {LineLayer} from '@deck.gl/layers';
 import MapGL from 'react-map-gl';
 
+//CSS
+import "./Map.css"
 
 // Set your mapbox access token here
-const MAPBOX_ACCESS_TOKEN = 'pk.eyJ1IjoiZ2xvZ2FuMTIzIiwiYSI6ImNsZHJ1YXQwbjBtN3MzeHFzZnd0NXpyM2MifQ.anhbrd1xcGWlirisqaSIJg';
+const MAPBOX_ACCESS_TOKEN = 'pk.eyJ1IjoiZ2xvZ2FuMTIzIiwiYSI6ImNsZHR1d3I3azJhMzQ0MW4waDJxcnVqdmQifQ.wPekEDtyDiv9aGVkCUMBUQ';
 
 // Viewport settings
 const INITIAL_VIEW_STATE = {
@@ -46,15 +48,16 @@ const Map = props => {
   ];
 
   return (
-    <div className="Map">
-      <MapGL
+      <div className='map'>
+        <MapGL
         width = {width}
         height = {height}
-        mapboxApiAccessToken={MAPBOX_ACCESS_TOKEN}
+        mapboxAccessToken={MAPBOX_ACCESS_TOKEN}
         viewState = {viewState}
         onViewStateChange = {onViewStateChange}
         />
-    </div>
+      </div>
+      
 
   // return (
   //   <div className="MapGL">

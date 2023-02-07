@@ -196,9 +196,11 @@ const Main = props => {
     const [viewState, setViewState] = React.useState(Locations.neutral)
     const handleViewStateChange = ({viewState}) => setViewState
 
+    const MAPBOX_ACCESS_TOKEN ='pk.eyJ1IjoiZ2xvZ2FuMTIzIiwiYSI6ImNsZHR1d3I3azJhMzQ0MW4waDJxcnVqdmQifQ.wPekEDtyDiv9aGVkCUMBUQ'
+
     return (
         <div className="main-root">
-            <div className="feed-outer">
+            <div className="feed-outer">     
                 <video
                     autoPlay
                     ref={videoRef}
@@ -249,9 +251,11 @@ const Main = props => {
             <Map 
                 width="100vw"
                 height="100vh"
-                viewState={viewState}
+                style='mapbox://styles/mapbox/streets-v11'
+                mapboxAccessToken={MAPBOX_ACCESS_TOKEN}
+                viewState={initialViewState}
                 changedViewState={handleViewStateChange}
-                />
+            />
         </div>
     );
 };
