@@ -110,6 +110,8 @@ const initialViewState = {
 };
 
 const geoToVid = (width, height, videoWidth, videoHeight, data) => {
+    console.log("geoToVid.data:", data);
+
     // Get Orientation (landscape/square, portrait)
     const orientation = (width >= height) ? "landscape" : "portrait";
 
@@ -139,7 +141,7 @@ const geoToVid = (width, height, videoWidth, videoHeight, data) => {
     // Step 2. Project Map Points to Screen Points
     let screenPoints = data[0].map(point => viewport.project(point));
 
-    // Step 3. Translate Screen Coordinates to Video Container-Relative Coordinates
+    // Step 3. Translate Screen Coordinates to Video-Relative Coordinates
     const videoElemContentWidth  = videoWidth  * widthFactor;
     const videoElemContentHeight = videoHeight * heightFactor;
     const videoXoffset = (width  - videoElemContentWidth) / 2;
@@ -178,6 +180,9 @@ const Main = props => {
     const [showEditor,   setShowEditor]   = useState(false);
     const [showMap,      setShowMap]      = useState(false);
 
+    // Route mapping
+    const [routes, setRoutes]             = useState([]);
+
     // Video player tracking
     const [currentTime,  setCurrentTime]  = useState(0);
 
@@ -213,7 +218,23 @@ const Main = props => {
         data: features,
         pickable: true,
         mode,
-        onClick: (info, event) => console.log('Clicked:', info, event),
+        onClick: (info, event) => {
+            const coordCount = Array.from(info.object.geometry.coordinates)[0].length;
+            console.log(coordCount);
+            if (coordCount > 2) {
+                console.log('Clicked:', info, event, info.object.geometry.coordinates); // , vidCoords);
+                const regionIdx = info.index;
+                const existingLabel = routes[regionIdx];
+                const label = prompt("Set route region label", existingLabel);
+                let newRoutes = [...routes];
+                if (label) {
+                    newRoutes[regionIdx] = label;
+                } else {
+                    newRoutes[regionIdx] = existingLabel;
+                }
+                setRoutes(newRoutes);
+            }
+        },
         onSelect: ({ pickingInfos }) => {
             console.log("SELECT:", pickingInfos)
             // use pickingInfos to set the SelectedFeatureIndexes
@@ -222,13 +243,12 @@ const Main = props => {
             // any other functionality for selecting, like adding id's to state
         },
         selectedFeatureIndexes,
-
         onEdit: ({ updatedData }) => {
             setFeatures(updatedData);
+            const features    = updatedData.features;
+            console.log("updatedData:", updatedData)
         },
-        //getFillColor: (feature) => [255, 0, 0],
         getLineColor: (feature) => [255, 0, 0]
-         
     });
 
     const { streams, stream, ...rest } = props;
@@ -254,6 +274,7 @@ const Main = props => {
         props.getStreams();
     }, []);
 
+    /*
     if (features.features.length > 0) {
         console.log(
             features.features[0].geometry.coordinates,
@@ -266,6 +287,7 @@ const Main = props => {
             )
         )
     }
+    */
 
     return (
         <div className="main-root">
@@ -322,7 +344,11 @@ const Main = props => {
                 showEditor={showEditor}
                 showMap={showMap}
                 setShowMap={setShowMap} />
-            {(showMap) && (<AnalysisMap />)}
+            {(showMap) && (
+                <AnalysisMap
+                    routes={routes}
+                />
+            )}
         </div>
     );
 };

@@ -133,7 +133,7 @@ const Analytics = props => {
             body: JSON.stringify({
                 "stream": stream,
                 "start": 1,
-                "end": 100
+                "end": 10000 // NOTE: Just set this as high as possible
             })
         })
             .then(res => res.json())
@@ -141,7 +141,6 @@ const Analytics = props => {
             .catch(err => {setMetadata({}) ; console.log(err)})
     }, [stream]);
 
-    // NOTE: This calls the microservice instead of the backend for performance reasons
     const getData = async () => {
         if (Object.keys(metadata).length > 0) {
             const start = parseInt(currentTime * metadata["fps"]);
