@@ -1,0 +1,35 @@
+/*
+GLOBAL
+*/
+
+.map {
+    position: fixed;
+    bottom: 0;
+    right: 0;
+    padding: 0.5rem;
+    background-color: rgb(41, 50, 60);
+}
+
+.map-marker {
+    display: flex;
+    text-align: center;
+    align-items: center;
+    justify-content: center;
+    color: white;
+}
+
+.map-marker__text {
+    margin-left: 0.5rem;
+    margin-right: 0.5rem;
+    user-select: none;
+}
+
+/*
+ICONS
+*/
+
+.map-controls-icon {
+    background-color: rgb(106, 116, 133);
+    padding: 0.2rem;
+    border-radius: 3px;
+}
