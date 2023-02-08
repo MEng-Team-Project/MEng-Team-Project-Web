@@ -5,14 +5,16 @@ Provides endpoints related to providing existing recorded videos via the
 backend to the frontend or possibly also the ML microservice in the future.
 */
 
+
 // Express
 const express = require("express");
 const router = express.Router();
 const fs = require("fs");
 const path = require("path");
 const sqlite3 = require('sqlite3').verbose();
+const { exec } = require('child_process');
 
-let livestreams = {"testStream": null}
+let livestreams = { "testStream": null }
 
 const updateLiveStreams = async () => {
     const dbPath = path.join(__dirname, "../../..", 'main.db');
@@ -23,21 +25,34 @@ const updateLiveStreams = async () => {
             db.all(stmt, [], (err, rows) => {
                 if (err) reject(err);
                 resolve(rows);
-              });
             });
+        });
         const rows = await getRows
         const runningLivestreams = Object.keys(livestreams)
-        console.log(rows);
-        const runningRows = rows.filter((livestream) => 
-          Boolean (livestream.running)
-          
-        ) 
+        //console.log(rows);
+        const runningRows = rows.filter((livestream) =>
+            Boolean(livestream.running)
+        )
+
         console.log(livestreams);
         console.log(runningRows);
         runningRows.forEach((livestream) => {
             console.log("livestream", livestream)
-            if (!runningLivestreams.includes(livestream.name)){
-                livestreams[livestream.name] = livestream.source; 
+            if (!runningLivestreams.includes(livestream.name)) {
+                livestreams[livestream.name] = exec(
+                    `node ./server/utils/ffmpeg.js --source ${livestream.source}`,
+                    (error, stdout, stderr) => {
+                        if (error) {
+                            console.error(`error: ${error.message}`);
+                            return;
+                        }
+                        if (stderr) {
+                            console.error(`stderr: ${stderr}`);
+                            return;
+                        }
+                        console.log(`stdout:\n${stdout}`);
+                    }
+                );
             }
         })
         console.log(livestreams);
@@ -54,7 +69,7 @@ updateLiveStreams();
  * @desc Returns all existing recorded video streams
  * @access Public
  */
-router.get("/all", async(_, res) => {
+router.get("/all", async (_, res) => {
     console.log(__dirname);
     const dbPath = path.join(__dirname, "../../..", 'main.db');
     //console.log(dbPath)
@@ -63,8 +78,8 @@ router.get("/all", async(_, res) => {
         const files = await fs.promises.readdir("./server/streams")
         const db = new sqlite3.Database(dbPath);
         let data = files.map(file => ({
-            "name": path.basename(file), 
-            "source" : path.basename(file),
+            "name": path.basename(file),
+            "source": path.basename(file),
             "running": 0,
             "is_livestream": 0,
         }));
@@ -73,8 +88,8 @@ router.get("/all", async(_, res) => {
             db.all(stmt, [], (err, rows) => {
                 if (err) reject(err);
                 resolve(rows);
-              });
             });
+        });
         console.log("rows: ", rows);
         rows.forEach(i => data = data.concat(i));
         console.log("data: ", data);
@@ -124,9 +139,9 @@ router.post('/add', (req, res) => {
     const db = new sqlite3.Database('main.db');
     const stmt = db.prepare(`INSERT INTO streams VALUES (?, ?, ?, ?);`);
     const name = req.body.streamName;
-    const port = (req.body.port)? `:${req.body.port}` : ""
-    const source =`${req.body.protocol}://${req.body.ip}${port}/${req.body.directory}`;
-    const isRunning = Number(1); 
+    const port = (req.body.port) ? `:${req.body.port}` : ""
+    const source = `${req.body.protocol}://${req.body.ip}${port}/${req.body.directory}`;
+    const isRunning = Number(1);
     const isLivestream = Number(1);
     stmt.run(name, source, isRunning, isLivestream);
     stmt.finalize();

@@ -4,6 +4,25 @@ a livestream of either:
 1) a pre-recorded video
 2) an OBS or other RTMP livestream
 */
+const { ArgumentParser } = require('argparse');
+const parser = new ArgumentParser({
+    description: 'Backend for Traffic Analysis. Uses port 5000.'
+});
+parser.add_argument('--host', {
+    help: "Change IP address backend is hosted",
+    default: "0.0.0.0" });
+parser.add_argument('--source', {
+    help: "Stream source",
+    default: "0.0.0.0" });
+parser.add_argument('--port', {
+    help: "Change port of IP address where backend is hosted",
+    default: "" });
+parser.add_argument('--dir', {
+    help: "IP camera sub directory",
+    default: "0.0.0.0" });
+
+const args = parser.parse_args();
+
 
 const ffmpeg = require("fluent-ffmpeg");
 const ffmpegInstaller = require("@ffmpeg-installer/ffmpeg");
@@ -39,11 +58,10 @@ const createTestRecordedStream = stream => {
  * @param {number} port Host IP address port of RTMP stream
  * @param {path}   path Sub directory within RTMP server to transcribe to HLS livestream
 */
-const createTestLiveStream = (host, port, path, subdir = "") => {  
-    const url = `rtmp://${host}:${port}${path}`;
+const createTestLiveStream = (source) => {  
     // const url = `rtmp://${host}${path}`;
-    console.log(url)
-    ffmpeg(url, { timeout: 432000 }).addOptions([
+    console.log(source)
+    ffmpeg(source, { timeout: 432000 }).addOptions([
         '-c:v libx264',
         '-c:a aac',
         '-ac 1',
@@ -57,7 +75,7 @@ const createTestLiveStream = (host, port, path, subdir = "") => {
         '-hls_list_size 6',
         '-hls_wrap 10',
         '-start_number 1'
-    ]).output(`./livestream/${subdir}output.m3u8`)
+    ]).output(`./livestream/output.m3u8`)
     .on('error', function (err, stdout, stderr) {
         console.log('An error occurred: ' + err.message, err, stderr);
     })
@@ -68,4 +86,4 @@ const createTestLiveStream = (host, port, path, subdir = "") => {
 };
 
 // createTestRecordedStream("SEM_ID_TRAFFIC_TEST_TILTON_TINY.mp4");
-createTestLiveStream("127.0.0.1", "1935", "/temp/test");
+createTestLiveStream(args.source);
