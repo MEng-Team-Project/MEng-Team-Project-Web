@@ -12,7 +12,7 @@ const router = express.Router();
 const fs = require("fs");
 const path = require("path");
 const sqlite3 = require('sqlite3').verbose();
-const { exec } = require('child_process');
+const { exec, spawn, execSync } = require('child_process');
 
 let livestreams = { "testStream": null }
 
@@ -34,8 +34,9 @@ const updateLiveStreams = async () => {
             Boolean(livestream.running)
         )
 
-        console.log(livestreams);
-        console.log(runningRows);
+       // console.log(livestreams);
+       // console.log(runningRows);
+        console.log(process.cwd());
         runningRows.forEach((livestream) => {
             console.log("livestream", livestream)
             if (!runningLivestreams.includes(livestream.name)) {
@@ -50,7 +51,7 @@ const updateLiveStreams = async () => {
                             console.error(`stderr: ${stderr}`);
                             return;
                         }
-                        console.log(`stdout:\n${stdout}`);
+                        console.log(`stdout:\n${JSON.parse(stdout)}`);
                     }
                 );
             }

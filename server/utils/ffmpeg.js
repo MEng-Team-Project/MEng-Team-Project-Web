@@ -75,7 +75,7 @@ const createTestLiveStream = (source) => {
         '-hls_list_size 6',
         '-hls_wrap 10',
         '-start_number 1'
-    ]).output(`./livestream/output.m3u8`)
+    ]).output(`../../livestream/output.m3u8`)
     .on('error', function (err, stdout, stderr) {
         console.log('An error occurred: ' + err.message, err, stderr);
     })
