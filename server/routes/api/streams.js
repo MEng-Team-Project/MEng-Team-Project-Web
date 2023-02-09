@@ -141,17 +141,23 @@ router.put('/upload', (req, res) => {
  * @desc Receives livestream details and stores them in database
 */
 router.post('/add', (req, res) => {
-    console.log(req.body);
-    const db = new sqlite3.Database('main.db');
-    const stmt = db.prepare(`INSERT INTO streams VALUES (?, ?, ?, ?);`);
-    const name = req.body.streamName;
-    const port = (req.body.port) ? `:${req.body.port}` : ""
-    const source = `${req.body.protocol}://${req.body.ip}${port}/${req.body.directory}`;
-    const isRunning = Number(1);
-    const isLivestream = Number(1);
-    stmt.run(name, source, isRunning, isLivestream);
-    stmt.finalize();
-    res.send("Deets recieved!");
+    try {
+        console.log(req.body);
+        const db = new sqlite3.Database('main.db');
+        const stmt = db.prepare(`INSERT INTO streams VALUES (?, ?, ?, ?);`);
+        const name = req.body.streamName;
+        const port = (req.body.port) ? `:${req.body.port}` : ""
+        const source = `${req.body.protocol}://${req.body.ip}${port}/${req.body.directory}`;
+        const isRunning = Number(1);
+        const isLivestream = Number(1);
+        stmt.run(name, source, isRunning, isLivestream);
+        stmt.finalize();
+        updateLiveStreams();
+        res.send("Livestream added to database and HLS streaming initialised");
+    } catch (err) {
+        console.error(err);
+        res.status(400).send(`Error: ${err}`);
+    }
 });
 
 module.exports = router;

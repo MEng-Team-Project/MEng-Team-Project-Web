@@ -42,12 +42,13 @@ const style = {
 const AddStreamModal = props => {
     const { open, addStreamClose } = props;
 
+    const protocolOptions = ["rtmp", "rstp"];
+
     const [directoryValue, setDirectoryValue] = useState("");
     const [streamName, setStreamName] = useState("");
     const [ipValue, setIpValue] = useState("");
     const [numericValue, setNumericValue] = useState("");
-    const [protocolValue, setProtocolValue] = useState("");
-    const protocolOptions = ["rtmp", "rstp"];
+    const [protocolValue, setProtocolValue] = useState(protocolOptions[0]);
     
     const handleInputIPChange = (value) => {
         setIpValue(value);
@@ -67,11 +68,11 @@ const AddStreamModal = props => {
 
     const handleProtocolChange = (e) => {
         setProtocolValue(e.target.value);
-        console.log(e);
+        console.log("handleProtocolChange:", e.target.value);
     };
     
     const handleSubmit = () => {
-        console.log(directoryValue, ipValue, streamName);
+        console.log("add stream info:", directoryValue, ipValue, streamName);
         if (directoryValue && ipValue && streamName) {
             const liveStreamDetails = {"directory": directoryValue, "ip": ipValue, "port": numericValue, "streamName": streamName, "protocol": protocolValue};
             axios
@@ -112,13 +113,17 @@ const AddStreamModal = props => {
                 </div>
                 <div className="modal-content">
                     <div className="modal-content__upload-msg">
-                        <div><b>Stream Name:  </b> <DirectoryInput onValueChange={(value) => handleStreamNameChange(value)}/> </div>
+                        <div><b>Stream Name:  </b> <DirectoryInput onValueChange={(value) => {handleStreamNameChange(value); console.log("DirectoryInput-val:", value)}}/> </div>
                         <div><b>Protocol:  </b>
-                        <select onChange= {handleProtocolChange}>
+                        <select
+                            value={protocolValue}
+                            onChange={handleProtocolChange}
+                        >
                             {protocolOptions.map((protocol, i) => (
-                                 <option
-                                 selected = {(i == 0) ? "selected": ""}
-                                 key={i} value={protocol}>
+                                <option
+                                    key={i}
+                                    value={protocol}
+                                >
                                     {protocol.toUpperCase()}
                                  </option>
                             ))}    

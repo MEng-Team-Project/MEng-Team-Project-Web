@@ -6,7 +6,7 @@ function InputIPAddress(props) {
 
   const handleChange = (event) => {
     setValue(event.target.value); 
-    props.onValueChange(value);
+    props.onValueChange(event.target.value);
   };
 
   function checkIpValue(value) {
