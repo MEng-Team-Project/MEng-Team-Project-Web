@@ -38,9 +38,10 @@ const updateLiveStreams = async () => {
        // console.log(runningRows);
         console.log(process.cwd());
         runningRows.forEach((livestream) => {
-            console.log("livestream", livestream)
+            console.log(">>> livestream: ", runningLivestreams, livestream.name)
             if (!runningLivestreams.includes(livestream.name)) {
-                livestreams[livestream.name] = exec(
+                console.log("ello pls do smth")
+                const proc = exec(
                     `node ./server/utils/ffmpeg.js --source ${livestream.source}`,
                     (error, stdout, stderr) => {
                         if (error) {
@@ -54,9 +55,13 @@ const updateLiveStreams = async () => {
                         console.log(`stdout:\n${JSON.parse(stdout)}`);
                     }
                 );
+                proc.stdout.on('data', function(data) {
+                    console.log(data); 
+                });
+                livestreams[livestream.name] = proc;
             }
         })
-        console.log(livestreams);
+        // console.log(livestreams);
         db.close();
     } catch (err) {
         console.log("Server side error retrieving streams." + err);
@@ -71,7 +76,7 @@ updateLiveStreams();
  * @access Public
  */
 router.get("/all", async (_, res) => {
-    console.log(__dirname);
+    // console.log(__dirname);
     const dbPath = path.join(__dirname, "../../..", 'main.db');
     //console.log(dbPath)
 
@@ -91,9 +96,9 @@ router.get("/all", async (_, res) => {
                 resolve(rows);
             });
         });
-        console.log("rows: ", rows);
+        // console.log("rows: ", rows);
         rows.forEach(i => data = data.concat(i));
-        console.log("data: ", data);
+        // console.log("data: ", data);
         res.send(data);
         db.close();
     } catch (err) {
