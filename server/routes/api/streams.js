@@ -14,7 +14,7 @@ const path = require("path");
 const sqlite3 = require('sqlite3').verbose();
 const { exec, spawn, execSync } = require('child_process');
 
-let livestreams = { "testStream": null }
+let livestreams = {};
 
 const updateLiveStreams = async () => {
     const dbPath = path.join(__dirname, "../../..", 'main.db');
@@ -42,7 +42,7 @@ const updateLiveStreams = async () => {
             if (!runningLivestreams.includes(livestream.name)) {
                 console.log("ello pls do smth")
                 const proc = exec(
-                    `node ./server/utils/ffmpeg.js --source ${livestream.source}`,
+                    `node ./server/utils/ffmpeg.js --source ${livestream.source} --livestreamDir ${livestream.name}`,
                     (error, stdout, stderr) => {
                         if (error) {
                             console.error(`error: ${error.message}`);

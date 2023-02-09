@@ -202,7 +202,7 @@ const Main = props => {
                 {
                     (isLivestream) ? ( 
                         <ReactHlsPlayer
-                        src="./livestream/output.m3u8"
+                        src="./livestream/test/output.m3u8"
                         autoPlay={true}
                         controls={true}
                         onContextMenu={e => e.preventDefault()}
