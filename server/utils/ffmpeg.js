@@ -6,6 +6,7 @@ a livestream of either:
 */
 const { ArgumentParser } = require('argparse');
 const fs = require('fs');
+const path = require('path');
 const parser = new ArgumentParser({
     description: 'Backend for Traffic Analysis. Uses port 5000.'
 });
@@ -56,6 +57,21 @@ const createTestRecordedStream = stream => {
     }).run();
 }
 
+function deleteFolderRecursive(folderPath) {
+    if (fs.existsSync(folderPath)) {
+        fs.readdirSync(folderPath).forEach((file) => {
+            const curPath = path.join(folderPath, file);
+            if (fs.lstatSync(curPath).isDirectory()) {
+                deleteFolderRecursive(curPath);
+            } else {
+                fs.unlinkSync(curPath);
+            }
+        });
+        fs.rmdirSync(folderPath);
+    }
+}
+
+
 /** 
  * Runs ffmpeg to continuously transcribe a running RTMP stream as a HLS livestream
  * 
@@ -71,9 +87,15 @@ const createTestLiveStream = (source, livestreamDir) => {
     // NOTE: This is required as old livestream files will be used
     //       during streaming or can corrupt an existing one.
     // Delete old livestream sub-directory and recreate a fresh one
-    const livestreamFullDir = `./server/livestream/${livestreamDir}/`
-    if (fs.existsSync(livestreamFullDir))
-        fs.rmSync(livestreamFullDir, { recursive: true, force: true });
+    const livestreamFullDir = `./server/livestream/${livestreamDir}`
+    if (fs.existsSync(livestreamFullDir)){
+        try {
+            deleteFolderRecursive(livestreamFullDir);
+            console.log('File deleted successfully.');
+        } catch (error) {
+            console.error(error);
+        }
+    }
     fs.mkdirSync(livestreamFullDir);
     
     // Run FFMPEG
@@ -91,7 +113,7 @@ const createTestLiveStream = (source, livestreamDir) => {
         '-hls_list_size 6',
         '-hls_wrap 10',
         '-start_number 1'
-    ]).output(`${livestreamFullDir}output.m3u8`)
+    ]).output(`${livestreamFullDir}/output.m3u8`)
     .on('error', function (err, stdout, stderr) {
         console.log('An error occurred: ' + err.message, err, stderr);
     })

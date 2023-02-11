@@ -36,6 +36,7 @@ const updateLiveStreams = async () => {
 
        // console.log(livestreams);
        // console.log(runningRows);
+       db.close();
         console.log(process.cwd());
         runningRows.forEach((livestream) => {
             console.log(">>> livestream: ", runningLivestreams, livestream.name)
@@ -62,7 +63,7 @@ const updateLiveStreams = async () => {
             }
         })
         // console.log(livestreams);
-        db.close();
+        
     } catch (err) {
         console.log("Server side error retrieving streams." + err);
     }
@@ -152,6 +153,7 @@ router.post('/add', (req, res) => {
         const isLivestream = Number(1);
         stmt.run(name, source, isRunning, isLivestream);
         stmt.finalize();
+        db.close();
         updateLiveStreams();
         res.send("Livestream added to database and HLS streaming initialised");
     } catch (err) {
@@ -159,5 +161,57 @@ router.post('/add', (req, res) => {
         res.status(400).send(`Error: ${err}`);
     }
 });
+
+/** 
+ * @desc Receives livestream details and deletes database entry
+*/
+router.post('/delete', async (req, res) => {
+    try {
+        console.log(req.body);
+        const db = new sqlite3.Database('main.db');
+        const stmt = db.prepare(`DELETE FROM streams WHERE source=(?);`);
+        const source = req.body.source;
+        await new Promise((resolve, reject) => {
+            stmt.run(source, (err) => {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve();
+                }
+            });
+        });
+        stmt.finalize();
+        db.close();
+        const livestreamFullDir = `./server/livestream/${source}`;
+        if (fs.existsSync(livestreamFullDir)) {
+            try {
+                deleteFolderRecursive(livestreamFullDir);
+                console.log('File deletedd successfully.');
+            } catch (error) {
+                console.error(error);
+            }
+        }
+        res.send("stream deleted from database/directory and HLS streaming updated");
+        updateLiveStreams();
+    } catch (err) {
+        console.error(err);
+        res.status(400).send(`Error: ${err}`);
+    }
+});
+
+function deleteFolderRecursive(folderPath) {
+    if (fs.existsSync(folderPath)) {
+        fs.readdirSync(folderPath).forEach((file) => {
+            const curPath = path.join(folderPath, file);
+            if (fs.lstatSync(curPath).isDirectory()) {
+                deleteFolderRecursive(curPath);
+            } else {
+                fs.unlinkSync(curPath);
+            }
+        });
+        fs.rmdirSync(folderPath);
+    }
+};
+
 
 module.exports = router;

@@ -113,6 +113,7 @@ SIDEBAR TABS
 }
 
 .sidebar-tab__top {
+    padding-bottom: 10px;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -138,6 +139,9 @@ STREAMS
 .sidebar-tab__streams {
     display: flex;
     flex-direction: column;
+    position: sticky;
+    overflow-y: scroll;
+    max-height: 70vh;
 }
 
 .sidebar-tab__streams-stream_outer {
@@ -146,8 +150,20 @@ STREAMS
   align-items: baseline;
 }
 
+.sidebar-tab__streams-stream_inner{
+    display: flex;
+    flex-direction: column;
+}
+
 .sidebar-tab__streams-stream_left {
     flex-grow: 0;
+}
+
+.line{
+    width: 230px;
+    height: 0px;
+    border-bottom: 3px solid rgb(60, 97, 174);
+    position: absolute;
 }
 
 .sidebar-tab__streams-stream_right {

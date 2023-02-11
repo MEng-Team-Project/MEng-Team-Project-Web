@@ -42,6 +42,7 @@ import VisibilityOffOutlinedIcon from '@mui/icons-material/VisibilityOffOutlined
 import FileDownloadOutlinedIcon from '@mui/icons-material/FileDownloadOutlined';
 import FileUploadOutlinedIcon from '@mui/icons-material/FileUploadOutlined';
 import StorageOutlinedIcon from '@mui/icons-material/StorageOutlined';
+import ModeEditIcon from '@mui/icons-material/ModeEdit';
 
 // Global Components
 import {
@@ -49,7 +50,7 @@ import {
     Button,
     Dropdown
 } from '../../../../components';
-
+import axios from "axios";
 // CSS
 import "./Sidebar.css"
 
@@ -197,21 +198,71 @@ const SidebarFilters = props => {
 
 const SidebarStreamList = props => {
     const { streams, setStream } = props;
+
+    const deleteStream = values => {
+        const response = confirm(`Are you sure you want to delete ${values.name} ?`);
+        const name = values.name;
+        if (response) {
+            const streamDetails = {"source": values.source};
+            axios
+            .post("/api/streams/delete", streamDetails)
+            .then(res => {
+                alert(`${name} has been deleted`);
+            })
+            .catch(err => {
+                console.log(">>>error", err.response.data);
+            })
+        } else {
+            alert("Delete cancelled");
+        }
+    }
     console.log("streams: ", streams)
     return (
         <div className="sidebar-tab__streams">
             {streams.map((stream, i) => ( 
                 <div key={i} className="sidebar-tab__streams-stream_outer">
-                    <div className="sidebar-tab__streams-stream_left">
-                        <Tooltip content="Change Colour" direction="right">
-                            <div className="sidebar-tab__streams-stream_square" />
-                        </Tooltip>
+                    <div classname ="sidebar-tab__streams-stream_inner"> 
+                        <div className="sidebar-tab__streams-stream_left">
+                            <Tooltip content="Change Colour" direction="right">
+                                <div className="sidebar-tab__streams-stream_square" />
+                            </Tooltip>
+                        </div>
+                        <div className="sidebar-tab__streams-stream_left"> 
+                            <Tooltip content="Delete" direction="right">
+                            <DeleteOutlineOutlinedIcon
+                                                onClick={() => {
+                                                    deleteStream(stream)
+                                                }}
+                                                style={{
+                                                    width: 20,
+                                                    height: 20
+                                                }}
+                                                className="icon sidebar-top__icon"
+                                            />
+                            </Tooltip>
+                            
+                        </div>
+                        <div className="sidebar-tab__streams-stream_left"> 
+                            <Tooltip content="Edit" direction="right">
+                                <ModeEditIcon
+                                                onClick={() => {
+                                                    console.log("edit clicked")
+                                                }}
+                                                style={{
+                                                    width: 20,
+                                                    height: 20
+                                                }}
+                                                className="icon sidebar-top__icon"
+                                            />
+                            </Tooltip>
+                        </div>
                     </div>
+              
                     <div className="sidebar-tab__streams-stream_right">
                         <div
                             className="sidebar-tab__streams-stream_title"
                             onClick={() => setStream(stream)}>
-                            {stream.source}
+                            {truncate(stream.source, 30)}
                         </div>
                         {(stream.is_livestream == 1) ? (
                              <div className="sidebar-tab__streams-stream_info">
@@ -222,11 +273,19 @@ const SidebarStreamList = props => {
                          </div>
                             )}
                     </div>
+                  
+                    <div class="line"></div>
                 </div>
+                
             ))}
         </div>
     )
 };
+
+function truncate(str, maxlength) {
+    return (str.length > maxlength) ?
+      str.slice(0, maxlength - 1) + '…' : str;
+}
 
 const SidebarStreams = props => {
     const { streams, setStream, setOpenAddStream} = props;
