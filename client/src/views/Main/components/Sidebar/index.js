@@ -139,7 +139,7 @@ const SidebarFilter = props => {
                     values={filterOptions}
                     placeholder={"Select a filter"}
                     type={"type"}
-                    onValueChange={(filterValue) => {updateFilter(values.id, {id: 0, value: filterValue})}}
+                    onValueChange={(filterValue) => {updateFilter(values.id, {value: filterValue})}}
                 />
                 <DeleteOutlineOutlinedIcon
                     className="delete-icon"
