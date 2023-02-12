@@ -53,6 +53,9 @@ import {
 // CSS
 import "./Sidebar.css"
 
+// Filter Options for Dropdown
+import filterOptions from './filterOptions.json';
+
 const SidebarLiveVideoLayer = props => {
     const { title, selected } = props;
     const labelClass = (selected)
@@ -133,12 +136,7 @@ const SidebarFilter = props => {
         <div className="sidebar-filter">
             <div className="sidebar-filter__field">
                 <Dropdown
-                    values={[
-                        {
-                            meta: "float",
-                            data: "time"
-                        },
-                    ]}
+                    values={filterOptions}
                     placeholder={"Select a filter"}
                     type={"type"}
                     onValueChange={(filterValue) => {updateFilter(values.id, {value: filterValue})}}
