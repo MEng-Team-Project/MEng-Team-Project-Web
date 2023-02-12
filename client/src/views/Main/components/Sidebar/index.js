@@ -197,7 +197,7 @@ const SidebarFilters = props => {
 };
 
 const SidebarStreamList = props => {
-    const { streams, setStream } = props;
+    const { streams, setStream, editStreamOpen} = props;
 
     const deleteStream = values => {
         const response = confirm(`Are you sure you want to delete ${values.name} ?`);
@@ -210,12 +210,31 @@ const SidebarStreamList = props => {
                 alert(`${name} has been deleted`);
             })
             .catch(err => {
-                console.log(">>>error", err.response.data);
+                alert(`Failed to delete ${name}`);
             })
         } else {
             alert("Delete cancelled");
         }
     }
+
+    const deleteVideo = values => {
+        const response = confirm(`Are you sure you want to delete ${values.name} ?`);
+        const name = values.name;
+        if (response) {
+            const streamDetails = {"source": values.source};
+            axios
+            .post("/api/streams/deleteVideo", streamDetails)
+            .then(res => {
+                alert(`${name} has been deleted`);
+            })
+            .catch(err => {
+                alert(`Failed to delete ${name}`);
+            })
+        } else {
+            alert("Delete cancelled");
+        }
+    }
+
     console.log("streams: ", streams)
     return (
         <div className="sidebar-tab__streams">
@@ -231,7 +250,7 @@ const SidebarStreamList = props => {
                             <Tooltip content="Delete" direction="right">
                             <DeleteOutlineOutlinedIcon
                                                 onClick={() => {
-                                                    deleteStream(stream)
+                                                    (stream.is_livestream)?(deleteStream(stream)):(deleteVideo(stream))
                                                 }}
                                                 style={{
                                                     width: 20,
@@ -246,7 +265,11 @@ const SidebarStreamList = props => {
                             <Tooltip content="Edit" direction="right">
                                 <ModeEditIcon
                                                 onClick={() => {
-                                                    console.log("edit clicked")
+                                                    editStreamOpen({directoryValue: "/path/to/stream",
+                                                    streamName: "Stream 1",
+                                                    ipValue: "192.168.1.1",
+                                                    numericValue: "1935",
+                                                    protocolValue: "rtmp"});
                                                 }}
                                                 style={{
                                                     width: 20,
@@ -288,7 +311,7 @@ function truncate(str, maxlength) {
 }
 
 const SidebarStreams = props => {
-    const { streams, setStream, setOpenAddStream} = props;
+    const { streams, setStream, setOpenAddStream, editStreamOpen} = props;
     return (
         <div className="sidebar-tab">
             <div className="sidebar-tab__top">
@@ -299,13 +322,14 @@ const SidebarStreams = props => {
             </div>
             <SidebarStreamList
                 streams={streams}
-                setStream={setStream} />
+                setStream={setStream} 
+                editStreamOpen = {editStreamOpen}/>
         </div>
     )
 };
 
 const Sidebar = props => {
-    const { streams, setStream, setOpenExport, setOpenImport, setOpenAnalysis, setOpenAddStream } = props;
+    const { streams, setStream, setOpenExport, setOpenImport, setOpenAnalysis, setOpenAddStream, editStreamOpen} = props;
 
     const [tab, setTab] = useState("STREAMS");
     const [visible, setVisible] = useState(true);
@@ -378,7 +402,8 @@ const Sidebar = props => {
                             <SidebarStreams
                                 streams={streams}
                                 setStream={setStream}
-                                setOpenAddStream = {setOpenAddStream} />    
+                                setOpenAddStream = {setOpenAddStream}
+                                editStreamOpen = {editStreamOpen}/>    
                         )}
                         {(tab == "FILTERS") && (
                             <SidebarFilters streams={streams} />

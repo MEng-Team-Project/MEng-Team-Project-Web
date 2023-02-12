@@ -13,6 +13,7 @@ const fs = require("fs");
 const path = require("path");
 const sqlite3 = require('sqlite3').verbose();
 const { exec, spawn, execSync } = require('child_process');
+const rimraf = require('rimraf');
 
 let livestreams = {};
 
@@ -162,6 +163,29 @@ router.post('/add', (req, res) => {
     }
 });
 
+router.post('/edit', (req, res) => {
+    try {
+        console.log(req.body);
+        const db = new sqlite3.Database('main.db');
+        const ogSource = req.body.ogSource;
+        const stmt = db.prepare(`UPADATE INTO streams SET name=(?), source=(?),  isRunning=(?), isLivestream=(?) WHERE source=(?));`);
+        const name = req.body.streamName;
+        const port = (req.body.port) ? `:${req.body.port}` : ""
+        const source = `${req.body.protocol}://${req.body.ip}${port}/${req.body.directory}`;
+        const isRunning = Number(1);
+        const isLivestream = Number(1);
+        stmt.run(name, source, isRunning, isLivestream, ogSource);
+        stmt.finalize();
+        db.close();
+        updateLiveStreams();
+        res.send("Livestream edited in database and HLS streaming initialised");
+    } catch (err) {
+        console.error(err);
+        res.status(400).send(`Error: ${err}`);
+    }
+});
+
+
 /** 
  * @desc Receives livestream details and deletes database entry
 */
@@ -197,6 +221,19 @@ router.post('/delete', async (req, res) => {
         console.error(err);
         res.status(400).send(`Error: ${err}`);
     }
+});
+
+router.post('/deleteVideo', async (req, res) => {
+    const livestreamFullDir = `./server/streams/${req.body.source}`;
+    if (fs.existsSync(livestreamFullDir)) {
+        try {
+            rimraf.sync(livestreamFullDir);
+            console.log('File deleted successfully.');
+        } catch (error) {
+            console.error(">>>>>>>>>>error", error);
+        }
+    }
+    res.send("video deleted from directory");
 });
 
 function deleteFolderRecursive(folderPath) {

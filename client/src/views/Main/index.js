@@ -29,6 +29,7 @@ import {
     ImportModal,
     AnalysisModal,
     AddStreamModal,
+    EditStreamModal,
     Controls
 } from "./components";
 
@@ -114,6 +115,12 @@ const Main = props => {
     const [openImport,   setOpenImport]   = useState(false);
     const [openAnalysis, setOpenAnalysis] = useState(false);
     const [openAddStreams, setOpenAddStream]  = useState(false);
+    const [openEditStreams, setOpenEditStream]  = useState(false);
+    const [streamDetails = {directory: "",
+    streamName: "",
+    ipValue: "",
+    port: "",
+    protocol: ""}, setStreamDetails] = useState({});
 
     // Route editor toggle
     const [showEditor,   setShowEditor]   = useState(false);
@@ -189,6 +196,16 @@ const Main = props => {
         setOpenAddStream(false);
     };
 
+    const editStreamClose = () => {
+        setOpenEditStream(false);
+    };
+
+    const editStreamOpen = (streamDetails) => {
+        setStreamDetails(streamDetails);
+        setOpenEditStream(true);
+      };
+
+
     useEffect(() => {
         props.getStreams();
     }, []);
@@ -241,6 +258,7 @@ const Main = props => {
                 setOpenImport={setOpenImport}
                 setOpenAnalysis={setOpenAnalysis}
                 setOpenAddStream={setOpenAddStream}
+                editStreamOpen={editStreamOpen}
                 />
             <ExportModal
                 open={openExport}
@@ -258,6 +276,12 @@ const Main = props => {
                 open={openAddStreams}
                 addStreamClose={addStreamClose}
                 streams={streams} />
+            <EditStreamModal
+                open={openEditStreams}
+                editStreamOpen={editStreamOpen}
+                editStreamClose={editStreamClose}
+                streamDetails={streamDetails}
+                streams={streams}/>
             <Controls
                 setMode={setMode}
                 mode={mode}
