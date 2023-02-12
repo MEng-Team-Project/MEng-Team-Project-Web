@@ -122,13 +122,13 @@ const SidebarLiveVideo = props => {
     );
 }
 const SidebarFilter = props => {
-    const { values, datasources, deleteFilter } = props;
+    const { values, datasources, deleteFilter, updateFilter } = props;
     const dropdownDatasources = 
         datasources.map(datasource => ({
             "meta": "rgb(60, 97, 174)",
             "data": datasource
         }));
-    
+
     return (
         <div className="sidebar-filter">
             <div className="sidebar-filter__field">
@@ -140,7 +140,9 @@ const SidebarFilter = props => {
                         },
                     ]}
                     placeholder={"Select a filter"}
-                    type={"type"} />
+                    type={"type"}
+                    onValueChange={(filterValue) => {updateFilter(values.id, {value: filterValue})}}
+                />
                 <DeleteOutlineOutlinedIcon
                     className="delete-icon"
                     onClick={() => {
@@ -160,7 +162,9 @@ const SidebarFilter = props => {
                     values={dropdownDatasources}
                     placeholder={"Select a data source"}
                     init={0}
-                    type={"dot"} />
+                    type={"dot"}
+                    onValueChange={(filterDataSrc) => {updateFilter(values.id, {dataSrc: filterDataSrc})}}
+                />
             </div>
         </div>
     )
@@ -168,6 +172,7 @@ const SidebarFilter = props => {
 
 const SidebarFilters = props => {
     const { streams } = props;
+    
     const [filters, setFilters] = useState([
         {
             "id": 0,
@@ -188,6 +193,17 @@ const SidebarFilters = props => {
         }]);
     };
 
+    const updateFilter = (updateId, updateObject) => {
+        setFilters(filters.map(filterItem => {
+            if (filterItem.id === updateId) {
+                Object.entries(updateObject).forEach(([updateKey, updateValue]) => {
+                    filterItem[updateKey] = updateValue;
+                });
+            }
+            return filterItem;
+        }));
+    };
+
     return (
         <div className="sidebar-tab">
             <div className="sidebar-tab__top">
@@ -202,7 +218,9 @@ const SidebarFilters = props => {
                     key={values.id}
                     values={values}
                     datasources={streams}
-                    deleteFilter={deleteFilter} /> )}
+                    deleteFilter={deleteFilter}
+                    updateFilter={updateFilter}
+                />)}
         </div>
     );
 };
