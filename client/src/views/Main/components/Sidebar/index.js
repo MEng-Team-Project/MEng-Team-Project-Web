@@ -139,7 +139,7 @@ const SidebarFilter = props => {
                     values={filterOptions}
                     placeholder={"Select a filter"}
                     type={"type"}
-                    onValueChange={(filterValue) => {updateFilter(values.id, {value: filterValue})}}
+                    onValueChange={(filterValue) => {updateFilter(values.id, {id: 0, value: filterValue})}}
                 />
                 <DeleteOutlineOutlinedIcon
                     className="delete-icon"
@@ -195,7 +195,9 @@ const SidebarFilters = props => {
         setFilters(filters.map(filterItem => {
             if (filterItem.id === updateId) {
                 Object.entries(updateObject).forEach(([updateKey, updateValue]) => {
-                    filterItem[updateKey] = updateValue;
+                    if (updateKey !== 'id') {
+                        filterItem[updateKey] = updateValue;
+                    }
                 });
             }
             return filterItem;
