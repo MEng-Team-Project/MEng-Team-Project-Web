@@ -53,6 +53,9 @@ import {
 // CSS
 import "./Sidebar.css"
 
+// Filter Options for Dropdown
+import filterOptions from './filterOptions.json';
+
 const SidebarLiveVideoLayer = props => {
     const { title, selected } = props;
     const labelClass = (selected)
@@ -122,29 +125,26 @@ const SidebarLiveVideo = props => {
     );
 }
 const SidebarFilter = props => {
-    const { values, datasources, deleteFilter } = props;
+    const { values, datasources, deleteFilter, updateFilter } = props;
     const dropdownDatasources = 
         datasources.map(datasource => ({
             "meta": "rgb(60, 97, 174)",
             "data": datasource
         }));
-    
+
     return (
         <div className="sidebar-filter">
             <div className="sidebar-filter__field">
                 <Dropdown
-                    values={[
-                        {
-                            meta: "float",
-                            data: "time"
-                        },
-                    ]}
+                    values={filterOptions}
                     placeholder={"Select a filter"}
-                    type={"type"} />
+                    type={"type"}
+                    onValueChange={(filterValue) => {updateFilter(values.id, {value: filterValue})}}
+                />
                 <DeleteOutlineOutlinedIcon
                     className="delete-icon"
                     onClick={() => {
-                        deleteFilter(values)
+                        deleteFilter(values.id);
                     }}
                     style={{
                         width: 15,
@@ -160,7 +160,9 @@ const SidebarFilter = props => {
                     values={dropdownDatasources}
                     placeholder={"Select a data source"}
                     init={0}
-                    type={"dot"} />
+                    type={"dot"}
+                    onValueChange={(filterDataSrc) => {updateFilter(values.id, {dataSrc: filterDataSrc})}}
+                />
             </div>
         </div>
     )
@@ -168,12 +170,38 @@ const SidebarFilter = props => {
 
 const SidebarFilters = props => {
     const { streams } = props;
+    
     const [filters, setFilters] = useState([
-        0
+        {
+            "id": 0,
+            "value": null,
+            "dataSrc": null
+        }
     ]);
     
-    const deleteFilter = values => {
-        setFilters(filters.filter(val => val != values))
+    const deleteFilter = deletionId => {
+        setFilters(filters.filter(filterItem => filterItem.id !== deletionId));
+    };
+
+    const addFilter = () => {
+        setFilters((filters) => [...filters,             {
+            "id": Math.max(0, ...filters.map(o => o.id)) + 1, // id is always greater than any existing filter id
+            "value": null,
+            "dataSrc": null
+        }]);
+    };
+
+    const updateFilter = (updateId, updateObject) => {
+        setFilters(filters.map(filterItem => {
+            if (filterItem.id === updateId) {
+                Object.entries(updateObject).forEach(([updateKey, updateValue]) => {
+                    if (updateKey !== 'id') {
+                        filterItem[updateKey] = updateValue;
+                    }
+                });
+            }
+            return filterItem;
+        }));
     };
 
     return (
@@ -182,15 +210,17 @@ const SidebarFilters = props => {
                 <div className="sidebar-tab__header">
                     Filters
                 </div>
-                <Button title="Add Filter" color="green" />
+                <Button title="Add Filter" color="green" onClick={() => addFilter()}/>
             </div>
             <div className="sidebar-spacing" />
-            {filters.map((values, i) =>
+            {filters.map((values) =>
                 <SidebarFilter
-                    key={i}
+                    key={values.id}
                     values={values}
                     datasources={streams}
-                    deleteFilter={deleteFilter} /> )}
+                    deleteFilter={deleteFilter}
+                    updateFilter={updateFilter}
+                />)}
         </div>
     );
 };

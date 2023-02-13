@@ -14,7 +14,7 @@ const Dropdown = props => {
     const [selectedValue, setSelectedValue] = useState(null);
     const [query, setQuery] = useState("");
 
-    const { values, placeholder, type, ...rest } = props;
+    const { values, placeholder, type, onValueChange, ...rest } = props;
 
     console.log("selectedValue:", selectedValue);
     console.log("values:", values);
@@ -44,6 +44,9 @@ const Dropdown = props => {
                     console.log("dropdown->onBlur", e.relatedTarget)
                     if (e.relatedTarget === null) {
                         setActive(false);
+                    }
+                    if (onValueChange) {
+                        onValueChange(selectedValue);
                     }
                 }}
             >
