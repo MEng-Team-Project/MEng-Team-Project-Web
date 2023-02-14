@@ -269,3 +269,7 @@ LIVE VIDEO
 .live-video__layer-label-selected {
     color: rgb(193, 200, 209);
 }
+
+.space{
+    padding-bottom: 500px;
+}

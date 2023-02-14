@@ -2,10 +2,9 @@ import React, { useState } from "react";
 const InputMask = require("react-input-mask");
 
 function InputIPAddress(props) {
-  const [value, setValue] = useState("");
+  const {value}= props;
 
   const handleChange = (event) => {
-    setValue(event.target.value); 
     props.onValueChange(event.target.value);
   };
 

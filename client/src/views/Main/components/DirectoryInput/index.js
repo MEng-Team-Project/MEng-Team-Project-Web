@@ -1,10 +1,8 @@
 import React, { useState } from "react";
 
 function DirectoryInput(props) {
-    const [value, setValue] = useState("");
-
+    const {value}= props;
     const handleChange = (event) => {
-      setValue(event.target.value);
       props.onValueChange(event.target.value);
     };
   

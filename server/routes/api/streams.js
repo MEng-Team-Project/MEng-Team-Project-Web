@@ -168,10 +168,10 @@ router.post('/edit', (req, res) => {
         console.log(req.body);
         const db = new sqlite3.Database('main.db');
         const ogSource = req.body.ogSource;
-        const stmt = db.prepare(`UPADATE INTO streams SET name=(?), source=(?),  isRunning=(?), isLivestream=(?) WHERE source=(?));`);
+        const stmt = db.prepare(`UPDATE streams SET name=(?), source=(?), running=(?), is_livestream=(?) WHERE source=(?);`);
         const name = req.body.streamName;
         const port = (req.body.port) ? `:${req.body.port}` : ""
-        const source = `${req.body.protocol}://${req.body.ip}${port}/${req.body.directory}`;
+        const source = `${req.body.protocol}://${req.body.ip}${port}${req.body.directory}`;
         const isRunning = Number(1);
         const isLivestream = Number(1);
         stmt.run(name, source, isRunning, isLivestream, ogSource);

@@ -1,17 +1,16 @@
 import React, { useState } from "react";
 
 function RestrictedNumericInput(props) {
-  const [value, setValue] = useState("");
+  const {value}= props;
   const regex = /^\d*$/;
 
   const handleChange = (event) => {
     const input = event.target.value.trim();
     if (input.match(regex) && input.length <= 5 || input.length == 0) {
-      setValue(input);
+      props.onValueChange(input);
     } else {
-      setValue(input.slice(0, 5));
+      props.onValueChange(input.slice(0, 5));
     }
-    props.onValueChange(value);
   };
 
   return (

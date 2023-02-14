@@ -28,7 +28,6 @@ import {
     ExportModal,
     ImportModal,
     AnalysisModal,
-    AddStreamModal,
     EditStreamModal,
     Controls
 } from "./components";
@@ -116,11 +115,12 @@ const Main = props => {
     const [openAnalysis, setOpenAnalysis] = useState(false);
     const [openAddStreams, setOpenAddStream]  = useState(false);
     const [openEditStreams, setOpenEditStream]  = useState(false);
-    const [streamDetails = {directory: "",
+    const [streamDetails, setStreamDetails] = useState({directory: "",
     streamName: "",
     ipValue: "",
     port: "",
-    protocol: ""}, setStreamDetails] = useState({});
+    protocol: ""});
+    const [edit, setEdit] = useState(false);
 
     // Route editor toggle
     const [showEditor,   setShowEditor]   = useState(false);
@@ -200,10 +200,14 @@ const Main = props => {
         setOpenEditStream(false);
     };
 
-    const editStreamOpen = (streamDetails) => {
+    const editStreamOpen = (streamDetails, value) => {
         setStreamDetails(streamDetails);
         setOpenEditStream(true);
-      };
+    };
+
+    const setEditMode = (value) => {
+        setEdit(value);
+    }
 
 
     useEffect(() => {
@@ -259,6 +263,8 @@ const Main = props => {
                 setOpenAnalysis={setOpenAnalysis}
                 setOpenAddStream={setOpenAddStream}
                 editStreamOpen={editStreamOpen}
+                setEditMode = {setEditMode}
+                edit = {edit}
                 />
             <ExportModal
                 open={openExport}
@@ -272,16 +278,15 @@ const Main = props => {
                 open={openAnalysis}
                 analysisClose={analysisClose}
                 streams={streams} />
-            <AddStreamModal
-                open={openAddStreams}
-                addStreamClose={addStreamClose}
-                streams={streams} />
             <EditStreamModal
                 open={openEditStreams}
                 editStreamOpen={editStreamOpen}
                 editStreamClose={editStreamClose}
                 streamDetails={streamDetails}
-                streams={streams}/>
+                streams={streams}
+                setEditMode = {setEditMode}
+                edit = {edit}
+                />
             <Controls
                 setMode={setMode}
                 mode={mode}
