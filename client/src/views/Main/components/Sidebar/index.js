@@ -243,9 +243,11 @@ const SidebarStreamList = props => {
                 <div key={i} className="sidebar-tab__streams-stream_outer">
                     <div classname ="sidebar-tab__streams-stream_inner"> 
                         <div className="sidebar-tab__streams-stream_left">
-                            <Tooltip content="Change Colour" direction="right">
-                                <div className="sidebar-tab__streams-stream_square" />
-                            </Tooltip>
+                            <div className="change_color_div">
+                                <Tooltip content="Change Colour" direction="right">
+                                    <div className="sidebar-tab__streams-stream_square" />
+                                </Tooltip>
+                            </div>
                         </div>
                         <div className="sidebar-tab__streams-stream_left"> 
                             <Tooltip content="Delete" direction="right">
@@ -254,8 +256,8 @@ const SidebarStreamList = props => {
                                                     (stream.is_livestream)?(deleteStream(stream)):(deleteVideo(stream))
                                                 }}
                                                 style={{
-                                                    width: 20,
-                                                    height: 20
+                                                    width: 15,
+                                                    height: 15
                                                 }}
                                                 className="icon sidebar-top__icon"
                                             />
@@ -263,7 +265,7 @@ const SidebarStreamList = props => {
                             
                         </div>
                         <div className="sidebar-tab__streams-stream_left"> 
-                        <div style={{width:20, height: 20, pointerEvents: stream.is_livestream ? "auto" : "none" }}>
+                        <div style={{ pointerEvents: stream.is_livestream ? "auto" : "none" }}>
                             <Tooltip content="Edit" direction="right">
                                 <ModeEditIcon
                                 onClick={() => {
@@ -271,13 +273,13 @@ const SidebarStreamList = props => {
                                     console.log(stream.source)
 
                                     if (streamDetails) {
-                                    editStreamOpen({
-                                        directoryValue: streamDetails.dirs,
-                                        streamName: stream.name,
-                                        ipValue: streamDetails.hostname,
-                                        numericValue: streamDetails.port,
-                                        protocolValue: streamDetails.protocol
-                                    }, setEditMode(true));
+                                        editStreamOpen({
+                                            directoryValue: streamDetails.dirs,
+                                            streamName: stream.name,
+                                            ipValue: streamDetails.hostname,
+                                            numericValue: streamDetails.port,
+                                            protocolValue: streamDetails.protocol
+                                        }, setEditMode(true));
                                     }
                                 }}
                                 style={{

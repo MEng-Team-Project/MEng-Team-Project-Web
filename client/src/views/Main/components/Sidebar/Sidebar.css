@@ -144,6 +144,30 @@ STREAMS
     max-height: 70vh;
 }
 
+/* style the scrollbar in WebKit-based browsers */
+::-webkit-scrollbar {
+    width: 0.5rem; 
+}
+
+::-webkit-scrollbar-thumb {
+    background-color: #5555; 
+    border-radius: 5px;
+}
+
+::-webkit-scrollbar-track {
+    background-color: rgba(41, 50, 60, 0.407); 
+    border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background-color: #555;
+   
+}
+
+::-webkit-scrollbar-track:hover {
+    background-color: rgb(41, 50, 60); 
+}
+
 .sidebar-tab__streams-stream_outer {
   display: flex;
   flex-direction: row;
@@ -191,6 +215,11 @@ STREAMS
     width: 10px;
     height: 10px;
     background-color: rgb(60, 97, 174);
+}
+
+.change_color_div {
+    padding-left: 5px;
+    padding-bottom: 5px;
 }
 
 .sidebar-tab__text {
