@@ -29,7 +29,8 @@ import {
     ImportModal,
     AnalysisModal,
     EditStreamModal,
-    Controls
+    Controls,
+    AnalysisMap
 } from "./components";
 
 // HLS Player
@@ -48,6 +49,7 @@ import {
   ModifyMode,
   TransformMode
 } from "nebula.gl";
+import {WebMercatorViewport} from '@deck.gl/core';
 
 /*
 // x1, y1, x2, y2
@@ -107,7 +109,68 @@ const initialViewState = {
     latitude: 37.775,
     zoom: 12
 };
- 
+
+const geoToVid = (width, height, videoWidth, videoHeight, data) => {
+    console.log("geoToVid.data:", data);
+
+    // Get Orientation (landscape/square, portrait)
+    const orientation = (width >= height) ? "landscape" : "portrait";
+
+    // Get Ratio Between Source Video Width and Displayed Width (and same for Height)
+    let widthFactor=1, heightFactor=1;
+    if (orientation == "landscape") {
+        if (videoWidth > width) {
+            widthFactor  = width / videoWidth;
+            heightFactor = widthFactor;
+        }
+    } else {
+        if (videoHeight > height) {
+            heightFactor = height / videoHeight;
+            widthFactor  = heightFactor;
+        }
+    }
+
+    // Step 1. Get Map to Screen Viewport Calculator
+    const viewport = new WebMercatorViewport({
+        width: width,
+        height: height,
+        longitude: -122.43,
+        latitude: 37.775,
+        zoom: 12
+    });
+
+    // Step 2. Project Map Points to Screen Points
+    let screenPoints = data[0].map(point => viewport.project(point));
+
+    // Step 3. Translate Screen Coordinates to Video-Relative Coordinates
+    const videoElemContentWidth  = videoWidth  * widthFactor;
+    const videoElemContentHeight = videoHeight * heightFactor;
+    const videoXoffset = (width  - videoElemContentWidth) / 2;
+    const videoYoffset = (height - videoElemContentHeight) / 2;
+    const videoPoints  = screenPoints.map(point => [
+        (point[0] - (videoXoffset)) / widthFactor,
+        (point[1] - (videoYoffset)) / heightFactor]);
+
+    /*
+    console.log(`CONV:
+        orientation: ${orientation},
+        data: ${data},
+        screenPoints: ${screenPoints},
+        width: ${width},
+        videoWidth: ${videoWidth},
+        videoWidth: ${videoHeight},
+        videoElemContentWidth: ${videoElemContentWidth},
+        videoElemContentHeight: ${videoElemContentHeight},
+        videoXoffset: ${videoXoffset},
+        videoYoffset: ${videoYoffset},
+        widthFactor: ${widthFactor},
+        heightFactor: ${heightFactor},
+        videoPoints: ${videoPoints}`);
+    */
+
+    return videoPoints;
+}
+
 const Main = props => {
     // Modal toggles
     const [openExport,   setOpenExport]   = useState(false);
@@ -124,14 +187,19 @@ const Main = props => {
 
     // Route editor toggle
     const [showEditor,   setShowEditor]   = useState(false);
+    const [showMap,      setShowMap]      = useState(false);
+
+    // Route mapping
+    const [routes, setRoutes]             = useState([]);
+
+    // Video player tracking
+    const [currentTime,  setCurrentTime]  = useState(0);
 
     // Deck.GL parameters
     const [features, setFeatures] = useState({
         type: "FeatureCollection",
         features: []
     });
-    // const [mode, setMode] = useState(() => DrawLineStringMode);
-    // const [mode, setMode] = useState(() => ViewMode);
     const [mode, setMode] = useState(() => ViewMode);
     const [selectedFeatureIndexes, setSelectedFeatureIndexes] = useState([]);
 
@@ -159,7 +227,23 @@ const Main = props => {
         data: features,
         pickable: true,
         mode,
-        onClick: (info, event) => console.log('Clicked:', info, event),
+        onClick: (info, event) => {
+            const coordCount = Array.from(info.object.geometry.coordinates)[0].length;
+            console.log(coordCount);
+            if (coordCount > 2) {
+                console.log('Clicked:', info, event, info.object.geometry.coordinates); // , vidCoords);
+                const regionIdx = info.index;
+                const existingLabel = routes[regionIdx];
+                const label = prompt("Set route region label", existingLabel);
+                let newRoutes = [...routes];
+                if (label) {
+                    newRoutes[regionIdx] = label;
+                } else {
+                    newRoutes[regionIdx] = existingLabel;
+                }
+                setRoutes(newRoutes);
+            }
+        },
         onSelect: ({ pickingInfos }) => {
             console.log("SELECT:", pickingInfos)
             // use pickingInfos to set the SelectedFeatureIndexes
@@ -168,17 +252,20 @@ const Main = props => {
             // any other functionality for selecting, like adding id's to state
         },
         selectedFeatureIndexes,
-
         onEdit: ({ updatedData }) => {
             setFeatures(updatedData);
+            const features    = updatedData.features;
+            console.log("updatedData:", updatedData)
         },
-        //getFillColor: (feature) => [255, 0, 0],
         getLineColor: (feature) => [255, 0, 0]
-         
     });
 
     const { streams, stream, ...rest } = props;
     const videoRef = useRef(null);
+
+    const handleTimeUpdate = () => {
+        setCurrentTime(videoRef.current.currentTime);
+    };
 
     const analysisClose = () => {
         setOpenAnalysis(false);
@@ -243,6 +330,23 @@ const Main = props => {
                     </video>
                     )
                 }
+    {/*
+    if (features.features.length > 0) {
+        for (let i=0; i<features.features.length; i++) {
+            console.log(
+                //features.features[0].geometry.coordinates,
+                routes[i],
+                geoToVid(
+                    window.innerWidth,
+                    window.innerHeight,
+                    videoRef.current.videoWidth,
+                    videoRef.current.videoHeight,
+                    features.features[i].geometry.coordinates
+                )
+            );
+        }
+    }
+    */}
                 {(showEditor) && (
                     <DeckGL
                         initialViewState={initialViewState}
@@ -288,10 +392,19 @@ const Main = props => {
                 edit = {edit}
                 />
             <Controls
+                stream={stream}
+                currentTime={currentTime}
                 setMode={setMode}
                 mode={mode}
                 setShowEditor={setShowEditor}
-                showEditor={showEditor} />
+                showEditor={showEditor}
+                showMap={showMap}
+                setShowMap={setShowMap} />
+            {(showMap) && (
+                <AnalysisMap
+                    routes={routes}
+                />
+            )}
         </div>
     );
 };

@@ -36,6 +36,8 @@
     "express-fileupload": "^1.4.0",
     "fluent-ffmpeg": "^2.1.2",
     "hls-server": "^1.5.0",
+    "leaflet": "^1.9.3",
+    "mapbox-gl": "^2.12.0",
     "moment": "^2.29.4",
     "nebula.gl": "^1.0.4",
     "node-fetch": "^2.6.7",
@@ -43,10 +45,17 @@
     "path": "^0.12.7",
     "react-hls-player": "^3.0.7",
     "react-input-mask": "^2.0.4",
+    "react-leaflet": "^1.6.0",
+    "react-map-gl": "^7.0.21",
     "react-redux": "^8.0.5",
     "react-router-dom": "^6.4.3",
     "redux": "^4.2.0",
     "redux-thunk": "^2.4.2",
     "sqlite3": "^5.1.4"
+  },
+  "devDependencies": {
+    "json-loader": "^0.5.7",
+    "transform-loader": "^0.2.4",
+    "webworkify-webpack": "^1.0.6"
   }
 }
