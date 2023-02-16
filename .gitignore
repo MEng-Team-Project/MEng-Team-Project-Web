@@ -141,6 +141,6 @@ analysis/
 # Ignore "/livestream" directory
 livestream/
 
-#Ignore .ts and .m3u8
-.ts
-.m3u8
+# Ignore .ts and .m3u8
+*.ts
+*.m3u8
