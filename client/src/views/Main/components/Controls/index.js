@@ -124,6 +124,8 @@ const Analytics = props => {
 
     // Get metadata for current stream
     useEffect(() => {
+        const streamSource = stream.source;
+        console.log("streamSource:", streamSource);
         fetch(`/api/analysis`, {
             method: 'POST',
             headers: {
@@ -131,7 +133,7 @@ const Analytics = props => {
                 'Accept': 'application/json'
             },
             body: JSON.stringify({
-                "stream": stream,
+                "stream": streamSource,
                 "start": 1,
                 "end": 10000 // NOTE: Just set this as high as possible
             })
@@ -146,6 +148,8 @@ const Analytics = props => {
             const start = parseInt(currentTime * metadata["fps"]);
             const end   = parseInt(
                 (currentTime * metadata["fps"]) + (metadata["fps"]));
+            console.log(stream, start, end);
+            const streamSource = stream.source;
             const response = await fetch(`/api/analysis`, {
                 method: 'POST',
                 headers: {
@@ -153,16 +157,18 @@ const Analytics = props => {
                     'Accept': 'application/json'
                 },
                 body: JSON.stringify({
-                    "stream":  stream,
+                    "stream":  streamSource,
                     "trk_fmt": "first_last",
                     "start":   start,
                     "end":     end
                 })
             });
             if (response.ok) {
+                console.log("COUNTS UPDATED")
                 const json_data = await response.json();
                 setData(json_data["counts"]);
             } else {
+                console.log("COUNTS NOT UPDATED")
                 setData([]);
             }
             setLastTime(currentTime);

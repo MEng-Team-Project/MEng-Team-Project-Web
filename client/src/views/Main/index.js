@@ -301,7 +301,6 @@ const Main = props => {
         props.getStreams();
     }, []);
 
-    console.log("stream: ", stream);
     const isLivestream = (stream.is_livestream) //check /livestream or /stream
 
     return (
@@ -310,43 +309,44 @@ const Main = props => {
                 {
                     (isLivestream) ? ( 
                         <ReactHlsPlayer
-                        src="./livestream/tes/output.m3u8"
-                        autoPlay={true}
-                        controls={true}
-                        onContextMenu={e => e.preventDefault()}
-                        className="feed"
-                    />
+                            src="./livestream/tes/output.m3u8"
+                            autoPlay={true}
+                            controls={true}
+                            onContextMenu={e => e.preventDefault()}
+                            className="feed"
+                        />
                     ) : (
                         <video
-                        autoPlay
-                        ref={videoRef}
-                        className="feed"
-                        src={`/streams/${stream.source}`}
-                        muted
-                        loop
-                        onContextMenu={e => e.preventDefault()}
-                    >
-                        Error retrieving video stream data.
-                    </video>
+                            autoPlay
+                            ref={videoRef}
+                            className="feed"
+                            src={`/streams/${stream.source}`}
+                            muted
+                            loop
+                            onContextMenu={e => e.preventDefault()}
+                            onTimeUpdate={handleTimeUpdate}
+                        >
+                            Error retrieving video stream data.
+                        </video>
                     )
                 }
-    {/*
-    if (features.features.length > 0) {
-        for (let i=0; i<features.features.length; i++) {
-            console.log(
-                //features.features[0].geometry.coordinates,
-                routes[i],
-                geoToVid(
-                    window.innerWidth,
-                    window.innerHeight,
-                    videoRef.current.videoWidth,
-                    videoRef.current.videoHeight,
-                    features.features[i].geometry.coordinates
-                )
-            );
-        }
-    }
-    */}
+                {/*
+                if (features.features.length > 0) {
+                    for (let i=0; i<features.features.length; i++) {
+                        console.log(
+                            //features.features[0].geometry.coordinates,
+                            routes[i],
+                            geoToVid(
+                                window.innerWidth,
+                                window.innerHeight,
+                                videoRef.current.videoWidth,
+                                videoRef.current.videoHeight,
+                                features.features[i].geometry.coordinates
+                            )
+                        );
+                    }
+                }
+                */}
                 {(showEditor) && (
                     <DeckGL
                         initialViewState={initialViewState}

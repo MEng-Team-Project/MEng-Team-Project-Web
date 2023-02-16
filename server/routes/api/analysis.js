@@ -23,6 +23,7 @@ router.post("/", async (req, res) => {
     console.log("POST /api/analysis/");
     try {
         let stream = req.body.stream;
+        console.log("stream:", stream)
         stream = path.basename(stream, path.extname(stream));
         let body = req.body;
         body.stream = stream;
