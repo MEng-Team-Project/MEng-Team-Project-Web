@@ -42,6 +42,7 @@ import VisibilityOffOutlinedIcon from '@mui/icons-material/VisibilityOffOutlined
 import FileDownloadOutlinedIcon from '@mui/icons-material/FileDownloadOutlined';
 import FileUploadOutlinedIcon from '@mui/icons-material/FileUploadOutlined';
 import StorageOutlinedIcon from '@mui/icons-material/StorageOutlined';
+import ModeEditIcon from '@mui/icons-material/ModeEdit';
 
 // Global Components
 import {
@@ -49,9 +50,10 @@ import {
     Button,
     Dropdown
 } from '../../../../components';
-
+import axios from "axios";
 // CSS
 import "./Sidebar.css"
+import { display } from '@mui/system';
 
 // Filter Options for Dropdown
 import filterOptions from './filterOptions.json';
@@ -226,51 +228,176 @@ const SidebarFilters = props => {
 };
 
 const SidebarStreamList = props => {
-    const { streams, setStream } = props;
+    const { streams, setStream, editStreamOpen, setEditMode, edit} = props;
+
+    const deleteStream = values => {
+        const response = confirm(`Are you sure you want to delete ${values.name} ?`);
+        const name = values.name;
+        if (response) {
+            const streamDetails = {"source": values.source};
+            axios
+            .post("/api/streams/delete", streamDetails)
+            .then(res => {
+                alert(`${name} has been deleted`);
+            })
+            .catch(err => {
+                alert(`Failed to delete ${name}`);
+            })
+        } else {
+            alert("Delete cancelled");
+        }
+    }
+
+    const deleteVideo = values => {
+        const response = confirm(`Are you sure you want to delete ${values.name} ?`);
+        const name = values.name;
+        if (response) {
+            const streamDetails = {"source": values.source};
+            axios
+            .post("/api/streams/deleteVideo", streamDetails)
+            .then(res => {
+                alert(`${name} has been deleted`);
+            })
+            .catch(err => {
+                alert(`Failed to delete ${name}`);
+            })
+        } else {
+            alert("Delete cancelled");
+        }
+    }
+
+    console.log("streams: ", streams)
     return (
         <div className="sidebar-tab__streams">
-            {streams.map((stream, i) => (
+            {streams.map((stream, i) => ( 
                 <div key={i} className="sidebar-tab__streams-stream_outer">
-                    <div className="sidebar-tab__streams-stream_left">
-                        <Tooltip content="Change Colour" direction="right">
-                            <div className="sidebar-tab__streams-stream_square" />
-                        </Tooltip>
+                    <div classname ="sidebar-tab__streams-stream_inner"> 
+                        <div className="sidebar-tab__streams-stream_left">
+                            <div className="change_color_div">
+                                <Tooltip content="Change Colour" direction="right">
+                                    <div className="sidebar-tab__streams-stream_square" />
+                                </Tooltip>
+                            </div>
+                        </div>
+                        <div className="sidebar-tab__streams-stream_left"> 
+                            <Tooltip content="Delete" direction="right">
+                            <DeleteOutlineOutlinedIcon
+                                                onClick={() => {
+                                                    (stream.is_livestream)?(deleteStream(stream)):(deleteVideo(stream))
+                                                }}
+                                                style={{
+                                                    width: 15,
+                                                    height: 15
+                                                }}
+                                                className="icon sidebar-top__icon"
+                                            />
+                            </Tooltip>
+                            
+                        </div>
+                        <div className="sidebar-tab__streams-stream_left"> 
+                        <div style={{ pointerEvents: stream.is_livestream ? "auto" : "none" }}>
+                            <Tooltip content="Edit" direction="right">
+                                <ModeEditIcon
+                                onClick={() => {
+                                    const streamDetails = getStreamDetails(stream.source);
+                                    console.log(stream.source)
+
+                                    if (streamDetails) {
+                                        editStreamOpen({
+                                            directoryValue: streamDetails.dirs,
+                                            streamName: stream.name,
+                                            ipValue: streamDetails.hostname,
+                                            numericValue: streamDetails.port,
+                                            protocolValue: streamDetails.protocol
+                                        }, setEditMode(true));
+                                    }
+                                }}
+                                style={{
+                                    width: 15,
+                                    height: 15
+                                }}
+                                className="icon sidebar-top__icon"
+                                />
+                            </Tooltip>
+                            </div>
+                        </div>
                     </div>
+              
                     <div className="sidebar-tab__streams-stream_right">
                         <div
                             className="sidebar-tab__streams-stream_title"
                             onClick={() => setStream(stream)}>
-                            {stream}
+                            {truncate(stream.source, 30)}
                         </div>
-                        <div className="sidebar-tab__streams-stream_info">
-                            Recorded
-                        </div>
+                        {(stream.is_livestream == 1) ? (
+                             <div className="sidebar-tab__streams-stream_info">
+                                Live
+                         </div>) : (
+                             <div className="sidebar-tab__streams-stream_info">
+                                Recorded
+                         </div>
+                            )}
                     </div>
+                  
+                    <div class="line"></div>
                 </div>
+                
             ))}
         </div>
     )
 };
 
+const getStreamDetails = stream => {
+  stream = stream.trim();
+  if (!stream.includes("://"))
+    return false;
+  const parts = stream.split("://");
+  const protocol = parts[0];
+  const rest = parts[1].split("/");
+  if (rest.length == 0) {
+    return false;
+  } else if (rest.length == 1 && rest[0].length == 0) {
+    return false;
+  }
+  const host = rest[0];
+  const hostname = host.split(":")[0];
+  const port = (host.split(":")[1])
+             ? Number(host.split(":")[1])
+             : null;
+  const dirs = (rest.slice(1))
+             ? "/" + rest.slice(1).join("/")
+             : null;
+  return {
+    protocol, hostname, port, dirs
+  };
+}
+
+function truncate(str, maxlength) {
+    return (str.length > maxlength) ?
+      str.slice(0, maxlength - 1) + '…' : str;
+}
+
 const SidebarStreams = props => {
-    const { streams, setStream } = props;
+    const { streams, setStream, editStreamOpen, setEditMode, edit} = props;
     return (
         <div className="sidebar-tab">
             <div className="sidebar-tab__top">
                 <div className="sidebar-tab__header">
-                    Streams
+                    Feeds
                 </div>
-                <Button title="Add Stream" color="grey" />
+                <Button title="Add Stream" color="grey"  onClick={() => editStreamOpen(true, setEditMode(false))} />
             </div>
             <SidebarStreamList
                 streams={streams}
-                setStream={setStream} />
+                setStream={setStream} 
+                editStreamOpen = {editStreamOpen}
+                setEditMode= {setEditMode}/>
         </div>
     )
 };
 
 const Sidebar = props => {
-    const { streams, setStream, setOpenExport, setOpenImport, setOpenAnalysis } = props;
+    const { streams, setStream, setOpenExport, setOpenImport, setOpenAnalysis, editStreamOpen, setEditMode, edit} = props;
 
     const [tab, setTab] = useState("STREAMS");
     const [visible, setVisible] = useState(true);
@@ -342,7 +469,9 @@ const Sidebar = props => {
                         {(tab == "STREAMS") && (
                             <SidebarStreams
                                 streams={streams}
-                                setStream={setStream} />
+                                setStream={setStream}
+                                editStreamOpen = {editStreamOpen}
+                                setEditMode = {setEditMode}/>    
                         )}
                         {(tab == "FILTERS") && (
                             <SidebarFilters streams={streams} />

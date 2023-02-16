@@ -113,6 +113,7 @@ SIDEBAR TABS
 }
 
 .sidebar-tab__top {
+    padding-bottom: 10px;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -138,6 +139,33 @@ STREAMS
 .sidebar-tab__streams {
     display: flex;
     flex-direction: column;
+    position: sticky;
+    overflow-y: scroll;
+    max-height: 70vh;
+}
+
+/* style the scrollbar in WebKit-based browsers */
+::-webkit-scrollbar {
+    width: 0.5rem; 
+}
+
+::-webkit-scrollbar-thumb {
+    background-color: #5555; 
+    border-radius: 5px;
+}
+
+::-webkit-scrollbar-track {
+    background-color: rgba(41, 50, 60, 0.407); 
+    border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background-color: #555;
+   
+}
+
+::-webkit-scrollbar-track:hover {
+    background-color: rgb(41, 50, 60); 
 }
 
 .sidebar-tab__streams-stream_outer {
@@ -146,8 +174,20 @@ STREAMS
   align-items: baseline;
 }
 
+.sidebar-tab__streams-stream_inner{
+    display: flex;
+    flex-direction: column;
+}
+
 .sidebar-tab__streams-stream_left {
     flex-grow: 0;
+}
+
+.line{
+    width: 230px;
+    height: 0px;
+    border-bottom: 3px solid rgb(60, 97, 174);
+    position: absolute;
 }
 
 .sidebar-tab__streams-stream_right {
@@ -175,6 +215,11 @@ STREAMS
     width: 10px;
     height: 10px;
     background-color: rgb(60, 97, 174);
+}
+
+.change_color_div {
+    padding-left: 5px;
+    padding-bottom: 5px;
 }
 
 .sidebar-tab__text {
@@ -252,4 +297,8 @@ LIVE VIDEO
   
 .live-video__layer-label-selected {
     color: rgb(193, 200, 209);
+}
+
+.space{
+    padding-bottom: 500px;
 }

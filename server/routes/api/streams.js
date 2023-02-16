@@ -5,27 +5,106 @@ Provides endpoints related to providing existing recorded videos via the
 backend to the frontend or possibly also the ML microservice in the future.
 */
 
+
 // Express
 const express = require("express");
 const router = express.Router();
 const fs = require("fs");
 const path = require("path");
+const sqlite3 = require('sqlite3').verbose();
+const { exec, spawn, execSync } = require('child_process');
+const rimraf = require('rimraf');
+
+let livestreams = {};
+
+const updateLiveStreams = async () => {
+    const dbPath = path.join(__dirname, "../../..", 'main.db');
+    try {
+        const db = new sqlite3.Database(dbPath);
+        const stmt = `SELECT * FROM streams;`
+        const getRows = new Promise((resolve, reject) => {
+            db.all(stmt, [], (err, rows) => {
+                if (err) reject(err);
+                resolve(rows);
+            });
+        });
+        const rows = await getRows
+        const runningLivestreams = Object.keys(livestreams)
+        //console.log(rows);
+        const runningRows = rows.filter((livestream) =>
+            Boolean(livestream.running)
+        )
+
+       // console.log(livestreams);
+       // console.log(runningRows);
+       db.close();
+        console.log(process.cwd());
+        runningRows.forEach((livestream) => {
+            console.log(">>> livestream: ", runningLivestreams, livestream.name)
+            if (!runningLivestreams.includes(livestream.name)) {
+                console.log("ello pls do smth")
+                const proc = exec(
+                    `node ./server/utils/ffmpeg.js --source ${livestream.source} --livestreamDir ${livestream.name}`,
+                    (error, stdout, stderr) => {
+                        if (error) {
+                            console.error(`error: ${error.message}`);
+                            return;
+                        }
+                        if (stderr) {
+                            console.error(`stderr: ${stderr}`);
+                            return;
+                        }
+                        console.log(`stdout:\n${JSON.parse(stdout)}`);
+                    }
+                );
+                proc.stdout.on('data', function(data) {
+                    console.log(data); 
+                });
+                livestreams[livestream.name] = proc;
+            }
+        })
+        // console.log(livestreams);
+        
+    } catch (err) {
+        console.log("Server side error retrieving streams." + err);
+    }
+}
+
+updateLiveStreams();
 
 /**
  * @route GET api/streams/all
  * @desc Returns all existing recorded video streams
  * @access Public
  */
-router.get("/all", (_, res) => {
+router.get("/all", async (_, res) => {
+    // console.log(__dirname);
+    const dbPath = path.join(__dirname, "../../..", 'main.db');
+    //console.log(dbPath)
+
     try {
-        fs.readdir("./server/streams", (err, files) => {
-            console.log(err)
-            if (err) return res.status(400).send("Error: Can't read local streams.");
-            const data = files.map(file => path.basename(file));
-            res.send(data);
+        const files = await fs.promises.readdir("./server/streams")
+        const db = new sqlite3.Database(dbPath);
+        let data = files.map(file => ({
+            "name": path.basename(file),
+            "source": path.basename(file),
+            "running": 0,
+            "is_livestream": 0,
+        }));
+        const stmt = `SELECT * FROM streams;`
+        const rows = await new Promise((resolve, reject) => {
+            db.all(stmt, [], (err, rows) => {
+                if (err) reject(err);
+                resolve(rows);
+            });
         });
+        // console.log("rows: ", rows);
+        rows.forEach(i => data = data.concat(i));
+        // console.log("data: ", data);
+        res.send(data);
+        db.close();
     } catch (err) {
-        return res.status(400).send("Server side error retrieving streams." + err);
+        res.status(400).send("Server side error retrieving streams." + err);
     }
 });
 
@@ -59,5 +138,117 @@ router.put('/upload', (req, res) => {
         res.send("Video stream file uploaded!");
     })
 });
+
+/** 
+ * @desc Receives livestream details and stores them in database
+*/
+router.post('/add', (req, res) => {
+    try {
+        console.log(req.body);
+        const db = new sqlite3.Database('main.db');
+        const stmt = db.prepare(`INSERT INTO streams VALUES (?, ?, ?, ?);`);
+        const name = req.body.streamName;
+        const port = (req.body.port) ? `:${req.body.port}` : ""
+        const source = `${req.body.protocol}://${req.body.ip}${port}/${req.body.directory}`;
+        const isRunning = Number(1);
+        const isLivestream = Number(1);
+        stmt.run(name, source, isRunning, isLivestream);
+        stmt.finalize();
+        db.close();
+        updateLiveStreams();
+        res.send("Livestream added to database and HLS streaming initialised");
+    } catch (err) {
+        console.error(err);
+        res.status(400).send(`Error: ${err}`);
+    }
+});
+
+router.post('/edit', (req, res) => {
+    try {
+        console.log(req.body);
+        const db = new sqlite3.Database('main.db');
+        const ogSource = req.body.ogSource;
+        const stmt = db.prepare(`UPDATE streams SET name=(?), source=(?), running=(?), is_livestream=(?) WHERE source=(?);`);
+        const name = req.body.streamName;
+        const port = (req.body.port) ? `:${req.body.port}` : ""
+        const source = `${req.body.protocol}://${req.body.ip}${port}${req.body.directory}`;
+        const isRunning = Number(1);
+        const isLivestream = Number(1);
+        stmt.run(name, source, isRunning, isLivestream, ogSource);
+        stmt.finalize();
+        db.close();
+        updateLiveStreams();
+        res.send("Livestream edited in database and HLS streaming initialised");
+    } catch (err) {
+        console.error(err);
+        res.status(400).send(`Error: ${err}`);
+    }
+});
+
+
+/** 
+ * @desc Receives livestream details and deletes database entry
+*/
+router.post('/delete', async (req, res) => {
+    try {
+        console.log(req.body);
+        const db = new sqlite3.Database('main.db');
+        const stmt = db.prepare(`DELETE FROM streams WHERE source=(?);`);
+        const source = req.body.source;
+        await new Promise((resolve, reject) => {
+            stmt.run(source, (err) => {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve();
+                }
+            });
+        });
+        stmt.finalize();
+        db.close();
+        const livestreamFullDir = `./server/livestream/${source}`;
+        if (fs.existsSync(livestreamFullDir)) {
+            try {
+                deleteFolderRecursive(livestreamFullDir);
+                console.log('File deletedd successfully.');
+            } catch (error) {
+                console.error(error);
+            }
+        }
+        res.send("stream deleted from database/directory and HLS streaming updated");
+        updateLiveStreams();
+    } catch (err) {
+        console.error(err);
+        res.status(400).send(`Error: ${err}`);
+    }
+});
+
+router.post('/deleteVideo', async (req, res) => {
+    const livestreamFullDir = `./server/streams/${req.body.source}`;
+    if (fs.existsSync(livestreamFullDir)) {
+        try {
+            rimraf.sync(livestreamFullDir);
+            console.log('File deleted successfully.');
+        } catch (error) {
+            console.error(">>>>>>>>>>error", error);
+        }
+    }
+    res.send("video deleted from directory");
+});
+
+function deleteFolderRecursive(folderPath) {
+    if (fs.existsSync(folderPath)) {
+        fs.readdirSync(folderPath).forEach((file) => {
+            const curPath = path.join(folderPath, file);
+            if (fs.lstatSync(curPath).isDirectory()) {
+                deleteFolderRecursive(curPath);
+            } else {
+                fs.unlinkSync(curPath);
+            }
+        });
+        fs.rmdirSync(folderPath);
+    }
+};
+
 
 module.exports = router;

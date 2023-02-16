@@ -4,6 +4,31 @@ a livestream of either:
 1) a pre-recorded video
 2) an OBS or other RTMP livestream
 */
+const { ArgumentParser } = require('argparse');
+const fs = require('fs');
+const path = require('path');
+const parser = new ArgumentParser({
+    description: 'Backend for Traffic Analysis. Uses port 5000.'
+});
+/*
+parser.add_argument('--host', {
+    help: "Change IP address backend is hosted",
+    default: "0.0.0.0" });
+parser.add_argument('--port', {
+    help: "Change port of IP address where backend is hosted",
+    default: "" });
+parser.add_argument('--dir', {
+    help: "IP camera sub directory",
+    default: "0.0.0.0" });
+*/
+parser.add_argument('--source', {
+    help: "Stream source",
+    default: "rtmp://localhost/temp/test" });
+parser.add_argument('--livestreamDir', {
+    help: "Livestream HLS files directory" });
+
+const args = parser.parse_args();
+
 
 const ffmpeg = require("fluent-ffmpeg");
 const ffmpegInstaller = require("@ffmpeg-installer/ffmpeg");
@@ -23,7 +48,7 @@ const createTestRecordedStream = stream => {
         "-hls_time 5",
         "-hls_list_size 0",
         "-f hls",
-    ]).output("./streams/output.m3u8")
+    ]).output("./livestreams/output.m3u8")
     .on('error', function (err, stdout, stderr) {
         console.log('An error occurred: ' + err.message, err, stderr);
     })
@@ -32,6 +57,21 @@ const createTestRecordedStream = stream => {
     }).run();
 }
 
+function deleteFolderRecursive(folderPath) {
+    if (fs.existsSync(folderPath)) {
+        fs.readdirSync(folderPath).forEach((file) => {
+            const curPath = path.join(folderPath, file);
+            if (fs.lstatSync(curPath).isDirectory()) {
+                deleteFolderRecursive(curPath);
+            } else {
+                fs.unlinkSync(curPath);
+            }
+        });
+        fs.rmdirSync(folderPath);
+    }
+}
+
+
 /** 
  * Runs ffmpeg to continuously transcribe a running RTMP stream as a HLS livestream
  * 
@@ -39,11 +79,27 @@ const createTestRecordedStream = stream => {
  * @param {number} port Host IP address port of RTMP stream
  * @param {path}   path Sub directory within RTMP server to transcribe to HLS livestream
 */
-const createTestLiveStream = (host, port, path) => {
-    const url = `rtmp://${host}:${port}${path}`;
-    // const url = `rtmp://${host}${path}`;
-    console.log(url)
-    ffmpeg(url, { timeout: 432000 }).addOptions([
+const createTestLiveStream = (source, livestreamDir) => {  
+    console.log("createTestLiveStream->cwd:", process.cwd())
+
+    console.log("ffmpeg->livestreamDir:", livestreamDir);
+
+    // NOTE: This is required as old livestream files will be used
+    //       during streaming or can corrupt an existing one.
+    // Delete old livestream sub-directory and recreate a fresh one
+    const livestreamFullDir = `./server/livestream/${livestreamDir}`
+    if (fs.existsSync(livestreamFullDir)){
+        try {
+            deleteFolderRecursive(livestreamFullDir);
+            console.log('File deleted successfully.');
+        } catch (error) {
+            console.error(error);
+        }
+    }
+    fs.mkdirSync(livestreamFullDir);
+    
+    // Run FFMPEG
+    ffmpeg(source, { timeout: 432000 }).addOptions([
         '-c:v libx264',
         '-c:a aac',
         '-ac 1',
@@ -57,14 +113,13 @@ const createTestLiveStream = (host, port, path) => {
         '-hls_list_size 6',
         '-hls_wrap 10',
         '-start_number 1'
-    ]).output("./livestream/output.m3u8")
+    ]).output(`${livestreamFullDir}/output.m3u8`)
     .on('error', function (err, stdout, stderr) {
         console.log('An error occurred: ' + err.message, err, stderr);
     })
     .on("end", () => {
-        console.log(`Finished converting recording to livestream: ${stream}`);
+        console.log("Stream Ended")
     }).run();
 };
 
-// createTestRecordedStream("SEM_ID_TRAFFIC_TEST_TILTON_TINY.mp4");
-createTestLiveStream("127.0.0.1", "1935", "/temp/test");
+createTestLiveStream(args.source, args.livestreamDir);

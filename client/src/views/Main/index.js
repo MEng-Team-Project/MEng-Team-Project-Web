@@ -28,6 +28,7 @@ import {
     ExportModal,
     ImportModal,
     AnalysisModal,
+    EditStreamModal,
     Controls,
     AnalysisMap
 } from "./components";
@@ -175,6 +176,14 @@ const Main = props => {
     const [openExport,   setOpenExport]   = useState(false);
     const [openImport,   setOpenImport]   = useState(false);
     const [openAnalysis, setOpenAnalysis] = useState(false);
+    const [openAddStreams, setOpenAddStream]  = useState(false);
+    const [openEditStreams, setOpenEditStream]  = useState(false);
+    const [streamDetails, setStreamDetails] = useState({directory: "",
+    streamName: "",
+    ipValue: "",
+    port: "",
+    protocol: ""});
+    const [edit, setEdit] = useState(false);
 
     // Route editor toggle
     const [showEditor,   setShowEditor]   = useState(false);
@@ -270,42 +279,74 @@ const Main = props => {
         setOpenImport(false);
     };
 
+    const addStreamClose = () => {
+        setOpenAddStream(false);
+    };
+
+    const editStreamClose = () => {
+        setOpenEditStream(false);
+    };
+
+    const editStreamOpen = (streamDetails, value) => {
+        setStreamDetails(streamDetails);
+        setOpenEditStream(true);
+    };
+
+    const setEditMode = (value) => {
+        setEdit(value);
+    }
+
+
     useEffect(() => {
         props.getStreams();
     }, []);
 
-    /*
-    if (features.features.length > 0) {
-        for (let i=0; i<features.features.length; i++) {
-            console.log(
-                //features.features[0].geometry.coordinates,
-                routes[i],
-                geoToVid(
-                    window.innerWidth,
-                    window.innerHeight,
-                    videoRef.current.videoWidth,
-                    videoRef.current.videoHeight,
-                    features.features[i].geometry.coordinates
-                )
-            );
-        }
-    }
-    */
+    const isLivestream = (stream.is_livestream) //check /livestream or /stream
+
     return (
         <div className="main-root">
             <div className="feed-outer">
-                <video
-                    autoPlay
-                    ref={videoRef}
-                    className="feed"
-                    src={stream}
-                    muted
-                    loop
-                    onContextMenu={e => e.preventDefault()}
-                    onTimeUpdate={handleTimeUpdate}
-                >
-                    Error retrieving video stream data.
-                </video>
+                {
+                    (isLivestream) ? ( 
+                        <ReactHlsPlayer
+                            src="./livestream/tes/output.m3u8"
+                            autoPlay={true}
+                            controls={true}
+                            onContextMenu={e => e.preventDefault()}
+                            className="feed"
+                        />
+                    ) : (
+                        <video
+                            autoPlay
+                            ref={videoRef}
+                            className="feed"
+                            src={`/streams/${stream.source}`}
+                            muted
+                            loop
+                            onContextMenu={e => e.preventDefault()}
+                            onTimeUpdate={handleTimeUpdate}
+                        >
+                            Error retrieving video stream data.
+                        </video>
+                    )
+                }
+                {/*
+                if (features.features.length > 0) {
+                    for (let i=0; i<features.features.length; i++) {
+                        console.log(
+                            //features.features[0].geometry.coordinates,
+                            routes[i],
+                            geoToVid(
+                                window.innerWidth,
+                                window.innerHeight,
+                                videoRef.current.videoWidth,
+                                videoRef.current.videoHeight,
+                                features.features[i].geometry.coordinates
+                            )
+                        );
+                    }
+                }
+                */}
                 {(showEditor) && (
                     <DeckGL
                         initialViewState={initialViewState}
@@ -324,6 +365,10 @@ const Main = props => {
                 setOpenExport={setOpenExport}
                 setOpenImport={setOpenImport}
                 setOpenAnalysis={setOpenAnalysis}
+                setOpenAddStream={setOpenAddStream}
+                editStreamOpen={editStreamOpen}
+                setEditMode = {setEditMode}
+                edit = {edit}
                 />
             <ExportModal
                 open={openExport}
@@ -337,6 +382,15 @@ const Main = props => {
                 open={openAnalysis}
                 analysisClose={analysisClose}
                 streams={streams} />
+            <EditStreamModal
+                open={openEditStreams}
+                editStreamOpen={editStreamOpen}
+                editStreamClose={editStreamClose}
+                streamDetails={streamDetails}
+                streams={streams}
+                setEditMode = {setEditMode}
+                edit = {edit}
+                />
             <Controls
                 stream={stream}
                 currentTime={currentTime}
