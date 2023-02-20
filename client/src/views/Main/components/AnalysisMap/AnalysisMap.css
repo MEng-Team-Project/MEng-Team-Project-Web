@@ -28,6 +28,11 @@ GLOBAL
 ICONS
 */
 
+.map-controls {
+    display: flex;
+    flex-direction: column;
+}
+
 .map-controls-icon {
     background-color: rgb(106, 116, 133);
     padding: 0.2rem;
