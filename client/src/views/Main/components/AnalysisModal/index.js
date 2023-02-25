@@ -32,7 +32,8 @@ import './AnalysisModal.css';
 // Global Components
 import {
     Button,
-    Tooltip
+    Tooltip,
+    Toggle
 } from '../../../../components';
 import axios from 'axios';
 
@@ -49,8 +50,16 @@ const style = {
     borderRadius: '5px'
 };
 
+
+
 const ModalTable = props => {
+    const [isToggled, setIsToggled] = useState(false);
     const { data } = props;
+
+    const handleToggleChange = (value) => {
+        setIsToggled(value);
+    };
+    
     console.log("ModalTable:", data);
     return (
         <div className="modal-table">
@@ -67,12 +76,16 @@ const ModalTable = props => {
                 <div className="modal-table__header-cell modal-table__header-cell-status">
                     Status
                 </div>
+                <div className="modal-table__header-cell modal-table__header-cell-check">
+                    Running
+                </div>
             </div>
             {data.map((row, i) => (
                 <div key={i} className="modal-table__rows">
                     <div className="modal-table__row">
                         <div className="modal-table__cell modal-table__cell-gameid">
                             {row.stream}
+                            <div className ="subtext">{(row.livestream == 1)?("Live"):("Recorded")}</div>
                         </div>
                         <div className="modal-table__cell modal-table__cell-gameid">
                             <Tooltip
@@ -127,11 +140,20 @@ const ModalTable = props => {
                                         }}/>
                                 </div>
                             )}
+                           
                         </div>
+                        <div className="modal-table__cell modal-table__cell-check">
+                        <Toggle isToggled={isToggled} onToggle={() => setIsToggled(!isToggled)}/>
+                        </div>                
+                     
+                       
                     </div>
                 </div>
+                
             ))}
+          
         </div>
+         
     )
 }
 
@@ -139,7 +161,9 @@ const AnalysisModal = props => {
     const { open, analysisClose, streams, ...rest  } = props;
 
     const data = streams.map((stream, i) => ({
-        "stream": stream,
+        "stream": stream.name,
+        "running": stream.running,
+        "livestream": stream.is_livestream,
         "creation_date": moment().format(),
     }));
 

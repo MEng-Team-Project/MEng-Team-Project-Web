@@ -30,7 +30,7 @@ import {
     AnalysisModal,
     EditStreamModal,
     Controls,
-    AnalysisMap
+    AnalysisMap,
 } from "./components";
 
 // HLS Player

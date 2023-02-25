@@ -2,6 +2,10 @@
     
 }
 
+.subtext {
+    color :rgba(147, 147, 147, 0.8)
+}
+
 .modal-table__header {
     display: flex;
     flex-direction: row;
@@ -45,6 +49,17 @@
 .modal-table__header-cell-status {
     flex-grow: 0;
     width: 120px;
+}
+
+.modal-table__header-cell-check {
+    flex-grow: 0;
+    width: 10px;
+}
+.modal-table__cell-check {
+    flex-grow: 0;
+    width: 10px;
+    padding-left: 20px;
+    padding-right: 20px;
 }
 
 .modal-table__cell-status {

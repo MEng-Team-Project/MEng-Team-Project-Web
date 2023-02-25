@@ -231,7 +231,7 @@ const SidebarStreamList = props => {
     const { streams, setStream, editStreamOpen, setEditMode, edit} = props;
 
     const deleteStream = values => {
-        const response = confirm(`Are you sure you want to delete ${values.name} ?`);
+        const response = Window.confirm(`Are you sure you want to delete ${values.name} ?`);
         const name = values.name;
         if (response) {
             const streamDetails = {"source": values.source};
@@ -249,7 +249,7 @@ const SidebarStreamList = props => {
     }
 
     const deleteVideo = values => {
-        const response = confirm(`Are you sure you want to delete ${values.name} ?`);
+        const response = Window.confirm(`Are you sure you want to delete ${values.name} ?`);
         const name = values.name;
         if (response) {
             const streamDetails = {"source": values.source};
