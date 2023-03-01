@@ -29,11 +29,13 @@ import moment from 'moment';
 // CSS
 import './AnalysisModal.css';
 
+//Switch from antd
+import { Switch } from 'antd';
+
 // Global Components
 import {
     Button,
-    Tooltip,
-    Toggle
+    Tooltip
 } from '../../../../components';
 import axios from 'axios';
 
@@ -53,13 +55,18 @@ const style = {
 
 
 const ModalTable = props => {
-    const [isToggled, setIsToggled] = useState(false);
     const { data } = props;
+    const [switches, setSwitches] = React.useState(data.map((row) => Boolean(row.running)));
+    const handleSwitchChange = (index) => {
+        const newSwitches = [...switches];
+        newSwitches[index] = !newSwitches[index];
+        setSwitches(newSwitches);
+    }
 
-    const handleToggleChange = (value) => {
-        setIsToggled(value);
-    };
-    
+    const updateStreamsDataBase = (row) => {
+        
+    }
+
     console.log("ModalTable:", data);
     return (
         <div className="modal-table">
@@ -140,20 +147,14 @@ const ModalTable = props => {
                                         }}/>
                                 </div>
                             )}
-                           
                         </div>
                         <div className="modal-table__cell modal-table__cell-check">
-                        <Toggle isToggled={isToggled} onToggle={() => setIsToggled(!isToggled)}/>
+                            <Switch checked = {switches[i]} onChange={() => {handleSwitchChange(i); updateStreamsDataBase(row);}}/>
                         </div>                
-                     
-                       
                     </div>
                 </div>
-                
             ))}
-          
         </div>
-         
     )
 }
 
@@ -166,6 +167,31 @@ const AnalysisModal = props => {
         "livestream": stream.is_livestream,
         "creation_date": moment().format(),
     }));
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
 
     useEffect(() => {
         props.getStreams();
