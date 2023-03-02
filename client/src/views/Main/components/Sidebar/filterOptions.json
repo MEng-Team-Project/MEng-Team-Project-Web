@@ -1,6 +1,8 @@
 [
     {
         "meta": "float",
-        "data": "time"
+        "data": {
+            "name": "time"
+        }
     }
 ]

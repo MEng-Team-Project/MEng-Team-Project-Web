@@ -21,7 +21,7 @@ const Dropdown = props => {
 
     const filterValues = (values, query) => {
         return values.filter(value => {
-            return value.data.trim().toLowerCase().includes(query.toLowerCase());
+            return value.data.name.trim().toLowerCase().includes(query.toLowerCase());
         });
     };
 
@@ -66,7 +66,7 @@ const Dropdown = props => {
                                 {selectedValue.meta}
                             </div>
                         )}
-                        {selectedValue.data}
+                        {selectedValue.data.name}
                     </div>
                 )}
             </div>
@@ -121,7 +121,7 @@ const Dropdown = props => {
                                 </div>
                             )}
                             <div className="dropdown-options__option-label">
-                                {String(value.data)}
+                                {String(value.data.name)}
                             </div>
                         </div>
                     ))}
