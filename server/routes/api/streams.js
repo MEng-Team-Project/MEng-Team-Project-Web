@@ -5,6 +5,7 @@ Provides endpoints related to providing existing recorded videos via the
 backend to the frontend or possibly also the ML microservice in the future.
 */
 
+const moment = require("moment");
 
 // Express
 const express = require("express");
@@ -42,7 +43,7 @@ const updateLiveStreams = async () => {
         runningRows.forEach((livestream) => {
             console.log(">>> livestream: ", runningLivestreams, livestream.name)
             if (!runningLivestreams.includes(livestream.name)) {
-                console.log("ello pls do smth")
+                console.log("yo pls do smth")
                 const proc = exec(
                     `node ./server/utils/ffmpeg.js --source ${livestream.source} --livestreamDir ${livestream.name}`,
                     (error, stdout, stderr) => {
@@ -90,6 +91,7 @@ router.get("/all", async (_, res) => {
             "source": path.basename(file),
             "running": 0,
             "is_livestream": 0,
+            "creation_date": moment(moment().format('YYYY/MM/DD HH:mm:ss')).format("YYYY-MM-DD HH:mm:ss"),
         }));
         const stmt = `SELECT * FROM streams;`
         const rows = await new Promise((resolve, reject) => {
@@ -100,7 +102,7 @@ router.get("/all", async (_, res) => {
         });
         // console.log("rows: ", rows);
         rows.forEach(i => data = data.concat(i));
-        // console.log("data: ", data);
+         console.log("data: ", data);
         res.send(data);
         db.close();
     } catch (err) {
@@ -146,14 +148,19 @@ router.post('/add', (req, res) => {
     try {
         console.log(req.body);
         const db = new sqlite3.Database('main.db');
-        const stmt = db.prepare(`INSERT INTO streams VALUES (?, ?, ?, ?);`);
+        const streams_stmt = db.prepare(`INSERT INTO streams VALUES (?, ?, ?, ?, ?);`);
+        const livestream_stmt = db.prepare(`INSERT INTO livestream_times VALUES (?, ?, ?, ?);`);
         const name = req.body.streamName;
         const port = (req.body.port) ? `:${req.body.port}` : ""
         const source = `${req.body.protocol}://${req.body.ip}${port}/${req.body.directory}`;
         const isRunning = Number(1);
         const isLivestream = Number(1);
-        stmt.run(name, source, isRunning, isLivestream);
-        stmt.finalize();
+        const creation_date = moment(moment().format('YYYY/MM/DD HH:mm:ss')).format("YYYY-MM-DD HH:mm:ss");
+        const end_time = null;
+        streams_stmt.run(name, source, isRunning, isLivestream, creation_date);
+        livestream_stmt.run(name, source, creation_date, end_time);
+        streams_stmt.finalize();
+        livestream_stmt.finalize();
         db.close();
         updateLiveStreams();
         res.send("Livestream added to database and HLS streaming initialised");
@@ -168,14 +175,19 @@ router.post('/edit', (req, res) => {
         console.log(req.body);
         const db = new sqlite3.Database('main.db');
         const ogSource = req.body.ogSource;
-        const stmt = db.prepare(`UPDATE streams SET name=(?), source=(?), running=(?), is_livestream=(?) WHERE source=(?);`);
+        const streams_stmt = db.prepare(`UPDATE streams SET name=(?), source=(?), running=(?), is_livestream=(?), creation_date=(?) WHERE source=(?);`);
+        const livestream_stmt =  db.prepare(`UPDATE livestream_times SET stream_name=(?), stream_source=(?), start_time=(?), end_time=(?), WHERE stream_source=(?);`);
         const name = req.body.streamName;
         const port = (req.body.port) ? `:${req.body.port}` : ""
         const source = `${req.body.protocol}://${req.body.ip}${port}${req.body.directory}`;
         const isRunning = Number(1);
         const isLivestream = Number(1);
-        stmt.run(name, source, isRunning, isLivestream, ogSource);
-        stmt.finalize();
+        const creation_date = moment(moment().format('YYYY/MM/DD HH:mm:ss')).format("YYYY-MM-DD HH:mm:ss");
+        const end_time = null;
+        streams_stmt.run(name, source, isRunning, isLivestream, creation_date, ogSource);
+        livestream_stmt.run(name, source, creation_date, end_time, ogSource);
+        streams_stmt.finalize();
+        livestream_stmt.finalize();
         db.close();
         updateLiveStreams();
         res.send("Livestream edited in database and HLS streaming initialised");
@@ -193,10 +205,11 @@ router.post('/delete', async (req, res) => {
     try {
         console.log(req.body);
         const db = new sqlite3.Database('main.db');
-        const stmt = db.prepare(`DELETE FROM streams WHERE source=(?);`);
+        const streams_stmt = db.prepare(`DELETE FROM streams WHERE source=(?);`);
+        const livestream_stmt = db.prepare(`DELETE FROM livestream_times WHERE stream_source=(?);`);
         const source = req.body.source;
         await new Promise((resolve, reject) => {
-            stmt.run(source, (err) => {
+            streams_stmt.run(source, (err) => {
                 if (err) {
                     reject(err);
                 } else {
@@ -204,7 +217,17 @@ router.post('/delete', async (req, res) => {
                 }
             });
         });
-        stmt.finalize();
+        await new Promise((resolve, reject) => {
+            livestream_stmt.run(source, (err) => {
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve();
+                }
+            });
+        });
+        streams_stmt.finalize();
+        livestream_stmt.finalize();
         db.close();
         const livestreamFullDir = `./server/livestream/${source}`;
         if (fs.existsSync(livestreamFullDir)) {

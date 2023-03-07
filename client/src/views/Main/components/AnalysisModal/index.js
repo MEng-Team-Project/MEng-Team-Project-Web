@@ -63,8 +63,8 @@ const ModalTable = props => {
         setSwitches(newSwitches);
     }
 
-    const updateStreamsDataBase = (row) => {
-        
+    const updateStreamsDataBase = (row, running) => {
+       
     }
 
     console.log("ModalTable:", data);
@@ -75,10 +75,7 @@ const ModalTable = props => {
                     StreamID
                 </div>
                 <div className="modal-table__header-cell modal-table__header-cell-gameid">
-                    Date
-                </div>
-                <div className="modal-table__header-cell modal-table__header-cell-flex">
-                    Progress
+                    Creation Date
                 </div>
                 <div className="modal-table__header-cell modal-table__header-cell-status">
                     Status
@@ -97,59 +94,17 @@ const ModalTable = props => {
                         <div className="modal-table__cell modal-table__cell-gameid">
                             <Tooltip
                                 direction="top"
-                                content={moment(row.creation_date).format()}
+                                content={moment(row.creation_date).fromNow()}
                             >
-                                {moment(row.creation_date).fromNow()}
+                                {moment(row.creation_date).format('DD-MM-YYYY HH:mm')}
                             </Tooltip>
                         </div>
-                        <div className="modal-table__cell modal-table__cell-flex">
-                            {(row.progress) && (
-                                ((!isNaN(row.progress)) && (
-                                    (Math.ceil(parseFloat(row.progress))
-                                     / 60) * 100
-                                     .toFixed(2) + "%"
-                                ))
-                            )}
-                        </div>
                         <div className="modal-table__cell modal-table__cell-status">
-                            {(!row.processing_status) ? (
-                                <Button
-                                    noAdd
-                                    color="green"
-                                    title="Process"
-                                    onClick={() => {
-                                        const gameId = row.game_id.split("-")
-
-                                        // game_id
-                                        const game_id = gameId[1];
-
-                                        // region
-                                        const region = 
-                                        (gameId[0][gameId[0].length-1] == "1")
-                                        ? gameId[0].substring(0, gameId[0].length-1)
-                                        : gameId[0];
-
-                                        axios.post(`/api/games/process?game_id=${game_id}&region=${region}`)
-                                            .then(res => console.log(res.data))
-                                    }}/>
-                            ) : (
-                                <div 
-                                    style={{
-                                    textAlign: "center"
-                                    }}
-                                >
-                                    <Button
-                                        noAdd
-                                        color="grey"
-                                        title="Done"
-                                        style={{
-                                            color: "white"  
-                                        }}/>
-                                </div>
-                            )}
+                           {(Boolean(row.running))? (`Running for ${moment.duration(moment().diff(row.creation_date)).humanize().replace(/ ago$/, '')}`) : ("Not started")}
                         </div>
                         <div className="modal-table__cell modal-table__cell-check">
-                            <Switch checked = {switches[i]} onChange={() => {handleSwitchChange(i); updateStreamsDataBase(row);}}/>
+                            <Switch style={{backgroundColor: switches[i]? `green` : 'red'}}
+                                    checked = {switches[i]} onChange={() => {console.log(!switches[i]); handleSwitchChange(i); updateStreamsDataBase(row, !switches[i]);}}/>
                         </div>                
                     </div>
                 </div>
@@ -160,12 +115,13 @@ const ModalTable = props => {
 
 const AnalysisModal = props => {
     const { open, analysisClose, streams, ...rest  } = props;
-
+    console.log( "time>>>> ", moment(moment().format('YYYY/MM/DD HH:mm:ss')).format("YYYY-MM-DD HH:mm:ss"));
     const data = streams.map((stream, i) => ({
         "stream": stream.name,
         "running": stream.running,
         "livestream": stream.is_livestream,
-        "creation_date": moment().format(),
+        "creation_date": stream.creation_date,
+        
     }));
 
 
