@@ -234,7 +234,7 @@ const SidebarStreamList = props => {
         const response = window.confirm(`Are you sure you want to delete ${values.name} ?`);
         const name = values.name;
         if (response) {
-            const streamDetails = {"source": values.source};
+            const streamDetails = {"source": values.source, "name": name};
             axios
             .post("/api/streams/delete", streamDetails)
             .then(res => {

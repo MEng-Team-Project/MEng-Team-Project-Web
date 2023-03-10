@@ -64,7 +64,28 @@ const ModalTable = props => {
     }
 
     const updateStreamsDataBase = (row, running) => {
-       
+       if (running) {
+        //update database and call updatestreams
+        //start transcoding stream update analytics table
+        row.running = 1;
+        row.start_time =  moment(moment().format('YYYY/MM/DD HH:mm:ss')).format("YYYY-MM-DD HH:mm:ss");
+        row.end_time = null
+       } else {
+        //stop transcoding stream
+        //update database and call updatestreams
+        row.running = 0;
+        row.end_time =  moment(moment().format('YYYY/MM/DD HH:mm:ss')).format("YYYY-MM-DD HH:mm:ss");
+       }
+       const liveStreamDetails = {"source": row.source, "start_time": row.start_time, "end_time": row.end_time, "running": row.running};
+       console.log(liveStreamDetails);
+       axios
+       .post("/api/streams/update_scrape", liveStreamDetails)
+       .then(res => {
+
+       })
+       .catch(err => {
+           console.log(err.response.data);
+       })
     }
 
     console.log("ModalTable:", data);
@@ -100,11 +121,52 @@ const ModalTable = props => {
                             </Tooltip>
                         </div>
                         <div className="modal-table__cell modal-table__cell-status">
-                           {(Boolean(row.running))? (`Running for ${moment.duration(moment().diff(row.creation_date)).humanize().replace(/ ago$/, '')}`) : ("Not started")}
+                           {(Boolean(row.livestream))? ((Boolean(row.running)) ? (`Running for ${moment.duration(moment().diff(row.start_time)).humanize().replace(/ ago$/, '')}`):
+                           (`Was running for ${moment.duration(moment(row.end_time).diff(moment(row.start_time))).humanize().replace(/ ago$/, '')}`))
+                           : ((row.progress) && (
+                            ((!isNaN(row.progress)) && (
+                                (Math.ceil(parseFloat(row.progress))
+                                 / 60) * 100
+                                 .toFixed(2) + "%"
+                            ))
+                        ))}
                         </div>
                         <div className="modal-table__cell modal-table__cell-check">
-                            <Switch style={{backgroundColor: switches[i]? `green` : 'red'}}
-                                    checked = {switches[i]} onChange={() => {console.log(!switches[i]); handleSwitchChange(i); updateStreamsDataBase(row, !switches[i]);}}/>
+                            {(row.livestream == 1)?( <Switch style={{backgroundColor: switches[i]? "green" : 'red'}}
+                                    checked = {switches[i]} onChange={() => {handleSwitchChange(i); updateStreamsDataBase(row, !switches[i]);}}/>)
+                                    :((!row.processing_status) ? (
+                                        <Button
+                                            noAdd
+                                            color="green"
+                                            title="Process"
+                                            onClick={() => {
+                                                const gameId = row.game_id.split("-")
+                                                // game_id
+                                                const game_id = gameId[1];
+                                                // region
+                                                const region = 
+                                                (gameId[0][gameId[0].length-1] == "1")
+                                                ? gameId[0].substring(0, gameId[0].length-1)
+                                                : gameId[0];
+                                                axios.post(`/api/games/process?game_id=${game_id}&region=${region}`)
+                                                    .then(res => console.log(res.data))
+                                            }}/>
+                                    ) : (
+                                        <div 
+                                            style={{
+                                            textAlign: "center"
+                                            }}
+                                        >
+                                            <Button
+                                                noAdd
+                                                color="grey"
+                                                title="Done"
+                                                style={{
+                                                    color: "white"  
+                                                }}/>
+                                        </div>
+                                    ))}
+                           
                         </div>                
                     </div>
                 </div>
@@ -119,39 +181,21 @@ const AnalysisModal = props => {
     const data = streams.map((stream, i) => ({
         "stream": stream.name,
         "running": stream.running,
+        "source": Boolean(stream.is_livestream)? stream.source : null,
         "livestream": stream.is_livestream,
         "creation_date": stream.creation_date,
-        
+        "start_time" : Boolean(stream.is_livestream)? stream.start_time : null,
+        "end_time": Boolean(stream.is_livestream)? stream.end_time : null,
     }));
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    
-
     useEffect(() => {
-        props.getStreams();
-    }, []);
+        const intervalId = setInterval(() => {
+          props.getStreams();
+        }, 5000); // 5 seconds
+      
+        return () => clearInterval(intervalId);
+      }, []);
+      
 
     const closeHandler = () => {
         analysisClose();
