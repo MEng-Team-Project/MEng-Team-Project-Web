@@ -231,10 +231,10 @@ const SidebarStreamList = props => {
     const { streams, setStream, editStreamOpen, setEditMode, edit} = props;
 
     const deleteStream = values => {
-        const response = confirm(`Are you sure you want to delete ${values.name} ?`);
+        const response = window.confirm(`Are you sure you want to delete ${values.name} ?`);
         const name = values.name;
         if (response) {
-            const streamDetails = {"source": values.source};
+            const streamDetails = {"source": values.source, "name": name};
             axios
             .post("/api/streams/delete", streamDetails)
             .then(res => {
@@ -249,7 +249,7 @@ const SidebarStreamList = props => {
     }
 
     const deleteVideo = values => {
-        const response = confirm(`Are you sure you want to delete ${values.name} ?`);
+        const response = window.confirm(`Are you sure you want to delete ${values.name} ?`);
         const name = values.name;
         if (response) {
             const streamDetails = {"source": values.source};

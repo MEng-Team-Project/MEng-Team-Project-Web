@@ -1,11 +1,13 @@
-.modal-table {
-    
+
+.subtext {
+    color :rgba(147, 147, 147, 0.8)
 }
 
 .modal-table__header {
     display: flex;
     flex-direction: row;
     padding: 0.5rem;
+    align-items: center;
 }
 
 .modal-table__row {
@@ -34,22 +36,31 @@
 
 .modal-table__header-cell-gameid {
     flex-grow: 0;
-    width: 200px;
+    width: 180px;
 }
 
 .modal-table__cell-gameid {
     flex-grow: 0;
-    width: 200px;
+    width: 180px;
 }
 
 .modal-table__header-cell-status {
     flex-grow: 0;
-    width: 120px;
+    width: 200px;
 }
 
 .modal-table__cell-status {
     flex-grow: 0;
-    width: 120px;
+    width: 200px;
+}
+
+.modal-table__header-cell-check {
+    flex-grow: 0;
+    width: 100px;
+}
+.modal-table__cell-check {
+    flex-grow: 0;
+    width: 100px;
 }
 
 .modal-table__header-cell-flex {
