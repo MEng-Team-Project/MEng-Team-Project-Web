@@ -14,7 +14,7 @@ const Dropdown = props => {
     const [selectedValue, setSelectedValue] = useState(null);
     const [query, setQuery] = useState("");
 
-    const { values, placeholder, type, onValueChange, ...rest } = props;
+    const { values, placeholder, type, onValueChange, releaseValueAfterSelected, ...rest } = props;
 
     console.log("selectedValue:", selectedValue);
     console.log("values:", values);
@@ -37,6 +37,7 @@ const Dropdown = props => {
                 className="dropdown"
                 onClick={e => {
                     console.log("dropdown->onClick");
+                    setQuery("");
                     setActive(!active)
                 }}
                 tabIndex={-1}
@@ -44,9 +45,6 @@ const Dropdown = props => {
                     console.log("dropdown->onBlur", e.relatedTarget)
                     if (e.relatedTarget === null) {
                         setActive(false);
-                    }
-                    if (onValueChange) {
-                        onValueChange(selectedValue);
                     }
                 }}
             >
@@ -108,6 +106,12 @@ const Dropdown = props => {
                             onMouseDown = {e => {
                                 console.log("dropdown-options__option")
                                 setSelectedValue(value);
+                                if (onValueChange) {
+                                    onValueChange(value);
+                                    if (releaseValueAfterSelected) {
+                                        setSelectedValue(null);
+                                    }
+                                }
                                 setActive(false);
                             }}>
                             {(type=="dot") && (

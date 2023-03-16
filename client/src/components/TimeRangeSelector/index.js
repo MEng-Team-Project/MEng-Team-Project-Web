@@ -2,12 +2,14 @@
 Custom <TimeRangeSelector /> component which supports selecting a time range
 */
 
-import React, { useState } from 'react';
+import { useState } from 'react';
 
 import './TimeRangeSelector.css';
 
 const TimeRangeSelector = (props) => {
-    const { title, ...rest } = props;
+    const { title, minStartTime, maxEndTime, onValueChange, ...rest } = props;
+    const [startTime, setStartTime] = useState(minStartTime ?? "2020-01-01T00:00")
+    const [endTime, setEndTime] = useState(maxEndTime ?? "2020-01-01T00:00")
 
     return (
         <div
@@ -18,17 +20,34 @@ const TimeRangeSelector = (props) => {
             </div>
             <div className="time-range-selector__time-outer">
                 <span className="time-range-selector__time-text">Start Time:</span>
-                <input className="time-range-selector__time-input" type="datetime-local" id="start-time"
-                    name="start-time" value="2018-06-12T19:30"
-                    >
-                    
+                <input className="time-range-selector__time-input"
+                        type="datetime-local"
+                        id="start-time"
+                        name="start-time"
+                        minvalue={minStartTime ?? "2020-01-01T00:00"}
+                        defaultValue={startTime}
+                        onChange={(e) => {
+                            setStartTime(e.target.value);
+                            if (onValueChange) {
+                                onValueChange(e.target.value, endTime);
+                            }
+                        }}>
                 </input>
             </div>
             <div className="time-range-selector__time-outer">
                 <span className="time-range-selector__time-text">End Time:</span>
-                <input className="time-range-selector__time-input" type="datetime-local" id="end-time"
-                    name="end-time" value="2018-06-12T19:30"
-                    >
+                <input className="time-range-selector__time-input"
+                    type="datetime-local"
+                    id="end-time"
+                    name="end-time"
+                    maxvalue={maxEndTime ?? "2024-01-01T00:00"}
+                    defaultValue={endTime}
+                    onChange={(e) => {
+                        setEndTime(e.target.value);
+                        if (onValueChange) {
+                            onValueChange(startTime, e.target.value);
+                        }
+                    }}>
                 </input>
             </div>
         </div>

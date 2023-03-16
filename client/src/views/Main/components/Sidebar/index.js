@@ -57,7 +57,13 @@ import { display } from '@mui/system';
 
 // Filter Options for Dropdown
 import filterOptions from './filterOptions.json';
+
 import TimeRangeSelector from '../../../../components/TimeRangeSelector';
+import DataSourceFilter from './Filters/DataSourceFilter';
+import ObjectFilter from './Filters/ObjectFilter';
+import StartRegionFilter from './Filters/StartRegionFilter';
+import EndRegionFilter from './Filters/EndRegionFilter';
+import DateTimeRangeFilter from './Filters/DateTimeRangeFilter';
 
 const SidebarLiveVideoLayer = props => {
     const { title, selected } = props;
@@ -127,87 +133,134 @@ const SidebarLiveVideo = props => {
         </div>
     );
 }
+
 const SidebarFilter = props => {
-    const { values, datasources, deleteFilter, updateFilter } = props;
-    const dropdownDatasources = 
-        datasources.map(datasource => ({
-            "meta": "rgb(60, 97, 174)",
-            "data": datasource
-        }));
+    const { values, updateFilter } = props;
+    
 
     return (
-        <div className="sidebar-filter">
-            <div className="sidebar-filter__field">
-                <Dropdown
-                    values={filterOptions}
-                    placeholder={"Select a filter"}
-                    type={"type"}
-                    onValueChange={(filterValue) => {updateFilter(values.id, {value: filterValue})}}
-                />
-                <DeleteOutlineOutlinedIcon
-                    className="delete-icon"
-                    onClick={() => {
-                        deleteFilter(values.id);
-                    }}
-                    style={{
-                        width: 15,
-                        height: 15
-                    }}
-                />
-                {values.value && values.value.data.name === 'time' && <TimeRangeSelector/>}
+        <>
+
+
+
+
+            <div className="sidebar-filter">
+                <div className="sidebar-filter__field">
+                    Time
+                </div>
+                <div className="sidebar-filter__data-source">
+                    <div className="sidebar-filter-text">
+                        Select your time range here:
+                    </div>
+                    <TimeRangeSelector></TimeRangeSelector>
+                </div>
+            </div>
+
+            <div className="sidebar-filter">
+                <div className="sidebar-filter__field">
+                    Start Region
+                </div>
+                <div className="sidebar-filter__data-source">
+                    <div className="sidebar-filter-text">
+                        Select your start region(s) here:
+                    </div>
+                </div>
+            </div>
+
+            <div className="sidebar-filter">
+                <div className="sidebar-filter__field">
+                    End Region
+                </div>
+                <div className="sidebar-filter__data-source">
+                    <div className="sidebar-filter-text">
+                        Select your end region(s) here:
+                    </div>
+                </div>
 
             </div>
-            <div className="sidebar-filter__data-source">
-                <div className="sidebar-filter-text">
-                    Data Source
-                </div>
-                <Dropdown
-                    values={dropdownDatasources}
-                    placeholder={"Select a data source"}
-                    init={0}
-                    type={"dot"}
-                    onValueChange={(filterDataSrc) => {updateFilter(values.id, {dataSrc: filterDataSrc})}}
-                />
-            </div>
-        </div>
+        </>
     )
 };
 
 const SidebarFilters = props => {
     const { streams } = props;
+
+    const [dataSourceFilter, setDataSourceFilter] = useState({});
+
+    const [objectFilter, setObjectFilter] = useState([]);
+
+    const [dateTimeRangeFilter, setDateTimeRangeFilter] = useState({});
+
+    const [startRegionFilter, setStartRegionFilter] = useState([]);
+
+    const [endRegionFilter, setEndRegionFilter] = useState([]);
+
+    const dropdownDataSources = streams.map(stream => ({
+        "meta": "rgb(60, 97, 174)",
+        "data": stream
+    }));
+
+
+    const dropdownObjects = filterOptions.objects;
+
+    const updateDataSourceFilter = (filter) => {
+        setDataSourceFilter(filter);
+    }
+
+    const updateObjectFilter = (filter) => {
+        setObjectFilter(filter);
+    }
     
-    const [filters, setFilters] = useState([
-        {
-            "id": 0,
-            "value": null,
-            "dataSrc": null
+    const addToObjectFilter = (filter) => {
+        if (filter) {
+            setObjectFilter([...objectFilter, filter]);
         }
-    ]);
-    
-    const deleteFilter = deletionId => {
-        setFilters(filters.filter(filterItem => filterItem.id !== deletionId));
-    };
+    }
 
-    const addFilter = () => {
-        setFilters((filters) => [...filters,             {
-            "id": Math.max(0, ...filters.map(o => o.id)) + 1, // id is always greater than any existing filter id
-            "value": null,
-            "dataSrc": null
-        }]);
-    };
+    const removeFromObjectFilter = (filter) => {
+        setObjectFilter(objectFilter.filter((object) => {return (object !== filter) ? true : false}));
+    }
 
-    const updateFilter = (updateId, updateObject) => {
-        setFilters(filters.map(filterItem => {
-            if (filterItem.id === updateId) {
-                Object.entries(updateObject).forEach(([updateKey, updateValue]) => {
-                    if (updateKey !== 'id') {
-                        filterItem[updateKey] = updateValue;
-                    }
-                });
+    const updateDateTimeRangeFilter = (startTime, endTime) => {
+        setDateTimeRangeFilter({
+            meta: "dateTime",
+            data: {
+                name: "dateTime",
+                startTime: startTime,
+                endTime: endTime
             }
-            return filterItem;
-        }));
-    };
+        });
+    }
+
+    const dropdownRegions = filterOptions.regions;
+
+    const updateStartRegionFilter = (filter) => {
+        setStartRegionFilter(filter);
+    }
+    
+    const addToStartRegionFilter = (filter) => {
+        if (filter) {
+            setStartRegionFilter([...startRegionFilter, filter]);
+        }
+    }
+
+    const removeFromStartRegionFilter = (filter) => {
+        setStartRegionFilter(startRegionFilter.filter((startRegion) => {return (startRegion !== filter) ? true : false}))
+    }
+
+    const updateEndRegionFilter = (filter) => {
+        setEndRegionFilter(filter);
+    }
+    
+    const addToEndRegionFilter = (filter) => {
+        if (filter) {
+            setEndRegionFilter([...endRegionFilter, filter]);
+        }
+    }
+
+    const removeFromEndRegionFilter = (filter) => {
+        setEndRegionFilter(endRegionFilter.filter((endRegion) => {return (endRegion !== filter) ? true : false}))
+    }
 
     return (
         <div className="sidebar-tab">
@@ -215,17 +268,39 @@ const SidebarFilters = props => {
                 <div className="sidebar-tab__header">
                     Filters
                 </div>
-                <Button title="Add Filter" color="green" onClick={() => addFilter()}/>
             </div>
             <div className="sidebar-spacing" />
-            {filters.map((values) =>
-                <SidebarFilter
-                    key={values.id}
-                    values={values}
-                    datasources={streams}
-                    deleteFilter={deleteFilter}
-                    updateFilter={updateFilter}
-                />)}
+            <DataSourceFilter
+                dataSources={dropdownDataSources}
+                updateDataSourceFilter={(filter) => {updateDataSourceFilter(filter)}}
+            />
+            <ObjectFilter
+                objects={dropdownObjects}
+                selectedObjects={objectFilter}
+                addToObjectFilter={(filter) => {addToObjectFilter(filter)}}
+                updateObjectFilter={(filter) => {updateObjectFilter(filter)}}
+                removeFromObjectFilter={(filter) => {removeFromObjectFilter(filter)}}
+            />
+
+            <DateTimeRangeFilter
+                updateDateTimeRangeFilter={(startTime, endTime) => {updateDateTimeRangeFilter(startTime, endTime)}}
+            />
+
+            <StartRegionFilter
+                regions={dropdownRegions}
+                selectedRegions={startRegionFilter}
+                addToStartRegionFilter={(filter) => { addToStartRegionFilter(filter) }}
+                updateStartRegionFilter={(filter) => { updateStartRegionFilter(filter) }}
+                removeFromStartRegionFilter={(filter) => { removeFromStartRegionFilter(filter) }}
+            />
+
+            <EndRegionFilter
+                regions={dropdownRegions}
+                selectedRegions={endRegionFilter}
+                addToEndRegionFilter={(filter) => { addToEndRegionFilter(filter) }}
+                updateEndRegionFilter={(filter) => { updateEndRegionFilter(filter) }}
+                removeFromEndRegionFilter={(filter) => { removeFromEndRegionFilter(filter) }}
+            />
         </div>
     );
 };
