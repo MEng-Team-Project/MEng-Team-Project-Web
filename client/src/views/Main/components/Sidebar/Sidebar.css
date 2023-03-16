@@ -243,6 +243,7 @@ FILTERS
 .sidebar-filter__field {
     display: flex;
     flex-direction: row;
+    flex-wrap: wrap;
     align-items: center;
     box-sizing: border-box;
     border-left: 4px solid rgb(60, 97, 174);

@@ -57,6 +57,7 @@ import { display } from '@mui/system';
 
 // Filter Options for Dropdown
 import filterOptions from './filterOptions.json';
+import TimeRangeSelector from '../../../../components/TimeRangeSelector';
 
 const SidebarLiveVideoLayer = props => {
     const { title, selected } = props;
@@ -153,6 +154,8 @@ const SidebarFilter = props => {
                         height: 15
                     }}
                 />
+                {values.value && values.value.data.name === 'time' && <TimeRangeSelector/>}
+
             </div>
             <div className="sidebar-filter__data-source">
                 <div className="sidebar-filter-text">
