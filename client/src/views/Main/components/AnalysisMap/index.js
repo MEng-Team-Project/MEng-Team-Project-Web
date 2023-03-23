@@ -7,8 +7,15 @@ import { Map, TileLayer, Marker, Popup, FeatureGroup } from 'react-leaflet';
 //import { useEventHandlers } from '@react-leaflet/core'
 //import { Rectangle } from 'react-leaflet';
 
+import 'leaflet-routing-machine'
+import 'leaflet-routing-machine/dist/leaflet-routing-machine.css'
+import L from 'leaflet'
+
 // Icons
 import RoomIcon from '@mui/icons-material/Room';
+import IconButton from '@mui/material/IconButton';
+import AspectRatioIcon from '@mui/icons-material/AspectRatio';
+
 
 // Global Components
 import {
@@ -23,8 +30,46 @@ const AnalysisMap = props => {
     const [selected, setSelected] = useState("");
     const [plotting, setPlotting] = useState(false);
     const [positions, setPositions] = useState([]);
+    
+    const [expanded, setExpanded] = useState(false);
+    const mapRef = useRef(null); // create a map reference using useRef hook
 
-    // console.log("routes, selectedRoute:", routes, selectedRoute);
+    const mapClass = expanded ? "map-expanded" : "map";
+
+    const mapWidth = expanded ? "100vh" : 300;
+    const mapHeight = expanded ? "90vh" : 300;
+
+    const handleToggleExpand = () => {
+        setExpanded(!expanded);
+    }
+
+      useEffect(() => {
+        if (mapRef.current && positions.filter(p => p).length >= 2) { // Filter out null elements
+          const map = mapRef.current.leafletElement;
+      
+          for (let i = 0; i < positions.length; i++) {
+            for (let j = i + 1; j < positions.length; j++) {
+              if (positions[i] && positions[j]) { // Check if both positions are non-null
+                L.Routing.control({
+                  waypoints: [
+                    L.latLng(positions[i]),
+                    L.latLng(positions[j])
+                  ],
+                fitSelectedRoutes: true,
+                draggableWaypoints: false,
+                routeWhileDragging: false,
+                createMarker: function() { return null; },
+                show: false,
+                lineOptions : {
+                    addWaypoints: false
+                }
+                }).addTo(map);
+              }
+              console.log("Route drawn between positions[" + i + " ] and positions [ " + j + " ]")
+            }
+          }
+        }
+      }, [mapRef, positions]);   
 
     const handleTogglePlotting = (route) => {
         if (route == selected) {
@@ -39,7 +84,7 @@ const AnalysisMap = props => {
     };
 
     return (
-        <div className="map">
+        <div className={mapClass}>
             <div className="map-controls">
                 {routes.map((route, i) => (
                     <Tooltip content="Mark Region" direction="top" >
@@ -62,6 +107,7 @@ const AnalysisMap = props => {
                 ))}
             </div>
             <Map
+                 ref={mapRef}
                 center={[
                     50.796586,
                     -1.098758
@@ -69,8 +115,8 @@ const AnalysisMap = props => {
                 zoom={18}
                 scrollWheelZoom={true}
                 style={{
-                    width: "300px",
-                    height: "300px",
+                    width: mapWidth,
+                    height: mapHeight,
                 }}
                 onClick={e => {
                     console.log("MAP CLICKED", e, plotting)
@@ -101,6 +147,16 @@ const AnalysisMap = props => {
                     ))}
                 </FeatureGroup>
             </Map>
+            <Tooltip title="Expand Map" arrow>
+                <IconButton
+                    className="map-expand"
+                    onClick={() => 
+                        handleToggleExpand()
+                    }
+                >
+                    <AspectRatioIcon />
+                </IconButton>
+            </Tooltip>
         </div>
     );
 };

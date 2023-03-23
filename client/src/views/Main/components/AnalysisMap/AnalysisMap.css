@@ -10,6 +10,15 @@ GLOBAL
     background-color: rgb(41, 50, 60);
 }
 
+.map-expanded {
+    position: fixed;
+    bottom: 0;
+    right: 50%;
+    transform: translate(+50%, -0);
+    padding: 0.5rem;
+    background-color: rgb(41, 50, 60);
+}
+
 .map-marker {
     display: flex;
     text-align: center;
