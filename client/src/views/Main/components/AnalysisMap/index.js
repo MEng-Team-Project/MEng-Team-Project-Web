@@ -55,7 +55,7 @@ const AnalysisMap = props => {
         if (mapRef.current && positions.filter(p => p).length >= 2) { // Filter out null elements
           const map = mapRef.current.leafletElement;
           const routingControls = [];
-      
+        //routingControl was being created for every combination of i and j, Meaning n*(n-1)/2 routingControls
           for (let i = 0; i < positions.length; i++) {
             for (let j = i + 1; j < positions.length; j++) {
               if (positions[i] && positions[j]) { // Check if both positions are non-null
