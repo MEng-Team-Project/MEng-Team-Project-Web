@@ -36,40 +36,57 @@ const AnalysisMap = props => {
 
     const mapClass = expanded ? "map-expanded" : "map";
 
-    const mapWidth = expanded ? "100vh" : 300;
-    const mapHeight = expanded ? "90vh" : 300;
+    const mapWidth = expanded ? "100vh" : "50vh";
+    const mapHeight = expanded ? "90vh" : "40vh";
+
+    const center = [50.796586, -1.098758];
+
+    const zoom = expanded ? 17 : 18
 
     const handleToggleExpand = () => {
         setExpanded(!expanded);
+        mapRef.current.leafletElement.setView(center, zoom)
+        setTimeout(function () {
+            window.dispatchEvent(new Event("resize"));
+         }, 200);
     }
 
-      useEffect(() => {
+    useEffect(() => {
         if (mapRef.current && positions.filter(p => p).length >= 2) { // Filter out null elements
           const map = mapRef.current.leafletElement;
+          const routingControls = [];
       
           for (let i = 0; i < positions.length; i++) {
             for (let j = i + 1; j < positions.length; j++) {
               if (positions[i] && positions[j]) { // Check if both positions are non-null
-                L.Routing.control({
+                const routingControl = L.Routing.control({
                   waypoints: [
                     L.latLng(positions[i]),
                     L.latLng(positions[j])
                   ],
-                fitSelectedRoutes: true,
-                draggableWaypoints: false,
-                routeWhileDragging: false,
-                createMarker: function() { return null; },
-                show: false,
-                lineOptions : {
+                  fitSelectedRoutes: true,
+                  draggableWaypoints: false,
+                  routeWhileDragging: false,
+                  createMarker: function() { return null; },
+                  show: false,
+                  lineOptions : {
                     addWaypoints: false
-                }
+                  }
                 }).addTo(map);
+      
+                routingControls.push(routingControl);
+                console.log("Route drawn between positions[" + i + " ] and positions [ " + j + " ]");
               }
-              console.log("Route drawn between positions[" + i + " ] and positions [ " + j + " ]")
             }
           }
+      
+          return () => {
+            // Clean up by removing all routing controls
+            routingControls.forEach(routingControl => map.removeControl(routingControl));
+          }
         }
-      }, [mapRef, positions]);   
+      }, [mapRef, positions]);
+      
 
     const handleTogglePlotting = (route) => {
         if (route == selected) {
@@ -108,11 +125,8 @@ const AnalysisMap = props => {
             </div>
             <Map
                  ref={mapRef}
-                center={[
-                    50.796586,
-                    -1.098758
-                ]}
-                zoom={18}
+                center={center}
+                zoom={zoom}
                 scrollWheelZoom={true}
                 style={{
                     width: mapWidth,

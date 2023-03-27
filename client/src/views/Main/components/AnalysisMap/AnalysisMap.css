@@ -8,6 +8,7 @@ GLOBAL
     right: 0;
     padding: 0.5rem;
     background-color: rgb(41, 50, 60);
+    transition: all 0.5s ease-in-out;
 }
 
 .map-expanded {
@@ -17,6 +18,7 @@ GLOBAL
     transform: translate(+50%, -0);
     padding: 0.5rem;
     background-color: rgb(41, 50, 60);
+    transition: all 0.5s ease-in-out;
 }
 
 .map-marker {
