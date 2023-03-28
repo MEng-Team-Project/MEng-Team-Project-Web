@@ -217,6 +217,8 @@ const Controls = props => {
         setShowMap(!showMap);
     }
 
+    // console.log("<Controls/> -> stream:", stream);
+
     return (
         <div className="controls-outermost">
             <div className="controls-outer">
@@ -231,7 +233,7 @@ const Controls = props => {
                 <div className="controls">
                     <Tooltip content="Draw Routes" direction="left">
                         <ModeEditOutlineOutlinedIcon
-                            onClick={toggleEdit}
+                            onClick={(stream) && toggleEdit}
                             className="icon controls-icon"
                             sx={{
                                 color: (showEditor) ? "white" : "rgb(106, 116, 133)"
@@ -239,7 +241,8 @@ const Controls = props => {
                     </Tooltip>
                     <Tooltip content="Toggle Map" direction="left">
                         <MapOutlinedIcon
-                            onClick={toggleMap}
+                            style={{display: (stream) ? "block" : "hidden"}}
+                            onClick={(stream) && toggleMap}
                             className="icon controls-icon"
                             sx={{
                                 color: (showMap) ? "white" : "rgb(106, 116, 133)"
@@ -247,7 +250,8 @@ const Controls = props => {
                     </Tooltip>
                     <Tooltip content="Analytics" direction="left">
                         <AnalyticsOutlinedIcon
-                            onClick={toggleAnalytics}
+                            style={{display: (stream) ? "block" : "hidden"}}
+                            onClick={(stream) && toggleAnalytics}
                             className="icon controls-icon"
                             sx={{
                                 color: (showAnalytics) ? "white" : "rgb(106, 116, 133)"
@@ -256,6 +260,7 @@ const Controls = props => {
                 </div>
                 {(showAnalytics) && (
                     <Analytics
+                        style={{display: (stream) ? "block" : "hidden"}}
                         stream={stream}
                         currentTime={currentTime}/>
                 )}

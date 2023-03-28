@@ -40,6 +40,7 @@ app.use("/livestream", express.static(__dirname + "/livestream"));
 // Routes
 const streams  = require("./routes/api/streams");
 const analysis = require("./routes/api/analysis");
+const routes   = require("./routes/api/routes");
 
 // Host and Port
 const host = args.host; // "0.0.0.0";
@@ -48,6 +49,7 @@ const port = args.port; // 5000;
 // Routes
 app.use("/api/analysis", analysis);
 app.use("/api/streams",  streams);
+app.use("/api/routes",   routes);
 
 // Init Express
 const server = app.listen(port, host, () => {

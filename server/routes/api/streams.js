@@ -77,12 +77,11 @@ const updateStartTimeInLiveStreamDB = async (db, rows) => {
     for (const row of rows) {
         const livestream_stmt = db.prepare(
             'UPDATE livestream_times SET start_time = ? WHERE stream_source = ?');
-        const start_time =  moment(moment().format('YYYY/MM/DD HH:mm:ss')).format("YYYY-MM-DD HH:mm:ss");
+        const start_time =  moment().format("YYYY-MM-DD HH:mm:ss");
         await livestream_stmt.run(start_time, row.source) 
         livestream_stmt.finalize();
     }
 }
-
 
 /**
  * @route GET api/streams/all
@@ -102,7 +101,7 @@ router.get("/all", async (_, res) => {
             "source": path.basename(file),
             "running": 0,
             "is_livestream": 0,
-            "creation_date": moment(moment().format('YYYY/MM/DD HH:mm:ss')).format("YYYY-MM-DD HH:mm:ss"),
+            "creation_date": moment().format("YYYY-MM-DD HH:mm:ss"),
         }));
 
         const stmt = `SELECT * FROM streams INNER JOIN livestream_times ON streams.source = livestream_times.stream_source;`
@@ -123,7 +122,7 @@ router.get("/all", async (_, res) => {
 });
 
 /** 
- * @route GET api/streams/upload
+ * @route PUT api/streams/upload
  * @desc Receives a video recording from the user and uploads it to local storage
  * @param {files} Stream - Video Stream File
  * @access Public

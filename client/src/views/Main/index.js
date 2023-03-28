@@ -51,59 +51,6 @@ import {
 } from "nebula.gl";
 import {WebMercatorViewport} from '@deck.gl/core';
 
-/*
-// x1, y1, x2, y2
-const boundingBoxes = [
-    [266.0, 74.0, 275.0, 99.0],
-    [257.0, 42.0, 264.0, 62.0],
-    [292.0, 225.0, 302.0, 260.0],
-    [222.0, 8.0, 242.0, 37.0],
-    [251.0, 104.0, 263.0, 141.0],
-    [157.0, 73.0, 169.0, 104.0],
-    [290.0, 150.0, 309.0, 193.0],
-];
-<video src={stream + "#t=0.04"} />
-style={{
-    top:    videoRef.current.offsetLeft + (bbox[1] * videoRef.current.clientHeight / height),
-    left:   videoRef.current.offsetLeft + (bbox[0] * videoRef.current.clientWidth / width),
-    width:  (bbox[2] - bbox[0]) * videoRef.current.clientWidth / width,
-    height: (bbox[3] - bbox[1]) * videoRef.current.clientHeight / height
-}}
-
-{(videoRef.current) && (boundingBoxes.map((bbox, i) => (
-    <BoundingBox
-        key={i}
-        x1={videoRef.current.offsetLeft + bbox[0]}
-        y1={videoRef.current.offsetTop  + bbox[1]}
-        x2={bbox[2]}
-        y2={bbox[3]}
-    />
-)))}
-
-const BoundingBox = props => {
-    const {x1, y1, x2, y2} = props;
-    return (
-        <div
-            className="bounding-box"
-            style={{
-                top: y1,
-                left: x1,
-                width: x2 - x1,
-                height: y2 - y1
-            }}
-        />
-    )
-};
-
-/*
-style={{
-    width: 352,
-    height: 288
-}}
-const width  = 352;
-const height = 288;
-*/
-
 const initialViewState = {
     longitude: -122.43,
     latitude: 37.775,
@@ -152,7 +99,7 @@ const geoToVid = (width, height, videoWidth, videoHeight, data) => {
         (point[1] - (videoYoffset)) / heightFactor]);
 
     /*
-    console.log(`CONV:
+    console.log(`geoToVid:
         orientation: ${orientation},
         data: ${data},
         screenPoints: ${screenPoints},
@@ -173,16 +120,18 @@ const geoToVid = (width, height, videoWidth, videoHeight, data) => {
 
 const Main = props => {
     // Modal toggles
-    const [openExport,   setOpenExport]   = useState(false);
-    const [openImport,   setOpenImport]   = useState(false);
-    const [openAnalysis, setOpenAnalysis] = useState(false);
-    const [openAddStreams, setOpenAddStream]  = useState(false);
-    const [openEditStreams, setOpenEditStream]  = useState(false);
-    const [streamDetails, setStreamDetails] = useState({directory: "",
-    streamName: "",
-    ipValue: "",
-    port: "",
-    protocol: ""});
+    const [openExport,      setOpenExport]     = useState(false);
+    const [openImport,      setOpenImport]     = useState(false);
+    const [openAnalysis,    setOpenAnalysis]   = useState(false);
+    const [openAddStreams,  setOpenAddStream]  = useState(false);
+    const [openEditStreams, setOpenEditStream] = useState(false);
+    const [streamDetails,   setStreamDetails]  = useState({
+        directory: "",
+        streamName: "",
+        ipValue: "",
+        port: "",
+        protocol: ""
+    });
     const [edit, setEdit] = useState(false);
 
     // Route editor toggle
@@ -224,13 +173,13 @@ const Main = props => {
     const layer = new EditableGeoJsonLayer({
         // id: "geojson-layer",
         // selectionType: "rectangle",
-        data: features,
+        data:     features,
         pickable: true,
         mode,
         onClick: (info, event) => {
+            console.log("layer->onClick", mode, mode == "view")
             const coordCount = Array.from(info.object.geometry.coordinates)[0].length;
-            console.log(coordCount);
-            if (coordCount > 2) {
+            if (mode == ViewMode) {
                 console.log('Clicked:', info, event, info.object.geometry.coordinates); // , vidCoords);
                 const regionIdx = info.index;
                 const existingLabel = routes[regionIdx];
