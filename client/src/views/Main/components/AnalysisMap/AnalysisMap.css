@@ -29,6 +29,10 @@ GLOBAL
     color: white;
 }
 
+.leaflet-routing-alt table{ /*hide route directions*/
+    display: none;
+}
+
 .map-marker__text {
     margin-left: 0.5rem;
     margin-right: 0.5rem;

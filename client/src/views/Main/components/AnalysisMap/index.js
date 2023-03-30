@@ -35,7 +35,6 @@ const AnalysisMap = props => {
     const mapRef = useRef(null); // create a map reference using useRef hook
 
     const mapClass = expanded ? "map-expanded" : "map";
-
     const mapWidth = expanded ? "100vh" : "50vh";
     const mapHeight = expanded ? "90vh" : "40vh";
 
@@ -53,41 +52,44 @@ const AnalysisMap = props => {
 
     useEffect(() => {
         if (mapRef.current && positions.filter(p => p).length >= 2) { // Filter out null elements
-          const map = mapRef.current.leafletElement;
-          const routingControls = [];
-        //routingControl was being created for every combination of i and j, Meaning n*(n-1)/2 routingControls
-          for (let i = 0; i < positions.length; i++) {
-            for (let j = i + 1; j < positions.length; j++) {
-              if (positions[i] && positions[j]) { // Check if both positions are non-null
-                const routingControl = L.Routing.control({
-                  waypoints: [
-                    L.latLng(positions[i]),
-                    L.latLng(positions[j])
-                  ],
-                  fitSelectedRoutes: true,
-                  draggableWaypoints: false,
-                  routeWhileDragging: false,
-                  createMarker: function() { return null; },
-                  show: false,
-                  lineOptions : {
-                    addWaypoints: false
-                  }
-                }).addTo(map);
-      
-                routingControls.push(routingControl);
-                console.log("Route drawn between positions[" + i + " ] and positions [ " + j + " ]");
-              }
+            const map = mapRef.current.leafletElement;
+            const routingControls = [];
+        //routingControl was being created for every combination of i and j, Meaning n*(n-1)/2 lines drawn between all possible pairs of points.
+            for (let i = 0; i < positions.length; i++) {
+                for (let j = i + 1; j < positions.length; j++) {
+                    if (positions[i] && positions[j]) { // Check if both positions are non-null
+                    const routingControl = L.Routing.control({
+                        waypoints: [
+                        L.latLng(positions[i]),
+                        L.latLng(positions[j])
+                        ],
+                        distanceTemplate: "",
+                        timeTemplate: "",
+                        //TODO: add route analytics below
+                        summaryTemplate: `<h2>{name}</h2> Analytics info will be displayed here eg HGVs = 60 ...`,
+                        fitSelectedRoutes: true,
+                        draggableWaypoints: false,
+                        routeWhileDragging: false,
+                        createMarker: function() { return null; },
+                        show: false,
+                        lineOptions : {
+                        addWaypoints: false
+                        },
+                    }).addTo(map);
+            
+                    routingControls.push(routingControl);
+                    console.log("Route drawn between positions[" + i + " ] and positions [ " + j + " ]");
+                    }
+                }
             }
-          }
       
-          return () => {
+            return () => {
             // Clean up by removing all routing controls
             routingControls.forEach(routingControl => map.removeControl(routingControl));
-          }
+            }
         }
       }, [mapRef, positions]);
       
-
     const handleTogglePlotting = (route) => {
         if (route == selected) {
             setPlotting(false);
