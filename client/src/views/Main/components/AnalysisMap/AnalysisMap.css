@@ -33,6 +33,39 @@ GLOBAL
     user-select: none;
 }
 
+.map-controls__checkboxes {
+    position: absolute;
+    right:calc(100% + 10px);
+    top: 45px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    margin-right: 0px;
+    width: 100px;
+    background-color: rgb(41, 50, 60);
+    border-radius: 8px;
+  }
+
+.map-controls__checkboxes label {
+    align-items: center;
+    display: flex;
+    color: white;
+    font-size: 12px;
+    font-family: sans-serif;
+}
+  
+.map-controls__checkbox-label input {
+    margin-right: 5px;
+    width: 20px;
+    height: 20px;
+}
+
+.map-controls__checkbox-container {
+margin-bottom: 10px;
+}
+
+
+
 /*
 ICONS
 */
