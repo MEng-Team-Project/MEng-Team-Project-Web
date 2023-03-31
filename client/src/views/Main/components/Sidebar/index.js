@@ -60,10 +60,8 @@ import filterOptions from './filterOptions.json';
 
 import TimeRangeSelector from '../../../../components/TimeRangeSelector';
 import DataSourceFilter from './Filters/DataSourceFilter';
-import ObjectFilter from './Filters/ObjectFilter';
-import StartRegionFilter from './Filters/StartRegionFilter';
-import EndRegionFilter from './Filters/EndRegionFilter';
 import DateTimeRangeFilter from './Filters/DateTimeRangeFilter';
+import MultiSelect from './Filters/MultiSelect';
 
 const SidebarLiveVideoLayer = props => {
     const { title, selected } = props;
@@ -274,32 +272,37 @@ const SidebarFilters = props => {
                 dataSources={dropdownDataSources}
                 updateDataSourceFilter={(filter) => {updateDataSourceFilter(filter)}}
             />
-            <ObjectFilter
-                objects={dropdownObjects}
-                selectedObjects={objectFilter}
-                addToObjectFilter={(filter) => {addToObjectFilter(filter)}}
-                updateObjectFilter={(filter) => {updateObjectFilter(filter)}}
-                removeFromObjectFilter={(filter) => {removeFromObjectFilter(filter)}}
+            
+            <MultiSelect key="objects"
+                title="Objects to Track"
+                itemName="object"
+                items={dropdownObjects}
+                selectedItems={objectFilter}
+                addToItemFilter={(filter) => {addToObjectFilter(filter)}}
+                updateItemFilter={(filter) => {updateObjectFilter(filter)}}
+                removeFromItemFilter={(filter) => {removeFromObjectFilter(filter)}}
             />
 
             <DateTimeRangeFilter
                 updateDateTimeRangeFilter={(startTime, endTime) => {updateDateTimeRangeFilter(startTime, endTime)}}
             />
 
-            <StartRegionFilter
-                regions={dropdownRegions}
-                selectedRegions={startRegionFilter}
-                addToStartRegionFilter={(filter) => { addToStartRegionFilter(filter) }}
-                updateStartRegionFilter={(filter) => { updateStartRegionFilter(filter) }}
-                removeFromStartRegionFilter={(filter) => { removeFromStartRegionFilter(filter) }}
+            <MultiSelect key="startRegions"
+                title="Start Regions"
+                itemName="region"
+                items={dropdownRegions}
+                selectedItems={startRegionFilter}
+                addToItemFilter={(filter) => { addToStartRegionFilter(filter) }}
+                updateItemFilter={(filter) => { updateStartRegionFilter(filter) }}
+                removeFromItemFilter={(filter) => { removeFromStartRegionFilter(filter) }}
             />
 
-            <EndRegionFilter
-                regions={dropdownRegions}
-                selectedRegions={endRegionFilter}
-                addToEndRegionFilter={(filter) => { addToEndRegionFilter(filter) }}
-                updateEndRegionFilter={(filter) => { updateEndRegionFilter(filter) }}
-                removeFromEndRegionFilter={(filter) => { removeFromEndRegionFilter(filter) }}
+            <MultiSelect key="endRegions"
+                items={dropdownRegions}
+                selectedItems={endRegionFilter}
+                addToItemFilter={(filter) => { addToEndRegionFilter(filter) }}
+                updateItemFilter={(filter) => { updateEndRegionFilter(filter) }}
+                removeFromItemFilter={(filter) => { removeFromEndRegionFilter(filter) }}
             />
         </div>
     );
