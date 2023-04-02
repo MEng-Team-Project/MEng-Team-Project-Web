@@ -190,7 +190,7 @@ const Main = props => {
     const [showMap,      setShowMap]      = useState(false);
 
     // Route mapping
-    const [routes, setRoutes]             = useState([]);
+    const [roads, setRoads]             = useState([]);
 
     // Video player tracking
     const [currentTime,  setCurrentTime]  = useState(0);
@@ -233,15 +233,15 @@ const Main = props => {
             if (coordCount > 2) {
                 console.log('Clicked:', info, event, info.object.geometry.coordinates); // , vidCoords);
                 const regionIdx = info.index;
-                const existingLabel = routes[regionIdx];
+                const existingLabel = roads[regionIdx];
                 const label = prompt("Set route region label", existingLabel);
-                let newRoutes = [...routes];
+                let newRoads = [...roads];
                 if (label) {
-                    newRoutes[regionIdx] = label;
+                    newRoads[regionIdx] = label;
                 } else {
-                    newRoutes[regionIdx] = existingLabel;
+                    newRoads[regionIdx] = existingLabel;
                 }
-                setRoutes(newRoutes);
+                setRoads(newRoads);
             }
         },
         onSelect: ({ pickingInfos }) => {
@@ -402,7 +402,7 @@ const Main = props => {
                 setShowMap={setShowMap} />
             {(showMap) && (
                 <AnalysisMap
-                    routes={routes}
+                    roads={roads}
                 />
             )}
         </div>

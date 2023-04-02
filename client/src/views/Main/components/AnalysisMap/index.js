@@ -9,7 +9,7 @@ import { Map, TileLayer, Marker, Popup, FeatureGroup } from 'react-leaflet';
 
 import 'leaflet-routing-machine'
 import 'leaflet-routing-machine/dist/leaflet-routing-machine.css'
-import L from 'leaflet'
+import L, { routing } from 'leaflet'
 
 // Icons
 import RoomIcon from '@mui/icons-material/Room';
@@ -26,7 +26,7 @@ import {
 import "./AnalysisMap.css";
 
 const AnalysisMap = props => {
-    const {routes} = props;
+    const {roads} = props;
     const [selected, setSelected] = useState("");
     const [plotting, setPlotting] = useState(false);
     const [positions, setPositions] = useState([]);
@@ -42,6 +42,9 @@ const AnalysisMap = props => {
 
     const zoom = expanded ? 17 : 18
 
+    const [routes, setRoutes] = useState([]);
+    const [originalWaypoints, setOriginalWaypoints] = useState([]);
+
     const handleToggleExpand = () => {
         setExpanded(!expanded);
         mapRef.current.leafletElement.setView(center, zoom)
@@ -53,12 +56,17 @@ const AnalysisMap = props => {
     useEffect(() => {
         if (mapRef.current && positions.filter(p => p).length >= 2) { // Filter out null elements
             const map = mapRef.current.leafletElement;
+
+            const newRoutes = [];
+            const newOriginalWaypoints = {}
+
             const routingControls = [];
+            
         //routingControl was being created for every combination of i and j, Meaning n*(n-1)/2 lines drawn between all possible pairs of points.
             for (let i = 0; i < positions.length; i++) {
                 for (let j = i + 1; j < positions.length; j++) {
                     if (positions[i] && positions[j]) { // Check if both positions are non-null
-                    const routingControl = L.Routing.control({
+                    const route = L.Routing.control({
                         waypoints: [
                         L.latLng(positions[i]),
                         L.latLng(positions[j])
@@ -73,53 +81,123 @@ const AnalysisMap = props => {
                         createMarker: function() { return null; },
                         show: false,
                         lineOptions : {
-                        addWaypoints: false
+                        addWaypoints: false,
+                        styles: [{
+                            color: congestionColor,
+                            opacity: 1,
+                            weight: 5
+                        }]
                         },
                     }).addTo(map);
             
-                    routingControls.push(routingControl);
+                    newRoutes.push(route);
                     console.log("Route drawn between positions[" + i + " ] and positions [ " + j + " ]");
+                    newOriginalWaypoints[newRoutes.length - 1] = route.getWaypoints();
                     }
                 }
             }
-      
+            setRoutes(newRoutes);
+            setOriginalWaypoints(newOriginalWaypoints);
             return () => {
             // Clean up by removing all routing controls
-            routingControls.forEach(routingControl => map.removeControl(routingControl));
+            newRoutes.forEach(route => map.removeControl(route));
+            }
+          
+        }
+    }, [mapRef, positions]);
+      
+    function hideRoute(index) {
+        const route = routes[index];
+        const originalWaypoint = originalWaypoints[index];
+        if (route) {
+            const map = mapRef.current.leafletElement;
+            if (JSON.stringify(route.getWaypoints()) === JSON.stringify(originalWaypoint)) {
+            // Waypoints are the same as original, so hide the route by setting waypoints to empty array
+            route.setWaypoints([]);
+            } else {
+            // Waypoints have been changed, so restore the original waypoints
+            route.setWaypoints(originalWaypoint);
             }
         }
-      }, [mapRef, positions]);
-      
-    const handleTogglePlotting = (route) => {
-        if (route == selected) {
+    }
+
+    const congestion = 15;
+    const congestionColor = congestion >= 50 ? 'red' : congestion >= 20 ? 'orange' : 'green';
+
+    function showCongestion(index, congestion) {
+    const route = routes[index];
+    if (route) {
+        const map = mapRef.current.leafletElement;
+        const originalWaypoints = route.getWaypoints();
+    
+        const newRoute = L.Routing.control({
+        waypoints: originalWaypoints,
+        fitSelectedRoutes: true,
+        draggableWaypoints: false,
+        routeWhileDragging: false,
+        createMarker: function() { return null; },
+        show: false,
+        lineOptions : {
+            addWaypoints: false,
+            styles: [{
+            color: congestion >= 50 ? 'red' : congestion >= 20 ? 'orange' : 'green',
+            opacity: 1,
+            weight: 5
+            }]
+        }
+        }).addTo(map);
+    
+        route.remove();
+        setRoutes([...routes.slice(0, index), newRoute, ...routes.slice(index + 1)]);
+    
+        setOriginalWaypoints({
+        ...originalWaypoints,
+        [index]: originalWaypoints
+        });
+    }
+    }
+
+    const handleTogglePlotting = (road) => {
+        if (road == selected) {
             setPlotting(false);
             setSelected("");
             console.log("SELECTED: ''")
-        } else if (route != selected) {
+        } else if (road != selected) {
             setPlotting(true);
-            setSelected(route);
-            console.log(`SELECTED: '${route}'`)
+            setSelected(road);
+            console.log(`SELECTED: '${road}'`)
         }
-    };
+    }
 
     return (
         <div className={mapClass}>
             <div className="map-controls">
-                {routes.map((route, i) => (
+                <div className="map-controls__checkboxes">
+                    {routes.map((route, i) => (
+                        <div key={i}>
+                            <label className="map-controls__checkbox-label">
+                                <input type="checkbox" onClick={() => showCongestion(i, 30)} defaultChecked/>
+                                Route {i + 1}
+                            </label>
+                            <br />
+                        </div>
+                    ))}
+                </div>
+                {roads.map((road, i) => (
                     <Tooltip content="Mark Region" direction="top" >
                         <div className="map-marker">
                             <RoomIcon
-                                onClick={() => handleTogglePlotting(route)}
+                                onClick={() => handleTogglePlotting(road)}
                                 className="icon map-controls-icon"
                                 sx={{
-                                    color: (plotting && selected == route)
+                                    color: (plotting && selected == road)
                                            ? "white"
                                            : "rgb(165, 168, 165)",
                                     backgroundColor: "rgb(106, 116, 133)"
                                 }}
                             />
                             <span className="map-marker__text">
-                                {route}
+                                {road}
                             </span>
                         </div>
                     </Tooltip>
@@ -138,7 +216,7 @@ const AnalysisMap = props => {
                     console.log("MAP CLICKED", e, plotting)
                     if (plotting) {
                         let newPositions = [...positions];
-                        let selectedIdx  = routes.indexOf(selected);
+                        let selectedIdx  = roads.indexOf(selected);
                         newPositions[selectedIdx] = e.latlng;
                         setPositions(newPositions);
                         setPlotting(false);
@@ -154,10 +232,10 @@ const AnalysisMap = props => {
                         <Marker
                             key={i}
                             position={position}
-                            label={routes[i]}
+                            label={roads[i]}
                         >
                             <Popup>
-                                <div>{routes[i]}</div>
+                                <div>{roads[i]}</div>
                             </Popup>
                         </Marker>
                     ))}
