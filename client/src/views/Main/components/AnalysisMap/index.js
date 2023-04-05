@@ -7,15 +7,15 @@ import { Map, TileLayer, Marker, Popup, FeatureGroup } from 'react-leaflet';
 //import { useEventHandlers } from '@react-leaflet/core'
 //import { Rectangle } from 'react-leaflet';
 
-import 'leaflet-routing-machine'
-import 'leaflet-routing-machine/dist/leaflet-routing-machine.css'
-import L, { routing } from 'leaflet'
+import 'leaflet-routing-machine';
+import 'leaflet-canvas-markers';
+import 'leaflet-routing-machine/dist/leaflet-routing-machine.css';
+import L, { routing } from 'leaflet';
 
 // Icons
 import RoomIcon from '@mui/icons-material/Room';
 import IconButton from '@mui/material/IconButton';
 import AspectRatioIcon from '@mui/icons-material/AspectRatio';
-
 
 // Global Components
 import {
@@ -53,6 +53,24 @@ const AnalysisMap = props => {
          }, 200);
     }
 
+    var arrowIcon = L.icon({
+        iconUrl: '',
+        iconSize: [30, 30],
+        iconAnchor: [15, 15],
+        popupAnchor: [0, -15],
+        className: 'leaflet-canvas-icon',
+        canvas: true,
+        drawIcon: function(canvas, size, anchor) {
+          var ctx = canvas.getContext('2d');
+          ctx.beginPath();
+          ctx.moveTo(0, 0);
+          ctx.lineTo(size.x, size.y/2);
+          ctx.lineTo(0, size.y);
+          ctx.fillStyle = 'red'; // or whatever color you want
+          ctx.fill();
+        }
+      });
+
     useEffect(() => {
         if (mapRef.current && positions.filter(p => p).length >= 2) { // Filter out null elements
             const map = mapRef.current.leafletElement;
@@ -68,8 +86,8 @@ const AnalysisMap = props => {
                     if (positions[i] && positions[j]) { // Check if both positions are non-null
                     const route = L.Routing.control({
                         waypoints: [
-                        L.latLng(positions[i]),
-                        L.latLng(positions[j])
+                            L.latLng(positions[i]),
+                            L.latLng(positions[j])
                         ],
                         distanceTemplate: "",
                         timeTemplate: "",
@@ -78,14 +96,24 @@ const AnalysisMap = props => {
                         fitSelectedRoutes: true,
                         draggableWaypoints: false,
                         routeWhileDragging: false,
-                        createMarker: function() { return null; },
+                        createMarker: function (i, waypoint, n) {
+                            if (i === 0) return null;
+                            const prevLatLng = positions[i - 1];
+                            return L.canvasMarker(positions[i], {
+                              img: {
+                                url: "mapArrow.png", 
+                                size: [40, 40],
+                                rotate: 10,
+                              },
+                              prevLatlng: prevLatLng,
+                            }); },
                         show: false,
-                        lineOptions : {
+                        lineOptions : { 
                         addWaypoints: false,
                         styles: [{
                             color: congestionColor,
                             opacity: 1,
-                            weight: 5
+                            weight: 5,
                         }]
                         },
                     }).addTo(map);
@@ -99,8 +127,8 @@ const AnalysisMap = props => {
             setRoutes(newRoutes);
             setOriginalWaypoints(newOriginalWaypoints);
             return () => {
-            // Clean up by removing all routing controls
-            newRoutes.forEach(route => map.removeControl(route));
+                    // Clean up by removing all routing controls
+                    newRoutes.forEach(route => map.removeControl(route));
             }
           
         }
@@ -172,17 +200,31 @@ const AnalysisMap = props => {
     return (
         <div className={mapClass}>
             <div className="map-controls">
-                <div className="map-controls__checkboxes">
-                    {routes.map((route, i) => (
-                        <div key={i}>
-                            <label className="map-controls__checkbox-label">
-                                <input type="checkbox" onClick={() => showCongestion(i, 30)} defaultChecked/>
-                                Route {i + 1}
-                            </label>
-                            <br />
-                        </div>
-                    ))}
+            <div className="map-controls__checkboxes">
+            {routes.map((route, i) => (
+                <div key={i}>
+                <label className="map-controls__checkbox-label">
+                    <input type="checkbox" onClick={() => hideRoute(i)} defaultChecked />
+                    Route {i + 1}
+                </label>
+                <ul className="map-controls__checkbox-sublist">
+                    <li>
+                    <label className="map-controls__checkbox-label_sub">
+                        <input type="checkbox" onClick={() => hideRoute(i)} />
+                        Incoming
+                    </label>
+                    </li>
+                    <li>
+                    <label className="map-controls__checkbox-label_sub">
+                        <input type="checkbox" onClick={() => hideRoute(i)} />
+                        Outgoing
+                    </label>
+                    </li>
+                </ul>
                 </div>
+            ))}
+            </div>
+
                 {roads.map((road, i) => (
                     <Tooltip content="Mark Region" direction="top" >
                         <div className="map-marker">

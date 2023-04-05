@@ -39,17 +39,26 @@ GLOBAL
     user-select: none;
 }
 
+.map-controls__checkbox-sublist {
+    list-style: none;
+    margin-top: 5px;
+    margin-bottom: 5px;
+    padding-left: 15px;
+
+  }
+
 .map-controls__checkboxes {
     position: absolute;
     right:calc(100% + 10px);
-    top: 45px;
-    display: flex;
+    display: inline-block;
     flex-direction: column;
     justify-content: center;
     margin-right: 0px;
     width: 100px;
     background-color: rgb(41, 50, 60);
     border-radius: 8px;
+    max-height: 50vh;
+    overflow-y: scroll;
   }
 
 .map-controls__checkboxes label {
