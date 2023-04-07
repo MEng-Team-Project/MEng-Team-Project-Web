@@ -10,11 +10,13 @@ import './Dropdown.css';
 import SearchOutlinedIcon from '@mui/icons-material/SearchOutlined';
 
 const Dropdown = props => {
-    const [active, setActive] = useState(false);
-    const [selectedValue, setSelectedValue] = useState(null);
-    const [query, setQuery] = useState("");
+    const { initialValue, values, placeholder, type, onValueChange, releaseValueAfterSelected, ...rest } = props;
 
-    const { values, placeholder, type, onValueChange, releaseValueAfterSelected, ...rest } = props;
+    const initialSelectedValue = (!initialValue || Object.keys(initialValue).length === 0) ? null : initialValue;
+
+    const [active, setActive] = useState(false);
+    const [selectedValue, setSelectedValue] = useState(initialSelectedValue);
+    const [query, setQuery] = useState("");
 
     console.log("selectedValue:", selectedValue);
     console.log("values:", values);

@@ -2,7 +2,17 @@ import TimeRangeSelector from '../../../../../../components/TimeRangeSelector';
 
 const DateTimeRangeFilter = (props) => {
 
-    const { minStartTime, maxEndTime, updateDateTimeRangeFilter } = props;
+    const { selectedDateTimeRange, minStartTime, maxEndTime, updateDateTimeRangeFilter } = props;
+
+    console.log("Selected date time range", selectedDateTimeRange);
+
+    let initialStartTime;
+    let initialEndTime;
+
+    if (Object.keys(selectedDateTimeRange).length !== 0) {
+        initialStartTime = selectedDateTimeRange.data.startTime;
+        initialEndTime = selectedDateTimeRange.data.endTime;
+    }
 
     return (
         <div className="sidebar-filter">
@@ -18,6 +28,8 @@ const DateTimeRangeFilter = (props) => {
                 </div>
 
                 <TimeRangeSelector
+                    initialStartTime={initialStartTime}
+                    initialEndTime={initialEndTime}
                     minStartTime={minStartTime}
                     maxEndTime={maxEndTime}
                     onValueChange={(startTime, endTime) => { updateDateTimeRangeFilter(startTime, endTime) }}

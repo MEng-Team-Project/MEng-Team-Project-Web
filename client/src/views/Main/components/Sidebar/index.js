@@ -18,7 +18,7 @@ As for the tabs, these are assumed to contain:
 */
 
 // React
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 
 // Redux
 import { connect } from "react-redux";
@@ -27,6 +27,7 @@ import { connect } from "react-redux";
 import {
     setStream
 } from "../../../../actions/streamActions";
+
 //from '../../actions/streamActions';
 
 // Icons
@@ -62,6 +63,7 @@ import TimeRangeSelector from '../../../../components/TimeRangeSelector';
 import DataSourceFilter from './Filters/DataSourceFilter';
 import DateTimeRangeFilter from './Filters/DateTimeRangeFilter';
 import MultiSelect from './Filters/MultiSelect';
+import { setFilters } from '../../../../actions/filterActions';
 
 const SidebarLiveVideoLayer = props => {
     const { title, selected } = props;
@@ -132,72 +134,29 @@ const SidebarLiveVideo = props => {
     );
 }
 
-const SidebarFilter = props => {
-    const { values, updateFilter } = props;
-    
-
-    return (
-        <>
-
-
-
-
-            <div className="sidebar-filter">
-                <div className="sidebar-filter__field">
-                    Time
-                </div>
-                <div className="sidebar-filter__data-source">
-                    <div className="sidebar-filter-text">
-                        Select your time range here:
-                    </div>
-                    <TimeRangeSelector></TimeRangeSelector>
-                </div>
-            </div>
-
-            <div className="sidebar-filter">
-                <div className="sidebar-filter__field">
-                    Start Region
-                </div>
-                <div className="sidebar-filter__data-source">
-                    <div className="sidebar-filter-text">
-                        Select your start region(s) here:
-                    </div>
-                </div>
-            </div>
-
-            <div className="sidebar-filter">
-                <div className="sidebar-filter__field">
-                    End Region
-                </div>
-                <div className="sidebar-filter__data-source">
-                    <div className="sidebar-filter-text">
-                        Select your end region(s) here:
-                    </div>
-                </div>
-
-            </div>
-        </>
-    )
-};
-
 const SidebarFilters = props => {
-    const { streams } = props;
+    const { streams, filters, setFilters } = props;
+    
+    const [ dataSourceFilter, setDataSourceFilter ] = useState(filters.dataSourceFilter);
+    const [ objectFilter, setObjectFilter ] = useState(filters.objectFilter);
+    const [ dateTimeRangeFilter, setDateTimeRangeFilter ] = useState(filters.dateTimeRangeFilter);
+    const [ startRegionFilter, setStartRegionFilter ] = useState(filters.startRegionFilter);
+    const [ endRegionFilter, setEndRegionFilter ] = useState(filters.endRegionFilter);
 
-    const [dataSourceFilter, setDataSourceFilter] = useState({});
-
-    const [objectFilter, setObjectFilter] = useState([]);
-
-    const [dateTimeRangeFilter, setDateTimeRangeFilter] = useState({});
-
-    const [startRegionFilter, setStartRegionFilter] = useState([]);
-
-    const [endRegionFilter, setEndRegionFilter] = useState([]);
+    useEffect(() => {
+        setFilters(    {
+            dataSourceFilter: dataSourceFilter,
+            objectFilter: objectFilter,
+            dateTimeRangeFilter: dateTimeRangeFilter,
+            startRegionFilter: startRegionFilter,
+            endRegionFilter: endRegionFilter
+        });
+    }, [ dataSourceFilter, objectFilter, dateTimeRangeFilter, startRegionFilter, endRegionFilter, setFilters ]);
 
     const dropdownDataSources = streams.map(stream => ({
         "meta": "rgb(60, 97, 174)",
         "data": stream
     }));
-
 
     const dropdownObjects = filterOptions.objects;
 
@@ -208,7 +167,7 @@ const SidebarFilters = props => {
     const updateObjectFilter = (filter) => {
         setObjectFilter(filter);
     }
-    
+
     const addToObjectFilter = (filter) => {
         if (filter) {
             setObjectFilter([...objectFilter, filter]);
@@ -235,7 +194,7 @@ const SidebarFilters = props => {
     const updateStartRegionFilter = (filter) => {
         setStartRegionFilter(filter);
     }
-    
+
     const addToStartRegionFilter = (filter) => {
         if (filter) {
             setStartRegionFilter([...startRegionFilter, filter]);
@@ -249,7 +208,7 @@ const SidebarFilters = props => {
     const updateEndRegionFilter = (filter) => {
         setEndRegionFilter(filter);
     }
-    
+
     const addToEndRegionFilter = (filter) => {
         if (filter) {
             setEndRegionFilter([...endRegionFilter, filter]);
@@ -268,11 +227,13 @@ const SidebarFilters = props => {
                 </div>
             </div>
             <div className="sidebar-spacing" />
+            
             <DataSourceFilter
+                selectedDataSource={dataSourceFilter}
                 dataSources={dropdownDataSources}
                 updateDataSourceFilter={(filter) => {updateDataSourceFilter(filter)}}
             />
-            
+
             <MultiSelect key="objects"
                 title="Objects to Track"
                 itemName="object"
@@ -284,6 +245,7 @@ const SidebarFilters = props => {
             />
 
             <DateTimeRangeFilter
+                selectedDateTimeRange={dateTimeRangeFilter}
                 updateDateTimeRangeFilter={(startTime, endTime) => {updateDateTimeRangeFilter(startTime, endTime)}}
             />
 
@@ -298,6 +260,8 @@ const SidebarFilters = props => {
             />
 
             <MultiSelect key="endRegions"
+                title="End Regions"
+                itemName="region"
                 items={dropdownRegions}
                 selectedItems={endRegionFilter}
                 addToItemFilter={(filter) => { addToEndRegionFilter(filter) }}
@@ -422,7 +386,7 @@ const SidebarStreamList = props => {
                   
                     <div class="line"></div>
                 </div>
-                
+
             ))}
         </div>
     )
@@ -478,7 +442,7 @@ const SidebarStreams = props => {
 };
 
 const Sidebar = props => {
-    const { streams, setStream, setOpenExport, setOpenImport, setOpenAnalysis, editStreamOpen, setEditMode, edit} = props;
+    const { filters, setFilters, streams, setStream, setOpenExport, setOpenImport, setOpenAnalysis, editStreamOpen, setEditMode, edit } = props;
 
     const [tab, setTab] = useState("STREAMS");
     const [visible, setVisible] = useState(true);
@@ -555,7 +519,7 @@ const Sidebar = props => {
                                 setEditMode = {setEditMode}/>    
                         )}
                         {(tab == "FILTERS") && (
-                            <SidebarFilters streams={streams} />
+                            <SidebarFilters streams={streams} filters={filters} setFilters={setFilters} />
                         )}
                         {(tab == "LIVE VIDEO") && (
                             <SidebarLiveVideo />
@@ -592,11 +556,12 @@ const Sidebar = props => {
 
 const mapStateToProps = state => {
     return {
-       stream: state.streams.stream
+       stream: state.streams.stream,
+       filters: state.filters.filters
     };
 }
 
 export default connect(
     mapStateToProps,
-    { setStream }
+    { setStream, setFilters }
 )(Sidebar);

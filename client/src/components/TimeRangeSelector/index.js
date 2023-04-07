@@ -7,9 +7,9 @@ import { useState } from 'react';
 import './TimeRangeSelector.css';
 
 const TimeRangeSelector = (props) => {
-    const { title, minStartTime, maxEndTime, onValueChange, ...rest } = props;
-    const [startTime, setStartTime] = useState(minStartTime ?? "2020-01-01T00:00")
-    const [endTime, setEndTime] = useState(maxEndTime ?? "2020-01-01T00:00")
+    const { title, initialStartTime, initialEndTime, minStartTime, maxEndTime, onValueChange, ...rest } = props;
+    const [startTime, setStartTime] = useState(initialStartTime ?? "2020-01-01T00:00")
+    const [endTime, setEndTime] = useState(initialEndTime ?? "2020-01-01T00:00")
 
     return (
         <div

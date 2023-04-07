@@ -2,7 +2,7 @@ import { Dropdown } from '../../../../../../components';
 
 const DataSourceFilter = (props) => {
 
-    const { dataSources, updateDataSourceFilter } = props;
+    const { selectedDataSource, dataSources, updateDataSourceFilter } = props;
 
     return (
         <div className="sidebar-filter">
@@ -19,6 +19,7 @@ const DataSourceFilter = (props) => {
 
                 <Dropdown
                     values={dataSources}
+                    initialValue={selectedDataSource}
                     placeholder={"Select a data source"}
                     init={0}
                     type={"dot"}

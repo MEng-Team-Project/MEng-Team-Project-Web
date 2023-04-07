@@ -6,9 +6,8 @@ import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline';
 import { Dropdown } from '../../../../../../components';
 
 const MultiSelect = (props) => {
-
   const { title, itemName, items, selectedItems, addToItemFilter, removeFromItemFilter, updateItemFilter } = props;
-  
+
   const itemElements = selectedItems.map((selectedItem) => {
       return (
           <div className="sidebar-filter__item-box"
