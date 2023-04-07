@@ -54,6 +54,7 @@ const AnalysisMap = (props) => {
 
   const [routes, setRoutes] = useState([]);
   const [originalWaypoints, setOriginalWaypoints] = useState([]);
+  const [routeNames, setRouteNames] = useState([])
 
   const handleToggleExpand = () => {
     setExpanded(!expanded);
@@ -75,6 +76,7 @@ const AnalysisMap = (props) => {
       const newRoutes = [];
       const newOriginalWaypoints = {};
       const routingControls = [];
+      const newRouteNames = []
 
       let congestion = incomingCount + outgoingCount;
 
@@ -133,12 +135,16 @@ const AnalysisMap = (props) => {
                 j +
                 " ]"
             );
+            
+            const routeName = `${roads[i]} to ${roads[j]}`
+            newRouteNames.push(routeName)
             newOriginalWaypoints[newRoutes.length - 1] = route.getWaypoints();
           }
         }
       }
       setRoutes(newRoutes);
       setOriginalWaypoints(newOriginalWaypoints);
+      setRouteNames(newRouteNames)
       return () => {
         // Clean up by removing all routing controls
         newRoutes.forEach((route) => map.removeControl(route));
@@ -244,7 +250,7 @@ const showRoute = (index, type) => {
                   onChange={(e) => handleMapCheckBoxes(e, i, "Route")}
                   defaultChecked
                 />
-                Route {i + 1}
+                Route {routeNames[i]}
               </label>
               <ul className="map-controls__checkbox-sublist">
                 <li>
