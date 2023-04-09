@@ -184,6 +184,7 @@ const Main = props => {
     port: "",
     protocol: ""});
     const [edit, setEdit] = useState(false);
+    const [visible, setVisible] = useState(true);
 
     // Route editor toggle
     const [showEditor,   setShowEditor]   = useState(false);
@@ -369,6 +370,8 @@ const Main = props => {
                 editStreamOpen={editStreamOpen}
                 setEditMode = {setEditMode}
                 edit = {edit}
+                setVisible = {setVisible}
+                visible = {visible}
                 />
             <ExportModal
                 open={openExport}
@@ -403,6 +406,8 @@ const Main = props => {
             {(showMap) && (
                 <AnalysisMap
                     roads={roads}
+                    setVisible = {setVisible}
+                    visible = {visible}
                 />
             )}
         </div>

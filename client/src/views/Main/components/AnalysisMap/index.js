@@ -30,7 +30,7 @@ import { Tooltip } from "../../../../components";
 import "./AnalysisMap.css";
 
 const AnalysisMap = (props) => {
-  const { roads } = props;
+  const { roads, visible, setVisible } = props;
   const [selected, setSelected] = useState("");
   const [plotting, setPlotting] = useState(false);
   const [positions, setPositions] = useState([]);
@@ -53,6 +53,14 @@ const AnalysisMap = (props) => {
   const [routeNames, setRouteNames] = useState([])
 
   const handleToggleExpand = () => {
+    switch (expanded){
+        case true:
+            setVisible(true);
+            break;
+        case false:
+            setVisible(false);
+            break;
+    }
     setExpanded(!expanded);
     mapRef.current.leafletElement.setView(center, zoom);
     setTimeout(function () {
@@ -63,7 +71,7 @@ const AnalysisMap = (props) => {
   const incomingCount = 5;
   const outgoingCount = 49;
 
-
+  
   useEffect(() => {
     if (mapRef.current && positions.filter((p) => p).length >= 2) {
       // Filter out null elements

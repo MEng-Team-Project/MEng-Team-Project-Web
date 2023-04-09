@@ -397,10 +397,10 @@ const SidebarStreams = props => {
 };
 
 const Sidebar = props => {
-    const { streams, setStream, setOpenExport, setOpenImport, setOpenAnalysis, editStreamOpen, setEditMode, edit} = props;
+    const { streams, setStream, setOpenExport, setOpenImport, setOpenAnalysis, editStreamOpen, setEditMode, edit, visible, setVisible} = props;
 
     const [tab, setTab] = useState("STREAMS");
-    const [visible, setVisible] = useState(true);
+    //const [visible, setVisible] = useState(true);
 
     return (
         <div className="sidebar-outermost">
