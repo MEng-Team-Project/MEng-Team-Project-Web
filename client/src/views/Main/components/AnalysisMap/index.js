@@ -38,11 +38,7 @@ const AnalysisMap = (props) => {
   const [expanded, setExpanded] = useState(false);
   const mapRef = useRef(null); // create a map reference using useRef hook
 
-  const [mapCheckoxes, setMapCheckboxes] = useState({
-    route: true,
-    incoming: false,
-    outgoing: false,
-  });
+  const [mapCheckboxes, setMapCheckboxes] = useState([]);
 
   const mapClass = expanded ? "map-expanded" : "map";
   const mapWidth = expanded ? "100vh" : "50vh";
@@ -152,6 +148,19 @@ const AnalysisMap = (props) => {
     }
   }, [mapRef, positions]);
 
+  useEffect(() => {
+    const updatedMapCheckboxes = routes.reduce((acc, _, i) => {
+      acc[`route_${i}`] = acc[`route_${i}`] || true;
+      acc[`incoming_${i}`] = acc[`incoming_${i}`] || false;
+      acc[`outgoing_${i}`] = acc[`outgoing_${i}`] || false;
+      return acc;
+    }, {});
+  
+    setMapCheckboxes((prevState) => ({
+      ...prevState,
+      ...updatedMapCheckboxes
+    }));
+  }, [routes]);
 
 const handleMapCheckBoxes = (event, i, type) => {
     console.log('Checkbox checked:', event.target.checked);
@@ -246,7 +255,7 @@ const showRoute = (index, type) => {
                 <input
                   type="checkbox"
                   name={`route_${i}`}
-                  checked={mapCheckoxes[`route_${i}`]} 
+                  checked={mapCheckboxes[`route_${i}`]} 
                   onChange={(e) => handleMapCheckBoxes(e, i, "Route")}
                   defaultChecked
                 />
@@ -258,9 +267,9 @@ const showRoute = (index, type) => {
                     <input
                       type="checkbox"
                       name={`incoming_${i}`}
-                      checked={mapCheckoxes[`incoming_${i}`]}
+                      checked={mapCheckboxes[`incoming_${i}`]}
                       onChange={(e) => handleMapCheckBoxes(e, i, "Incoming")}
-                      disabled={!mapCheckoxes[`route_${i}`]}
+                      disabled={!mapCheckboxes[`route_${i}`]}   
                     />
                     Incoming
                   </label>
@@ -270,9 +279,9 @@ const showRoute = (index, type) => {
                     <input
                      type="checkbox"
                      name={`outgoing_${i}`}
-                     checked={mapCheckoxes[`outgoing_${i}`]}
+                     checked={mapCheckboxes[`outgoing_${i}`]}
                      onChange={(e) => handleMapCheckBoxes(e, i, "Outgoing")}
-                     disabled={!mapCheckoxes[`route_${i}`]}   
+                     disabled={!mapCheckboxes[`route_${i}`]}   
                     />
                     Outgoing
                   </label>
