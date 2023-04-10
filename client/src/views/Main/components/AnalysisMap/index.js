@@ -71,7 +71,7 @@ const AnalysisMap = (props) => {
   const incomingCount = 5;
   const outgoingCount = 49;
 
-  
+
   useEffect(() => {
     if (mapRef.current && positions.filter((p) => p).length >= 2) {
       // Filter out null elements
@@ -88,13 +88,14 @@ const AnalysisMap = (props) => {
       for (let i = 0; i < positions.length; i++) {
         for (let j = i + 1; j < positions.length; j++) {
           if (positions[i] && positions[j]) {
+            const routeName = `${roads[i]} to ${roads[j]}`
             // Check if both positions are non-null
             const route = L.Routing.control({
               waypoints: [L.latLng(positions[i]), L.latLng(positions[j])],
               distanceTemplate: "",
               timeTemplate: "",
               //TODO: add route analytics below
-              summaryTemplate: `<h2>{name}</h2> Analytics info will be displayed here eg HGVs = 60 ...`,
+              summaryTemplate: `<h2>${routeName}</h2> Analytics info will be displayed here eg HGVs = 60 ...`,
               fitSelectedRoutes: true,
               draggableWaypoints: false,
               routeWhileDragging: false,
@@ -140,7 +141,7 @@ const AnalysisMap = (props) => {
                 " ]"
             );
             
-            const routeName = `${roads[i]} to ${roads[j]}`
+           
             newRouteNames.push(routeName)
             newOriginalWaypoints[newRoutes.length - 1] = route.getWaypoints();
           }
