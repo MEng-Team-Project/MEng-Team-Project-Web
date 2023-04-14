@@ -42,7 +42,7 @@ const AnalysisMap = (props) => {
 
   const mapClass = expanded ? "map-expanded" : "map";
   const mapWidth = expanded ? "100vh" : "50vh";
-  const mapHeight = expanded ? "90vh" : "40vh";
+  const mapHeight = expanded ? "87vh" : "40vh";
 
   const center = [50.796586, -1.098758];
 
@@ -195,14 +195,19 @@ const handleMapCheckBoxes = (event, i, type) => {
         return updatedState;
       });
  
+    const route = routes[i]
     if(isChecked){
         showRoute(i, type);
+        if (name.includes("incoming_") || name.includes("outgoing_")) {
+          route.show()
+        }
     }else{
         if (name.includes("incoming_") || name.includes("outgoing_")) {
+            route.hide()
             showRoute(i, "Route");
             return;
         }
-        hideRoute(i);
+        route.hide()
     }
 }
 
