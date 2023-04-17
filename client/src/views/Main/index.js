@@ -257,6 +257,23 @@ const Main = props => {
 
     const isLivestream = (stream.is_livestream) //check /livestream or /stream
 
+    
+    if (features.features.length > 0) {
+        for (let i=0; i<features.features.length; i++) {
+            console.log(
+                //features.features[0].geometry.coordinates,
+                routes[i],
+                geoToVid(
+                    window.innerWidth,
+                    window.innerHeight,
+                    videoRef.current.videoWidth,
+                    videoRef.current.videoHeight,
+                    features.features[i].geometry.coordinates
+                )
+            );
+        }
+    }
+
     return (
         <div className="main-root">
             <div className="feed-outer">
@@ -284,23 +301,6 @@ const Main = props => {
                         </video>
                     )
                 }
-                {/*
-                if (features.features.length > 0) {
-                    for (let i=0; i<features.features.length; i++) {
-                        console.log(
-                            //features.features[0].geometry.coordinates,
-                            routes[i],
-                            geoToVid(
-                                window.innerWidth,
-                                window.innerHeight,
-                                videoRef.current.videoWidth,
-                                videoRef.current.videoHeight,
-                                features.features[i].geometry.coordinates
-                            )
-                        );
-                    }
-                }
-                */}
                 {(showEditor) && (
                     <DeckGL
                         initialViewState={initialViewState}

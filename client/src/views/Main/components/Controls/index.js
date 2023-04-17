@@ -91,6 +91,7 @@ const EditorControls = props => {
             >
                 <PolylineOutlinedIcon />
             </EditorControl>
+            {/*
             <EditorControl
                 title="Line"
                 selected={CUR_MODE == "LINE"}
@@ -98,6 +99,7 @@ const EditorControls = props => {
             >
                 <ShapeLineOutlinedIcon />
             </EditorControl>
+            */}
             <EditorControl
                 onClick={() => setShowEditor(!showEditor)}
                 title={(showEditor) ? "Hide" : "Show"}
