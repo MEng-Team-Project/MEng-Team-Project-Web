@@ -34,7 +34,7 @@ const AnalysisMap = (props) => {
   const [selected, setSelected] = useState("");
   const [plotting, setPlotting] = useState(false);
   const [positions, setPositions] = useState([]);
-
+  
   const [expanded, setExpanded] = useState(false);
   const mapRef = useRef(null); // create a map reference using useRef hook
 
@@ -171,6 +171,16 @@ const AnalysisMap = (props) => {
     }));
   }, [routes]);
 
+
+
+useEffect(() => {
+  //clear map checkboxes if only 1 position is left on the map
+  if (positions.length === 1) {
+    setRoutes([]);
+  }
+}, [positions]);
+
+
 const handleMapCheckBoxes = (event, i, type) => {
     console.log('Checkbox checked:', event.target.checked);
     const name = event.target.name;
@@ -204,6 +214,7 @@ const handleMapCheckBoxes = (event, i, type) => {
         }
         hideRoute(i);
     }
+    //removePosition(positions[0]); test for removing a waypoint(position) on the map 
 }
 
 const hideRoute = (index) => {
@@ -250,6 +261,33 @@ const showRoute = (index, type) => {
     }
   };
 
+  const removePosition = (positionToRemove) => {
+    const newPositions = positions.filter(
+      (position) => position !== positionToRemove
+    );
+    setPositions(newPositions);
+
+    const newRoutes = routes.filter((route, index) => {
+      const routePositions = originalWaypoints[index];
+      // Check if the removed position exists in routePositions
+      const hasRemovedPosition = routePositions.includes(positionToRemove);
+      return !hasRemovedPosition;
+    });
+  
+    // Update mapCheckboxes based on the remaining routes
+    const newMapCheckboxes = newRoutes.reduce((acc, route, index) => {
+      acc[index] = mapCheckboxes[routes.indexOf(route)];
+      return acc;
+    }, {});
+  
+    // Update routeNames based on the remaining routes
+    const newRouteNames = newRoutes.map((route) => routeNames[routes.indexOf(route)]);
+  
+    setRoutes(newRoutes);
+    setMapCheckboxes(newMapCheckboxes);
+    setRouteNames(newRouteNames);
+  };
+  
 
   return (
     <div className={mapClass}>
