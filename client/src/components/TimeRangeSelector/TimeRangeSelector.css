@@ -1,0 +1,21 @@
+.time-range-selector-outer {
+    display: block;
+    width: 100%;
+    font-size: 0.8rem;
+    color: rgb(121, 129, 141);
+    padding-right: 0.5rem;
+}
+
+.time-range-selector__time-outer{
+    display: flex;
+    margin:  0.5rem 0;
+}
+
+.time-range-selector__time-text {
+    width: min-content;
+}
+
+.time-range-selector__time-input {
+    margin-left: auto;
+    margin-right: 0;
+}

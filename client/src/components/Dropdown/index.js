@@ -10,18 +10,20 @@ import './Dropdown.css';
 import SearchOutlinedIcon from '@mui/icons-material/SearchOutlined';
 
 const Dropdown = props => {
-    const [active, setActive] = useState(false);
-    const [selectedValue, setSelectedValue] = useState(null);
-    const [query, setQuery] = useState("");
+    const { initialValue, values, placeholder, type, onValueChange, releaseValueAfterSelected, ...rest } = props;
 
-    const { values, placeholder, type, onValueChange, ...rest } = props;
+    const initialSelectedValue = (!initialValue || Object.keys(initialValue).length === 0) ? null : initialValue;
+
+    const [active, setActive] = useState(false);
+    const [selectedValue, setSelectedValue] = useState(initialSelectedValue);
+    const [query, setQuery] = useState("");
 
     console.log("selectedValue:", selectedValue);
     console.log("values:", values);
 
     const filterValues = (values, query) => {
         return values.filter(value => {
-            return value.data.trim().toLowerCase().includes(query.toLowerCase());
+            return value.data.name.trim().toLowerCase().includes(query.toLowerCase());
         });
     };
 
@@ -37,6 +39,7 @@ const Dropdown = props => {
                 className="dropdown"
                 onClick={e => {
                     console.log("dropdown->onClick");
+                    setQuery("");
                     setActive(!active)
                 }}
                 tabIndex={-1}
@@ -44,9 +47,6 @@ const Dropdown = props => {
                     console.log("dropdown->onBlur", e.relatedTarget)
                     if (e.relatedTarget === null) {
                         setActive(false);
-                    }
-                    if (onValueChange) {
-                        onValueChange(selectedValue);
                     }
                 }}
             >
@@ -66,7 +66,7 @@ const Dropdown = props => {
                                 {selectedValue.meta}
                             </div>
                         )}
-                        {selectedValue.data}
+                        {selectedValue.data.name}
                     </div>
                 )}
             </div>
@@ -108,6 +108,12 @@ const Dropdown = props => {
                             onMouseDown = {e => {
                                 console.log("dropdown-options__option")
                                 setSelectedValue(value);
+                                if (onValueChange) {
+                                    onValueChange(value);
+                                    if (releaseValueAfterSelected) {
+                                        setSelectedValue(null);
+                                    }
+                                }
                                 setActive(false);
                             }}>
                             {(type=="dot") && (
@@ -121,7 +127,7 @@ const Dropdown = props => {
                                 </div>
                             )}
                             <div className="dropdown-options__option-label">
-                                {String(value.data)}
+                                {String(value.data.name)}
                             </div>
                         </div>
                     ))}
