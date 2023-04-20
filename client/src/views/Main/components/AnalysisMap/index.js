@@ -22,6 +22,7 @@ import L, { routing } from "leaflet";
 import RoomIcon from "@mui/icons-material/Room";
 import IconButton from "@mui/material/IconButton";
 import AspectRatioIcon from "@mui/icons-material/AspectRatio";
+import CloseIcon from '@mui/icons-material/Close';
 
 // Global Components
 import { Tooltip } from "../../../../components";
@@ -30,11 +31,11 @@ import { Tooltip } from "../../../../components";
 import "./AnalysisMap.css";
 
 const AnalysisMap = (props) => {
-  const { roads, visible, setVisible } = props;
+  const [positions, setPositions] = useState({});  
+  const {roads = Object.keys(positions), visible, setVisible } = props;
   const [selected, setSelected] = useState("");
   const [plotting, setPlotting] = useState(false);
-  const [positions, setPositions] = useState([]);
-  
+ // const [positions, setPositions] = useState([]);
   const [expanded, setExpanded] = useState(false);
   const mapRef = useRef(null); // create a map reference using useRef hook
 
@@ -71,9 +72,10 @@ const AnalysisMap = (props) => {
   const incomingCount = 5;
   const outgoingCount = 49;
 
-
   useEffect(() => {
-    if (mapRef.current && positions.filter((p) => p).length >= 2) {
+    const positionsArray = Object.values(positions);
+
+    if (mapRef.current && positionsArray.filter((p) => p).length >= 2) {
       // Filter out null elements
       const map = mapRef.current.leafletElement;
 
@@ -83,15 +85,15 @@ const AnalysisMap = (props) => {
       const newRouteNames = []
 
       let congestion = incomingCount + outgoingCount;
-
+  
       //routingControl was being created for every combination of i and j, Meaning n*(n-1)/2 lines drawn between all possible pairs of points.
-      for (let i = 0; i < positions.length; i++) {
-        for (let j = i + 1; j < positions.length; j++) {
-          if (positions[i] && positions[j]) {
+      for (let i = 0; i < positionsArray.length; i++) {
+        for (let j = i + 1; j < positionsArray.length; j++) {
+          if (positionsArray[i] && positionsArray[j]) {
             const routeName = `${roads[i]} to ${roads[j]}`
             // Check if both positions are non-null
             const route = L.Routing.control({
-              waypoints: [L.latLng(positions[i]), L.latLng(positions[j])],
+              waypoints: [L.latLng(positionsArray[i]), L.latLng(positionsArray[j])],
               distanceTemplate: "",
               timeTemplate: "",
               //TODO: add route analytics below
@@ -101,16 +103,6 @@ const AnalysisMap = (props) => {
               routeWhileDragging: false,
               createMarker: function (i, waypoint, n) {
                 return null;
-                /* if (i === 0) return null;
-                            const prevLatLng = positions[i - 1];
-                            return L.canvasMarker(positions[i], {
-                              img: {
-                                url: "mapArrow.png", 
-                                size: [40, 40],
-                                rotate: 10,
-                              },
-                              prevLatlng: prevLatLng,
-                            });*/
               },
               show: false,
               lineOptions: {
@@ -141,7 +133,6 @@ const AnalysisMap = (props) => {
                 " ]"
             );
             
-           
             newRouteNames.push(routeName)
             newOriginalWaypoints[newRoutes.length - 1] = route.getWaypoints();
           }
@@ -175,10 +166,10 @@ const AnalysisMap = (props) => {
 
 useEffect(() => {
   //clear map checkboxes if only 1 position is left on the map
-  if (positions.length === 1) {
+  if (Object.values(positions).length === 1) {
     setRoutes([]);
   }
-}, [positions]);
+},[positions]);
 
 
 const handleMapCheckBoxes = (event, i, type) => {
@@ -219,7 +210,6 @@ const handleMapCheckBoxes = (event, i, type) => {
         }
         route.hide()
     }
-    //removePosition(positions[0]); test for removing a waypoint(position) on the map 
 }
 
 const hideRoute = (index) => {
@@ -266,11 +256,14 @@ const showRoute = (index, type) => {
     }
   };
 
-  const removePosition = (positionToRemove) => {
-    const newPositions = positions.filter(
-      (position) => position !== positionToRemove
-    );
-    setPositions(newPositions);
+  const removePosition = () => {
+    const selectedIdx = roads.indexOf(selected);
+    const positionToRemove = positions[selected];
+    setPositions((prevState) => {
+      const newState = { ...prevState };
+      delete newState[selected];
+      return newState;
+    });
 
     const newRoutes = routes.filter((route, index) => {
       const routePositions = originalWaypoints[index];
@@ -291,9 +284,9 @@ const showRoute = (index, type) => {
     setRoutes(newRoutes);
     setMapCheckboxes(newMapCheckboxes);
     setRouteNames(newRouteNames);
+    setSelected("");
   };
   
-
   return (
     <div className={mapClass}>
       <div className="map-controls">
@@ -342,8 +335,7 @@ const showRoute = (index, type) => {
             </div>
           ))}
         </div>
-
-        {roads.map((road, i) => (
+       {roads.map((road, i) => (
           <Tooltip content="Mark Region" direction="top">
             <div className="map-marker">
               <RoomIcon
@@ -374,10 +366,10 @@ const showRoute = (index, type) => {
         onClick={(e) => {
           console.log("MAP CLICKED", e, plotting);
           if (plotting) {
-            let newPositions = [...positions];
-            let selectedIdx = roads.indexOf(selected);
-            newPositions[selectedIdx] = e.latlng;
-            setPositions(newPositions);
+            setPositions((prevState) => ({
+              ...prevState,
+              [selected]: e.latlng,
+            }));
             setPlotting(false);
           }
         }}
@@ -386,19 +378,31 @@ const showRoute = (index, type) => {
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
-        <FeatureGroup>
-          {positions.map((position, i) => (
-            <Marker key={i} position={position} label={roads[i]}>
-              <Popup>
-                <div>{roads[i]}</div>
-              </Popup>
-            </Marker>
-          ))}
-        </FeatureGroup>
+       <FeatureGroup>
+        {roads.map((road, i) => {
+          const position = positions[road];
+          if (position) {
+            return (
+              <Marker key={i} position={position} label={road}>
+                <Popup>
+                  <div>{road}</div>
+                </Popup>
+              </Marker>
+            );
+          } else {
+            return null;
+          }
+        })}
+      </FeatureGroup>
       </Map>
       <Tooltip title="Expand Map" arrow>
         <IconButton className="map-expand" onClick={() => handleToggleExpand()}>
           <AspectRatioIcon />
+        </IconButton>
+      </Tooltip>
+      <Tooltip title="Remove Selected Marker" arrow>
+        <IconButton className="map-expand" onClick={() => removePosition()}>
+          <CloseIcon />
         </IconButton>
       </Tooltip>
     </div>

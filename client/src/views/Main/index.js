@@ -236,6 +236,7 @@ const Main = props => {
                 const regionIdx = info.index;
                 const existingLabel = roads[regionIdx];
                 const label = prompt("Set route region label", existingLabel);
+                console.log('here');
                 let newRoads = [...roads];
                 if (label) {
                     newRoads[regionIdx] = label;
