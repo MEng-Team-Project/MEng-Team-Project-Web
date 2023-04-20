@@ -64,6 +64,7 @@ import DataSourceFilter from './Filters/DataSourceFilter';
 import DateTimeRangeFilter from './Filters/DateTimeRangeFilter';
 import MultiSelect from './Filters/MultiSelect';
 import { setFilters } from '../../../../actions/filterActions';
+import { setAnalytics } from '../../../../actions/analyticsActions';
 
 const SidebarLiveVideoLayer = props => {
     const { title, selected } = props;
@@ -135,13 +136,14 @@ const SidebarLiveVideo = props => {
 }
 
 const SidebarFilters = props => {
-    const { streams, filters, setFilters } = props;
+    const { streams, filters, setFilters, analytics, setAnalytics } = props;
     
     const [ dataSourceFilter, setDataSourceFilter ] = useState(filters.dataSourceFilter);
     const [ objectFilter, setObjectFilter ] = useState(filters.objectFilter);
     const [ dateTimeRangeFilter, setDateTimeRangeFilter ] = useState(filters.dateTimeRangeFilter);
     const [ startRegionFilter, setStartRegionFilter ] = useState(filters.startRegionFilter);
     const [ endRegionFilter, setEndRegionFilter ] = useState(filters.endRegionFilter);
+
 
     useEffect(() => {
         setFilters(    {
@@ -219,6 +221,53 @@ const SidebarFilters = props => {
         setEndRegionFilter(endRegionFilter.filter((endRegion) => {return (endRegion !== filter) ? true : false}))
     }
 
+    const getAnalyticsFromBackend = async () => {
+        const streamName = dataSourceFilter?.data?.source.split('.').slice(0, -1).join('.');
+        const classes = objectFilter.map(object => object.data.name);
+        const startTime = dateTimeRangeFilter?.data?.startTime;
+        const endTime = dateTimeRangeFilter?.data?.endTime;
+
+        const analyticsDetails = {
+            "stream": streamName,
+            "regions" : {},
+            "classes": classes,
+            "interval_spacing": 30,
+            "time_of_recording": new Date(startTime ?? 0).toISOString(),
+            "start_time": new Date(startTime ?? 0).toISOString(),
+            "end_time": new Date(endTime ?? 31556926000).toISOString()
+            
+        };
+
+        console.log(analyticsDetails);
+
+        const response = await axios.post("api/routeAnalytics/", analyticsDetails)
+        .then(res => {
+            console.log("RES", res);
+            return res;
+        })
+        .catch(err => {
+            console.log(err);
+            return err;
+        });
+
+        return response;
+    }
+
+    const updateAnalytics = async (filter) => {
+        // call backend
+        const analyticsFromBackend = await getAnalyticsFromBackend();
+
+        // set analytics
+        if (analyticsFromBackend.status === 200) {
+            const data = analyticsFromBackend.data;
+            console.log("ANALYTICS SET", data);
+            setAnalytics(data.countsAtTimes[0].routeCounts);
+        } else {
+            console.warn("ERROR IN RETRIEVING ANALYTICS");
+            window.alert("There was an error in retrieving analytics");
+        }
+    }
+
     return (
         <div className="sidebar-tab">
             <div className="sidebar-tab__top">
@@ -232,6 +281,7 @@ const SidebarFilters = props => {
                 selectedDataSource={dataSourceFilter}
                 dataSources={dropdownDataSources}
                 updateDataSourceFilter={(filter) => {updateDataSourceFilter(filter)}}
+                updateAnalytics={(filter) => updateAnalytics(filter)}
             />
 
             <MultiSelect key="objects"
@@ -442,7 +492,7 @@ const SidebarStreams = props => {
 };
 
 const Sidebar = props => {
-    const { filters, setFilters, streams, setStream, setOpenExport, setOpenImport, setOpenAnalysis, editStreamOpen, setEditMode, edit } = props;
+    const { analytics, setAnalytics, filters, setFilters, streams, setStream, setOpenExport, setOpenImport, setOpenAnalysis, editStreamOpen, setEditMode, edit } = props;
 
     const [tab, setTab] = useState("STREAMS");
     const [visible, setVisible] = useState(true);
@@ -519,7 +569,12 @@ const Sidebar = props => {
                                 setEditMode = {setEditMode}/>    
                         )}
                         {(tab == "FILTERS") && (
-                            <SidebarFilters streams={streams} filters={filters} setFilters={setFilters} />
+                            <SidebarFilters
+                                streams={streams}
+                                analytics={analytics}
+                                setAnalytics={setAnalytics}
+                                filters={filters}
+                                setFilters={setFilters}/>
                         )}
                         {(tab == "LIVE VIDEO") && (
                             <SidebarLiveVideo />
@@ -557,11 +612,12 @@ const Sidebar = props => {
 const mapStateToProps = state => {
     return {
        stream: state.streams.stream,
-       filters: state.filters.filters
+       filters: state.filters.filters,
+       analytics: state.analytics.analytics
     };
 }
 
 export default connect(
     mapStateToProps,
-    { setStream, setFilters }
+    { setStream, setFilters, setAnalytics }
 )(Sidebar);
