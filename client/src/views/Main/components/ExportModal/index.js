@@ -58,6 +58,7 @@ const ExportModal = props => {
     const { open, exportClose, streams } = props;
     const [selectedStream, setSelectedStream ] = useState("");
 
+    console.log("streams:", streams)
     /*
     useEffect(() => {
         props.getGames();
@@ -115,14 +116,9 @@ const ExportModal = props => {
                             <select
                                 onChange={e => setSelectedStream(e.target.value)}
                             >
-                                {/*
-                                <option key={0} value="all">
-                                    All
-                                </option>
-                                */}
                                 {streams.map((stream, i) => (
-                                    <option key={i+1} value={stream}>
-                                        {stream}
+                                    <option key={i+1} value={stream.name}>
+                                        {stream.name}
                                     </option>
                                 ))}
                             </select>

@@ -31,6 +31,7 @@ import {
     EditStreamModal,
     Controls,
     AnalysisMap,
+    SegmentModal
 } from "./components";
 
 // HLS Player
@@ -243,8 +244,11 @@ const Main = props => {
 
     const setEditMode = (value) => {
         setEdit(value);
-    }
+    };
 
+    const editorClose = () => {
+        setShowEditor(false);
+    }
 
     useEffect(() => {
         const intervalId = setInterval(() => {
@@ -301,9 +305,6 @@ const Main = props => {
                         </video>
                     )
                 }
-                {(showEditor) && (
-                    {/**/}
-                )}
             </div>
             <Sidebar
                 streams={streams}
@@ -335,6 +336,10 @@ const Main = props => {
                 streams={streams}
                 setEditMode = {setEditMode}
                 edit = {edit}
+                />
+            <SegmentModal
+                open={showEditor}
+                segmentClose={editorClose}
                 />
             <Controls
                 stream={stream}
