@@ -302,16 +302,7 @@ const Main = props => {
                     )
                 }
                 {(showEditor) && (
-                    <DeckGL
-                        initialViewState={initialViewState}
-                        controller={{
-                            doubleClickZoom: false,
-                            scrollZoom: false,
-                            dragPan: false
-                        }}
-                        layers={[layer]}
-                        getCursor={layer.getCursor.bind(layer)}
-                    />
+                    {/**/}
                 )}
             </div>
             <Sidebar
