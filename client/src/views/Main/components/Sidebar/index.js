@@ -180,13 +180,15 @@ const SidebarFilters = props => {
         setObjectFilter(objectFilter.filter((object) => {return (object !== filter) ? true : false}));
     }
 
-    const updateDateTimeRangeFilter = (startTime, endTime) => {
+    const updateDateTimeRangeFilter = (recordingStartTime, startTime, endTime, interval) => {
         setDateTimeRangeFilter({
             meta: "dateTime",
             data: {
                 name: "dateTime",
+                recordingStartTime: recordingStartTime,
                 startTime: startTime,
-                endTime: endTime
+                endTime: endTime,
+                interval: interval
             }
         });
     }
@@ -296,7 +298,7 @@ const SidebarFilters = props => {
 
             <DateTimeRangeFilter
                 selectedDateTimeRange={dateTimeRangeFilter}
-                updateDateTimeRangeFilter={(startTime, endTime) => {updateDateTimeRangeFilter(startTime, endTime)}}
+                updateDateTimeRangeFilter={(recordingStartTime, startTime, endTime, interval) => {updateDateTimeRangeFilter(recordingStartTime, startTime, endTime, interval)}}
             />
 
             <MultiSelect key="startRegions"

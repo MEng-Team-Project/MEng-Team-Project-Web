@@ -2,7 +2,7 @@ import TimeRangeSelector from '../../../../../../components/TimeRangeSelector';
 
 const DateTimeRangeFilter = (props) => {
 
-    const { selectedDateTimeRange, minStartTime, maxEndTime, updateDateTimeRangeFilter } = props;
+    const { selectedDateTimeRange, updateDateTimeRangeFilter } = props;
 
     console.log("Selected date time range", selectedDateTimeRange);
 
@@ -30,9 +30,7 @@ const DateTimeRangeFilter = (props) => {
                 <TimeRangeSelector
                     initialStartTime={initialStartTime}
                     initialEndTime={initialEndTime}
-                    minStartTime={minStartTime}
-                    maxEndTime={maxEndTime}
-                    onValueChange={(startTime, endTime) => { updateDateTimeRangeFilter(startTime, endTime) }}
+                    onValueChange={(recordingStartTime, startTime, endTime, interval) => { updateDateTimeRangeFilter(recordingStartTime, startTime, endTime, interval) }}
                 ></TimeRangeSelector>
 
             </div>

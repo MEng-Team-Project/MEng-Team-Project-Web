@@ -13,6 +13,7 @@
 
 .time-range-selector__time-text {
     width: min-content;
+    margin-right: 0.5rem;
 }
 
 .time-range-selector__time-input {
