@@ -4,14 +4,16 @@ const DateTimeRangeFilter = (props) => {
 
     const { selectedDateTimeRange, updateDateTimeRangeFilter } = props;
 
-    console.log("Selected date time range", selectedDateTimeRange);
-
     let initialStartTime;
     let initialEndTime;
+    let initialInterval;
+    let initialRecordingStartTime;
 
     if (Object.keys(selectedDateTimeRange).length !== 0) {
+        initialRecordingStartTime = selectedDateTimeRange.data.recordingStartTime;
         initialStartTime = selectedDateTimeRange.data.startTime;
         initialEndTime = selectedDateTimeRange.data.endTime;
+        initialInterval = selectedDateTimeRange.data.interval;
     }
 
     return (
@@ -28,8 +30,10 @@ const DateTimeRangeFilter = (props) => {
                 </div>
 
                 <TimeRangeSelector
+                    initialRecordingStartTime={initialRecordingStartTime}
                     initialStartTime={initialStartTime}
                     initialEndTime={initialEndTime}
+                    initialInterval={initialInterval}
                     onValueChange={(recordingStartTime, startTime, endTime, interval) => { updateDateTimeRangeFilter(recordingStartTime, startTime, endTime, interval) }}
                 ></TimeRangeSelector>
 

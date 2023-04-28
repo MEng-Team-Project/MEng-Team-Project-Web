@@ -18,7 +18,7 @@ As for the tabs, these are assumed to contain:
 */
 
 // React
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 
 // Redux
 import { connect } from "react-redux";
@@ -59,7 +59,6 @@ import { display } from '@mui/system';
 // Filter Options for Dropdown
 import filterOptions from './filterOptions.json';
 
-import TimeRangeSelector from '../../../../components/TimeRangeSelector';
 import DataSourceFilter from './Filters/DataSourceFilter';
 import DateTimeRangeFilter from './Filters/DateTimeRangeFilter';
 import MultiSelect from './Filters/MultiSelect';
@@ -136,7 +135,7 @@ const SidebarLiveVideo = props => {
 }
 
 const SidebarFilters = props => {
-    const { streams, filters, setFilters, analytics, setAnalytics } = props;
+    const { streams, filters, setFilters, setAnalytics } = props;
     
     const [ dataSourceFilter, setDataSourceFilter ] = useState(filters.dataSourceFilter);
     const [ objectFilter, setObjectFilter ] = useState(filters.objectFilter);
@@ -144,16 +143,69 @@ const SidebarFilters = props => {
     const [ startRegionFilter, setStartRegionFilter ] = useState(filters.startRegionFilter);
     const [ endRegionFilter, setEndRegionFilter ] = useState(filters.endRegionFilter);
 
+    const getAnalyticsFromBackend = useCallback(
+        async () => {
+            const streamName = dataSourceFilter?.data?.source.split('.').slice(0, -1).join('.');
+            const classes = objectFilter.map(object => object.data.name);
+            const recordingStartTime = dateTimeRangeFilter?.data?.recordingStartTime;
+            const startTime = dateTimeRangeFilter?.data?.startTime;
+            const endTime = dateTimeRangeFilter?.data?.endTime;
+            const interval = dateTimeRangeFilter?.data?.interval ?? 1800;
+    
+            const analyticsDetails = {
+                "stream": streamName,
+                "regions" : {},
+                "classes": classes,
+                "interval_spacing": interval,
+                "time_of_recording": new Date(recordingStartTime ?? "2020-01-01T00:00").toISOString(),
+                "start_time": new Date(startTime ?? "2020-01-01T00:00").toISOString(),
+                "end_time": new Date(endTime ?? "2020-01-01T00:30").toISOString(),
+                "start_regions": startRegionFilter.map(region => region.data.name),
+                "end_regions": endRegionFilter.map(region => region.data.name),
+            };
+    
+            const response = await axios.post("api/routeAnalytics/", analyticsDetails)
+                .then(res => {
+                    console.log("RES", res);
+                    return res;
+                })
+                .catch(err => {
+                    console.log(err);
+                    return err;
+                });
+    
+            return response;
+        }, [dataSourceFilter, objectFilter, dateTimeRangeFilter, startRegionFilter, endRegionFilter] );
+
+    const updateAnalytics = useCallback( async (dataSourceFilter) => {
+        console.log("UPDATE ANALYTICS", Object.keys(dataSourceFilter).length);
+        if (Object.keys(dataSourceFilter).length === 0) { return; }
+        // call backend
+        const analyticsFromBackend = await getAnalyticsFromBackend();
+    
+        // set analytics
+        if (analyticsFromBackend.status === 200) {
+            const data = analyticsFromBackend.data;
+            console.log("ANALYTICS SET", data);
+            setAnalytics({
+                regions: data.regions,
+                counts: data.countsAtTimes[0].routeCounts});
+        } else {
+            console.warn("ERROR IN RETRIEVING ANALYTICS");
+            window.alert("There was an error in retrieving analytics. Please try again.");
+        }
+    }, [getAnalyticsFromBackend, setAnalytics]);
 
     useEffect(() => {
-        setFilters(    {
+        setFilters({
             dataSourceFilter: dataSourceFilter,
             objectFilter: objectFilter,
             dateTimeRangeFilter: dateTimeRangeFilter,
             startRegionFilter: startRegionFilter,
             endRegionFilter: endRegionFilter
         });
-    }, [ dataSourceFilter, objectFilter, dateTimeRangeFilter, startRegionFilter, endRegionFilter, setFilters ]);
+        updateAnalytics(dataSourceFilter);
+    }, [dataSourceFilter, objectFilter, dateTimeRangeFilter, startRegionFilter, endRegionFilter, setFilters, updateAnalytics]);
 
     const dropdownDataSources = streams.map(stream => ({
         "meta": "rgb(60, 97, 174)",
@@ -223,53 +275,6 @@ const SidebarFilters = props => {
         setEndRegionFilter(endRegionFilter.filter((endRegion) => {return (endRegion !== filter) ? true : false}))
     }
 
-    const getAnalyticsFromBackend = async () => {
-        const streamName = dataSourceFilter?.data?.source.split('.').slice(0, -1).join('.');
-        const classes = objectFilter.map(object => object.data.name);
-        const startTime = dateTimeRangeFilter?.data?.startTime;
-        const endTime = dateTimeRangeFilter?.data?.endTime;
-
-        const analyticsDetails = {
-            "stream": streamName,
-            "regions" : {},
-            "classes": classes,
-            "interval_spacing": 30,
-            "time_of_recording": new Date(startTime ?? 0).toISOString(),
-            "start_time": new Date(startTime ?? 0).toISOString(),
-            "end_time": new Date(endTime ?? 31556926000).toISOString()
-            
-        };
-
-        console.log(analyticsDetails);
-
-        const response = await axios.post("api/routeAnalytics/", analyticsDetails)
-        .then(res => {
-            console.log("RES", res);
-            return res;
-        })
-        .catch(err => {
-            console.log(err);
-            return err;
-        });
-
-        return response;
-    }
-
-    const updateAnalytics = async (filter) => {
-        // call backend
-        const analyticsFromBackend = await getAnalyticsFromBackend();
-
-        // set analytics
-        if (analyticsFromBackend.status === 200) {
-            const data = analyticsFromBackend.data;
-            console.log("ANALYTICS SET", data);
-            setAnalytics(data.countsAtTimes[0].routeCounts);
-        } else {
-            console.warn("ERROR IN RETRIEVING ANALYTICS");
-            window.alert("There was an error in retrieving analytics");
-        }
-    }
-
     return (
         <div className="sidebar-tab">
             <div className="sidebar-tab__top">
@@ -283,7 +288,6 @@ const SidebarFilters = props => {
                 selectedDataSource={dataSourceFilter}
                 dataSources={dropdownDataSources}
                 updateDataSourceFilter={(filter) => {updateDataSourceFilter(filter)}}
-                updateAnalytics={(filter) => updateAnalytics(filter)}
             />
 
             <MultiSelect key="objects"

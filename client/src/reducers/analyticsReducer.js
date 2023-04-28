@@ -17,7 +17,68 @@ import {
 } from "../actions/types";
 
 const initialState = {
-    analytics: [],
+    analytics: {
+        regions: [
+            "North_Burnaby_Road",
+            "East_Park_Road",
+            "South_Burnaby_Road",
+            "West_Park_Road"
+        ],
+        counts: [
+            {
+                "start": "West_Park_Road",
+                "end": "East_Park_Road",
+                "counts": {
+                    "total": 1,
+                    "car": 1
+                }
+            },
+            {
+                "start": "South_Burnaby_Road",
+                "end": "West_Park_Road",
+                "counts": {
+                    "total": 3,
+                    "bicycle": 1,
+                    "person": 1,
+                    "car": 1
+                }
+            },
+            {
+                "start": "South_Burnaby_Road",
+                "end": "North_Burnaby_Road",
+                "counts": {
+                    "total": 1,
+                    "car": 1
+                }
+            },
+            {
+                "start": "East_Park_Road",
+                "end": "West_Park_Road",
+                "counts": {
+                    "total": 4,
+                    "car": 1,
+                    "person": 3
+                }
+            },
+            {
+                "start": "East_Park_Road",
+                "end": "South_Burnaby_Road",
+                "counts": {
+                    "total": 4,
+                    "person": 2,
+                    "car": 2
+                }
+            },
+            {
+                "start": "North_Burnaby_Road",
+                "end": "South_Burnaby_Road",
+                "counts": {
+                    "total": 1,
+                    "car": 1
+                }
+            }
+        ]
+    },
     analyticsLoading: false,
 };
 
