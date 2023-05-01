@@ -1,0 +1,8 @@
+.segment-modal-stage {
+    display: flex;
+}
+
+.segment-modal-stage__canvas {
+    margin-left: auto;
+    margin-right: auto;
+}

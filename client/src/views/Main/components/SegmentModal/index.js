@@ -18,13 +18,15 @@ import CloseOutlinedIcon from '@mui/icons-material/CloseOutlined';
 // CSS
 import './SegmentModal.css';
 
+// Components
+import Stage from "./components/Stage";
+
 const style = {
     position: 'absolute',
     top: '50%',
     left: '50%',
     transform: 'translate(-50%, -50%)',
     width: '80%',
-    height: '40%',
     bgcolor: 'background.paper',
     border: '2px solid #000',
     boxShadow: 24,
@@ -33,9 +35,12 @@ const style = {
 };
 
 const SegmentModal = props => {
-    const { open, segmentClose } = props;
+    const { videoRef, open, segmentClose } = props;
 
-    console.log("SEGMENT MODAL DISPLAYED!")
+    if (videoRef.current) {
+        console.log("SegmentModal:", videoRef.current.videoWidth, videoRef.current.videoHeight);
+    }
+
     return (
         <Modal
             open={open}
@@ -53,7 +58,7 @@ const SegmentModal = props => {
                     </div>
                 </div>
                 <div className="modal-content">
-                    Segment stuff goes here?
+                    <Stage videoRef={videoRef} />
                 </div>
             </Box>
         </Modal>

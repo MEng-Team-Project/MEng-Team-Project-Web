@@ -84,6 +84,7 @@ const EditorControls = props => {
             >
                 <HighlightAltOutlinedIcon/>
             </EditorControl>
+            {/*
             <EditorControl
                 title="Polygon"
                 selected={CUR_MODE == "POLYGON"}
@@ -91,6 +92,7 @@ const EditorControls = props => {
             >
                 <PolylineOutlinedIcon />
             </EditorControl>
+            */}
             {/*
             <EditorControl
                 title="Line"

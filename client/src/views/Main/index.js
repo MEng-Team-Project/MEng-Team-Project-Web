@@ -38,86 +38,10 @@ import {
 import ReactHlsPlayer from 'react-hls-player';
 
 // Polygon Modules
-import DeckGL from "deck.gl";
 import {
-  SelectionLayer,
-  EditableGeoJsonLayer,
-  DrawLineStringMode,
-  DrawPolygonMode,
-  MeasureAngleMode,
-  MeasureAreaMode,
-  ViewMode,
-  ModifyMode,
-  TransformMode
+  ViewMode
 } from "nebula.gl";
 import {WebMercatorViewport} from '@deck.gl/core';
-
-const initialViewState = {
-    longitude: -122.43,
-    latitude: 37.775,
-    zoom: 12
-};
-
-const geoToVid = (width, height, videoWidth, videoHeight, data) => {
-    console.log("geoToVid.data:", data);
-
-    // Get Orientation (landscape/square, portrait)
-    const orientation = (width >= height) ? "landscape" : "portrait";
-
-    // Get Ratio Between Source Video Width and Displayed Width (and same for Height)
-    let widthFactor=1, heightFactor=1;
-    if (orientation == "landscape") {
-        if (videoWidth > width) {
-            widthFactor  = width / videoWidth;
-            heightFactor = widthFactor;
-        }
-    } else {
-        if (videoHeight > height) {
-            heightFactor = height / videoHeight;
-            widthFactor  = heightFactor;
-        }
-    }
-
-    // Step 1. Get Map to Screen Viewport Calculator
-    const viewport = new WebMercatorViewport({
-        width: width,
-        height: height,
-        longitude: -122.43,
-        latitude: 37.775,
-        zoom: 12
-    });
-
-    // Step 2. Project Map Points to Screen Points
-    let screenPoints = data[0].map(point => viewport.project(point));
-
-    // Step 3. Translate Screen Coordinates to Video-Relative Coordinates
-    const videoElemContentWidth  = videoWidth  * widthFactor;
-    const videoElemContentHeight = videoHeight * heightFactor;
-    const videoXoffset = (width  - videoElemContentWidth) / 2;
-    const videoYoffset = (height - videoElemContentHeight) / 2;
-    const videoPoints  = screenPoints.map(point => [
-        (point[0] - (videoXoffset)) / widthFactor,
-        (point[1] - (videoYoffset)) / heightFactor]);
-
-    /*
-    console.log(`geoToVid:
-        orientation: ${orientation},
-        data: ${data},
-        screenPoints: ${screenPoints},
-        width: ${width},
-        videoWidth: ${videoWidth},
-        videoWidth: ${videoHeight},
-        videoElemContentWidth: ${videoElemContentWidth},
-        videoElemContentHeight: ${videoElemContentHeight},
-        videoXoffset: ${videoXoffset},
-        videoYoffset: ${videoYoffset},
-        widthFactor: ${widthFactor},
-        heightFactor: ${heightFactor},
-        videoPoints: ${videoPoints}`);
-    */
-
-    return videoPoints;
-}
 
 const Main = props => {
     // Modal toggles
@@ -135,6 +59,9 @@ const Main = props => {
     });
     const [edit, setEdit] = useState(false);
 
+    const { streams, stream, ...rest } = props;
+    const videoRef = useRef(null);
+
     // Route editor toggle
     const [showEditor,   setShowEditor]   = useState(false);
     const [showMap,      setShowMap]      = useState(false);
@@ -146,72 +73,7 @@ const Main = props => {
     const [currentTime,  setCurrentTime]  = useState(0);
 
     // Deck.GL parameters
-    const [features, setFeatures] = useState({
-        type: "FeatureCollection",
-        features: []
-    });
     const [mode, setMode] = useState(() => ViewMode);
-    const [selectedFeatureIndexes, setSelectedFeatureIndexes] = useState([]);
-
-    /*
-    const selectLayer = new SelectionLayer({
-        id: 'selection',
-        selectionType: 'rectangle',
-        mode: ViewMode,
-        pickable: true,
-        onSelect: ({ pickingInfos }) => {
-            console.log("SELECT:", pickingInfos)
-            // use pickingInfos to set the SelectedFeatureIndexes
-            setSelectedFeatureIndexes(pickingInfos.map((pi) => pi.index));
-        
-            // any other functionality for selecting, like adding id's to state
-        },
-        layerIds: ['geojson'],
-    });
-    */
-
-    // Deck.GL editor layer
-    const layer = new EditableGeoJsonLayer({
-        // id: "geojson-layer",
-        // selectionType: "rectangle",
-        data:     features,
-        pickable: true,
-        mode,
-        onClick: (info, event) => {
-            console.log("layer->onClick", mode, mode == "view")
-            const coordCount = Array.from(info.object.geometry.coordinates)[0].length;
-            if (mode == ViewMode) {
-                console.log('Clicked:', info, event, info.object.geometry.coordinates); // , vidCoords);
-                const regionIdx = info.index;
-                const existingLabel = routes[regionIdx];
-                const label = prompt("Set route region label", existingLabel);
-                let newRoutes = [...routes];
-                if (label) {
-                    newRoutes[regionIdx] = label;
-                } else {
-                    newRoutes[regionIdx] = existingLabel;
-                }
-                setRoutes(newRoutes);
-            }
-        },
-        onSelect: ({ pickingInfos }) => {
-            console.log("SELECT:", pickingInfos)
-            // use pickingInfos to set the SelectedFeatureIndexes
-            setSelectedFeatureIndexes(pickingInfos.map((pi) => pi.index));
-        
-            // any other functionality for selecting, like adding id's to state
-        },
-        selectedFeatureIndexes,
-        onEdit: ({ updatedData }) => {
-            setFeatures(updatedData);
-            const features    = updatedData.features;
-            console.log("updatedData:", updatedData)
-        },
-        getLineColor: (feature) => [255, 0, 0]
-    });
-
-    const { streams, stream, ...rest } = props;
-    const videoRef = useRef(null);
 
     const handleTimeUpdate = () => {
         setCurrentTime(videoRef.current.currentTime);
@@ -256,34 +118,19 @@ const Main = props => {
         }, 3000);
       
         return () => clearInterval(intervalId);
-      }, []);
-      
+    }, []);
 
-    const isLivestream = (stream.is_livestream) //check /livestream or /stream
+    const isLivestream = (stream.is_livestream); //check /livestream or /stream
 
-    
-    if (features.features.length > 0) {
-        for (let i=0; i<features.features.length; i++) {
-            console.log(
-                //features.features[0].geometry.coordinates,
-                routes[i],
-                geoToVid(
-                    window.innerWidth,
-                    window.innerHeight,
-                    videoRef.current.videoWidth,
-                    videoRef.current.videoHeight,
-                    features.features[i].geometry.coordinates
-                )
-            );
-        }
-    }
-
+    // console.log("SegmentModal main check:", videoRef.current.width, videoRef.current.height);
+   
     return (
         <div className="main-root">
             <div className="feed-outer">
                 {
                     (isLivestream) ? ( 
                         <ReactHlsPlayer
+                            ref={videoRef}
                             src="./livestream/tes/output.m3u8"
                             autoPlay={true}
                             controls={true}
@@ -338,6 +185,7 @@ const Main = props => {
                 edit = {edit}
                 />
             <SegmentModal
+                videoRef={videoRef}
                 open={showEditor}
                 segmentClose={editorClose}
                 />
