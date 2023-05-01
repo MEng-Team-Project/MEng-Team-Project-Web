@@ -30,9 +30,14 @@ import { Tooltip } from "../../../../components";
 // CSS
 import "./AnalysisMap.css";
 
+// Redux
+import { connect } from 'react-redux';
+
 const AnalysisMap = (props) => {
   const [positions, setPositions] = useState({});  
   const {roads = Object.keys(positions), visible, setVisible } = props;
+  //const {roads = Object.keys(positions), visible, setVisible, analytics, analyticsLoading } = props;
+  //const { roads, visible, setVisible, analytics, analyticsLoading } = props;
   const [selected, setSelected] = useState("");
   const [plotting, setPlotting] = useState(false);
  // const [positions, setPositions] = useState([]);
@@ -69,6 +74,13 @@ const AnalysisMap = (props) => {
     }, 200);
   };
 
+  // useEffect(() => {
+  //   // when analytics is updated, draw routes with predetermined values
+  //   for(let i = 0; i < routes.length; i++){
+  //     showRoute(i,"Route")
+  //   }
+  // }, [analytics])
+
   const incomingCount = 5;
   const outgoingCount = 49;
 
@@ -81,7 +93,6 @@ const AnalysisMap = (props) => {
 
       const newRoutes = [];
       const newOriginalWaypoints = {};
-      const routingControls = [];
       const newRouteNames = []
 
       let congestion = incomingCount + outgoingCount;
@@ -115,6 +126,10 @@ const AnalysisMap = (props) => {
                         : congestion >= 20
                         ? "orange"
                         : "green",
+
+                    // color:
+                    //   !analytics || analytics.length === 0 ? "grey")
+                    //   : calculateCongestion(roads[i], roads[j], "total",
                     opacity: 1,
                     weight: 5,
                   },
@@ -209,6 +224,7 @@ const handleMapCheckBoxes = (event, i, type) => {
             return;
         }
         route.hide()
+        hideRoute(i)
     }
 }
 
@@ -237,12 +253,108 @@ const showRoute = (index, type) => {
     }
     let congestionColor =
     congestion >= 50 ? "red" : congestion >= 20 ? "orange" : "green";
-    if (route) {
+    // if analytics store not empty use original route colour determined by function
+    if (route ) {   //&& analytics.length != 0    -- add on test merge branch   CHANGE alter to use calculateCongestion function
         let originalWaypoint = originalWaypoints[index];
         route.options.lineOptions.styles[0].color = congestionColor;
         route.setWaypoints(originalWaypoint);
     }
+    // otherwise use grey colour to indicate lack of data.
+    else {
+      let originalWaypoint = originalWaypoints[index];
+        route.options.lineOptions.styles[0].color = "grey";
+        route.setWaypoints(originalWaypoint);
+    }
 }
+
+// Calculate and congestion against standardised values for a route (both directions)
+// const calculateCongestion = (startRoad, endRoad, objectType, direction) => {
+//   //const standardisedCarMin = 4012 
+//   const standardisedCarMax = 4595
+//   //const standardisedHGVMin = 42
+//   const standardisedHGVMax = 55
+//   //const standardisedBicycleMin = 552 
+//   const standardisedBicycleMax = 779
+//   //const standardisedPersonMin = 1000    // CHANGE - find actual value
+//   const standardisedPersonMax = 2000    // CHANGE - find actual value
+//   // const totalMin = 
+//   //   standardisedCarMin + 
+//   //   standardisedHGVMin +
+//   //   standardisedBicycleMin +
+//   //   standardisedPersonMin
+//   const totalMax = 
+//     standardisedCarMax +
+//     standardisedHGVMax +
+//     standardisedBicycleMax +
+//     standardisedPersonMax
+
+//   // Get the counts object for the specified start and end points
+//   // check for direction paramater, if both combine values from both
+//   // if incoming switch stand and end road parameters
+//   // if either incoming or outgoing - half the max value
+//   const routeCounts = null
+//   const routeCounts2 = null
+//   const scaler = 1
+  
+//   if(direction === "both"){
+//     routeCounts = analytics.counts.find(
+//       (count) => count.start === startRoad && count.end === endRoad
+//     ).counts;
+//     routeCounts2 = analytics.counts.find(
+//       (count) => count.end === startRoad && count.start === endRoad
+//     ).counts;
+//   }
+//   else if(direction === "outgoing"){
+//     routeCounts = analytics.counts.find(
+//       (count) => count.start === startRoad && count.end === endRoad
+//     ).counts;
+//     scaler = 0.5
+//   }
+//   else if(direction === "incoming"){
+//     routeCounts = analytics.counts.find(
+//       (count) => count.end === startRoad && count.start === endRoad
+//     ).counts;
+//     scaler = 0.5
+//   }
+  
+
+//   const timeInMinutes = routeCounts.endTime - routeCounts.startTime   // CHANGE WHEN TIME FORMAT IS KNOWN
+
+//   // Calculate the congestion value
+//   let congestionValue = 0;
+//   if (objectType === "total") {
+//     congestionValue =
+//       ( ( (routeCounts.total + routeCounts2.total) / timeInMinutes) / (totalMax * scaler / (24*60)) ) * 100
+//   } 
+//   else if (objectType === "car"){
+//     congestionValue =
+//       ( ( (routeCounts.car + routeCounts2.car) / timeInMinutes) / (standardisedCarMax * scaler / (24*60)) ) * 100
+//   }
+//   else if (objectType === "HGV"){
+//     congestionValue =
+//       ( ( (routeCounts.hgv + routeCounts2.hgv) / timeInMinutes) / (standardisedHGVMax * scaler / (24*60)) ) * 100
+//   }
+//   else if (objectType === "bicycle"){
+//     congestionValue =
+//       ( ( (routeCounts.bicycle + routeCounts2.bicycle) / timeInMinutes) / (standardisedBicycleMax * scaler / (24*60)) ) * 100
+//   }
+//   else if (objectType === "person"){
+//     congestionValue =
+//       ( ( (routeCounts.person + routeCounts2.person) / timeInMinutes) / (standardisedPersonMax * scaler / (24*60)) ) * 100
+//   }
+
+//   // output the congestion level string
+//   let congestionLevel = "";
+//   if (congestionValue <= 33) {
+//     congestionLevel = "green";
+//   } else if (congestionValue <= 66) {
+//     congestionLevel = "orange";
+//   } else {
+//     congestionLevel = "red";
+//   }
+
+// return congestionLevel;
+// }
 
   const handleTogglePlotting = (road) => {
     if (road == selected) {
@@ -408,5 +520,14 @@ const showRoute = (index, type) => {
     </div>
   );
 };
+
+const mapStateToProps = state => {
+  return {
+    analytics: state.analytics, // subject to edit for specific values
+    analyticsLoading: state.analyticsLoading
+  }
+}
+
+//export default connect(mapStateToProps) (AnalysisMap);
 
 export default AnalysisMap;
