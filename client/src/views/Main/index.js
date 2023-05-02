@@ -30,7 +30,7 @@ import {
     AnalysisModal,
     EditStreamModal,
     Controls,
-    AnalysisMap
+    AnalysisMap,
 } from "./components";
 
 // HLS Player
@@ -300,8 +300,13 @@ const Main = props => {
 
 
     useEffect(() => {
-        props.getStreams();
-    }, []);
+        const intervalId = setInterval(() => {
+          props.getStreams();
+        }, 3000);
+      
+        return () => clearInterval(intervalId);
+      }, []);
+      
 
     const isLivestream = (stream.is_livestream) //check /livestream or /stream
 

@@ -27,6 +27,7 @@
     "@mui/icons-material": "^5.10.16",
     "@mui/material": "^5.10.16",
     "@mui/styled-engine": "^5.10.16",
+    "antd": "^5.2.3",
     "argparse": "^2.0.1",
     "axios": "^1.2.0",
     "concurrently": "^7.6.0",
@@ -57,6 +58,7 @@
     "sqlite3": "^5.1.4"
   },
   "devDependencies": {
+    "electron-rebuild": "^3.2.9",
     "json-loader": "^0.5.7",
     "transform-loader": "^0.2.4",
     "webworkify-webpack": "^1.0.6"

@@ -104,6 +104,8 @@ SIDEBAR TABS
 
 .sidebar-tab {
     padding: 1rem;
+    max-height: 80vh;
+    overflow-y: auto;
 }
 
 .sidebar-tab__header {
@@ -243,6 +245,7 @@ FILTERS
 .sidebar-filter__field {
     display: flex;
     flex-direction: row;
+    flex-wrap: wrap;
     align-items: center;
     box-sizing: border-box;
     border-left: 4px solid rgb(60, 97, 174);
@@ -260,6 +263,61 @@ FILTERS
     font-size: 0.8rem;
     color: rgb(121, 129, 141);
     margin-bottom: 0.5rem;
+}
+
+.sidebar-filter__multi-selection-box {
+    margin-bottom: 0.2rem;
+}
+
+.sidebar-filter__item-box {
+    display: inline-flex;
+    align-items: center;
+    font-size: 0.8rem;
+    margin-right: 0.2rem;
+    margin-bottom: 0.2rem;
+    padding: 0.2rem 0.4rem;
+    background-color: #3c61ae;
+    color: #fff;
+    border-radius: 0.2rem;
+    transition: all 0.5s ease-in-out;
+}
+
+.sidebar-filter__item-box:hover {
+    background-color: #ff6060;
+    color: #000;
+    cursor: pointer;
+}
+
+.sidebar-filter__select-all-none-container {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    grid-gap: 1rem;
+    margin-bottom: 0.8rem;
+}
+
+.sidebar-filter__select-all-none-option {
+    text-align: center;
+    padding: 0.2rem;
+    border: none;
+    font-family: inherit;
+    cursor: pointer;
+}
+
+.sidebar-filter__item-box-remove-icon-container {
+    display: inline-flex;
+    margin-left: 0.3rem;
+}
+
+svg.sidebar-filter__item-box-remove-icon {
+    font-size: inherit;
+}
+
+.sidebar-filter__select-all {
+    background-color: #aeffae;
+}
+
+.sidebar-filter__select-none {
+background-color: #ff6060;
 }
 
 /*

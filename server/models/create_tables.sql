@@ -3,7 +3,17 @@ CREATE TABLE IF NOT EXISTS "streams" (
 	"source"	TEXT NOT NULL UNIQUE,
 	"running"	INTEGER NOT NULL,
     "is_livestream" INTEGER NOT NULL,
+	"creation_date" TEXT,
 	PRIMARY KEY("name","source")
+);
+
+CREATE TABLE IF NOT EXISTS "livestream_times" (
+	"stream_name" TEXT NOT NULL,
+	"stream_source" TEXT NOT NULL,
+	"start_time" TEXT NOT NULL,
+	"end_time"  NULL,
+	PRIMARY KEY("stream_name", "stream_source", "start_time")
+	FOREIGN KEY("stream_name", "stream_source")
 );
 
 /*INSERT INTO streams VALUES ("testlive", "2432.242.23", 0, 1);

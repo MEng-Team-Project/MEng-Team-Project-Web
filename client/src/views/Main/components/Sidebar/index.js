@@ -18,7 +18,7 @@ As for the tabs, these are assumed to contain:
 */
 
 // React
-import React, { useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 
 // Redux
 import { connect } from "react-redux";
@@ -27,6 +27,7 @@ import { connect } from "react-redux";
 import {
     setStream
 } from "../../../../actions/streamActions";
+
 //from '../../actions/streamActions';
 
 // Icons
@@ -57,6 +58,12 @@ import { display } from '@mui/system';
 
 // Filter Options for Dropdown
 import filterOptions from './filterOptions.json';
+
+import DataSourceFilter from './Filters/DataSourceFilter';
+import DateTimeRangeFilter from './Filters/DateTimeRangeFilter';
+import MultiSelect from './Filters/MultiSelect';
+import { setFilters } from '../../../../actions/filterActions';
+import { setAnalytics } from '../../../../actions/analyticsActions';
 
 const SidebarLiveVideoLayer = props => {
     const { title, selected } = props;
@@ -126,85 +133,147 @@ const SidebarLiveVideo = props => {
         </div>
     );
 }
-const SidebarFilter = props => {
-    const { values, datasources, deleteFilter, updateFilter } = props;
-    const dropdownDatasources = 
-        datasources.map(datasource => ({
-            "meta": "rgb(60, 97, 174)",
-            "data": datasource
-        }));
-
-    return (
-        <div className="sidebar-filter">
-            <div className="sidebar-filter__field">
-                <Dropdown
-                    values={filterOptions}
-                    placeholder={"Select a filter"}
-                    type={"type"}
-                    onValueChange={(filterValue) => {updateFilter(values.id, {value: filterValue})}}
-                />
-                <DeleteOutlineOutlinedIcon
-                    className="delete-icon"
-                    onClick={() => {
-                        deleteFilter(values.id);
-                    }}
-                    style={{
-                        width: 15,
-                        height: 15
-                    }}
-                />
-            </div>
-            <div className="sidebar-filter__data-source">
-                <div className="sidebar-filter-text">
-                    Data Source
-                </div>
-                <Dropdown
-                    values={dropdownDatasources}
-                    placeholder={"Select a data source"}
-                    init={0}
-                    type={"dot"}
-                    onValueChange={(filterDataSrc) => {updateFilter(values.id, {dataSrc: filterDataSrc})}}
-                />
-            </div>
-        </div>
-    )
-};
 
 const SidebarFilters = props => {
-    const { streams } = props;
+    const { streams, filters, setFilters, setAnalytics } = props;
     
-    const [filters, setFilters] = useState([
-        {
-            "id": 0,
-            "value": null,
-            "dataSrc": null
-        }
-    ]);
+    const [ dataSourceFilter, setDataSourceFilter ] = useState(filters.dataSourceFilter);
+    const [ objectFilter, setObjectFilter ] = useState(filters.objectFilter);
+    const [ dateTimeRangeFilter, setDateTimeRangeFilter ] = useState(filters.dateTimeRangeFilter);
+    const [ startRegionFilter, setStartRegionFilter ] = useState(filters.startRegionFilter);
+    const [ endRegionFilter, setEndRegionFilter ] = useState(filters.endRegionFilter);
+
+    const getAnalyticsFromBackend = useCallback(
+        async () => {
+            const streamName = dataSourceFilter?.data?.source.split('.').slice(0, -1).join('.');
+            const classes = objectFilter.map(object => object.data.name);
+            const recordingStartTime = dateTimeRangeFilter?.data?.recordingStartTime;
+            const startTime = dateTimeRangeFilter?.data?.startTime;
+            const endTime = dateTimeRangeFilter?.data?.endTime;
+            const interval = dateTimeRangeFilter?.data?.interval ?? 1800;
     
-    const deleteFilter = deletionId => {
-        setFilters(filters.filter(filterItem => filterItem.id !== deletionId));
-    };
-
-    const addFilter = () => {
-        setFilters((filters) => [...filters,             {
-            "id": Math.max(0, ...filters.map(o => o.id)) + 1, // id is always greater than any existing filter id
-            "value": null,
-            "dataSrc": null
-        }]);
-    };
-
-    const updateFilter = (updateId, updateObject) => {
-        setFilters(filters.map(filterItem => {
-            if (filterItem.id === updateId) {
-                Object.entries(updateObject).forEach(([updateKey, updateValue]) => {
-                    if (updateKey !== 'id') {
-                        filterItem[updateKey] = updateValue;
-                    }
+            const analyticsDetails = {
+                "stream": streamName,
+                "regions" : {},
+                "classes": classes,
+                "interval_spacing": interval,
+                "time_of_recording": new Date(recordingStartTime ?? "2020-01-01T00:00").toISOString(),
+                "start_time": new Date(startTime ?? "2020-01-01T00:00").toISOString(),
+                "end_time": new Date(endTime ?? "2020-01-01T00:30").toISOString(),
+                "start_regions": startRegionFilter.map(region => region.data.name),
+                "end_regions": endRegionFilter.map(region => region.data.name),
+            };
+    
+            const response = await axios.post("api/routeAnalytics/", analyticsDetails)
+                .then(res => {
+                    console.log("RES", res);
+                    return res;
+                })
+                .catch(err => {
+                    console.log(err);
+                    return err;
                 });
+    
+            return response;
+        }, [dataSourceFilter, objectFilter, dateTimeRangeFilter, startRegionFilter, endRegionFilter] );
+
+    const updateAnalytics = useCallback( async (dataSourceFilter) => {
+        console.log("UPDATE ANALYTICS", Object.keys(dataSourceFilter).length);
+        if (Object.keys(dataSourceFilter).length === 0) { return; }
+        // call backend
+        const analyticsFromBackend = await getAnalyticsFromBackend();
+    
+        // set analytics
+        if (analyticsFromBackend.status === 200) {
+            const data = analyticsFromBackend.data;
+            console.log("ANALYTICS SET", data);
+            setAnalytics({
+                regions: data.regions,
+                counts: data.countsAtTimes[0].routeCounts});
+        } else {
+            console.warn("ERROR IN RETRIEVING ANALYTICS");
+            window.alert("There was an error in retrieving analytics. Please try again.");
+        }
+    }, [getAnalyticsFromBackend, setAnalytics]);
+
+    useEffect(() => {
+        setFilters({
+            dataSourceFilter: dataSourceFilter,
+            objectFilter: objectFilter,
+            dateTimeRangeFilter: dateTimeRangeFilter,
+            startRegionFilter: startRegionFilter,
+            endRegionFilter: endRegionFilter
+        });
+        updateAnalytics(dataSourceFilter);
+    }, [dataSourceFilter, objectFilter, dateTimeRangeFilter, startRegionFilter, endRegionFilter, setFilters, updateAnalytics]);
+
+    const dropdownDataSources = streams.map(stream => ({
+        "meta": "rgb(60, 97, 174)",
+        "data": stream
+    }));
+
+    const dropdownObjects = filterOptions.objects;
+
+    const updateDataSourceFilter = (filter) => {
+        setDataSourceFilter(filter);
+    }
+
+    const updateObjectFilter = (filter) => {
+        setObjectFilter(filter);
+    }
+
+    const addToObjectFilter = (filter) => {
+        if (filter) {
+            setObjectFilter([...objectFilter, filter]);
+        }
+    }
+
+    const removeFromObjectFilter = (filter) => {
+        setObjectFilter(objectFilter.filter((object) => {return (object !== filter) ? true : false}));
+    }
+
+    const updateDateTimeRangeFilter = (recordingStartTime, startTime, endTime, interval) => {
+        setDateTimeRangeFilter({
+            meta: "dateTime",
+            data: {
+                name: "dateTime",
+                recordingStartTime: recordingStartTime,
+                startTime: startTime,
+                endTime: endTime,
+                interval: interval
             }
-            return filterItem;
-        }));
-    };
+        });
+    }
+
+    const dropdownRegions = filterOptions.regions;
+
+    const updateStartRegionFilter = (filter) => {
+        setStartRegionFilter(filter);
+    }
+
+    const addToStartRegionFilter = (filter) => {
+        if (filter) {
+            setStartRegionFilter([...startRegionFilter, filter]);
+        }
+    }
+
+    const removeFromStartRegionFilter = (filter) => {
+        setStartRegionFilter(startRegionFilter.filter((startRegion) => {return (startRegion !== filter) ? true : false}))
+    }
+
+    const updateEndRegionFilter = (filter) => {
+        setEndRegionFilter(filter);
+    }
+
+    const addToEndRegionFilter = (filter) => {
+        if (filter) {
+            setEndRegionFilter([...endRegionFilter, filter]);
+        }
+    }
+
+    const removeFromEndRegionFilter = (filter) => {
+        setEndRegionFilter(endRegionFilter.filter((endRegion) => {return (endRegion !== filter) ? true : false}))
+    }
 
     return (
         <div className="sidebar-tab">
@@ -212,17 +281,49 @@ const SidebarFilters = props => {
                 <div className="sidebar-tab__header">
                     Filters
                 </div>
-                <Button title="Add Filter" color="green" onClick={() => addFilter()}/>
             </div>
             <div className="sidebar-spacing" />
-            {filters.map((values) =>
-                <SidebarFilter
-                    key={values.id}
-                    values={values}
-                    datasources={streams}
-                    deleteFilter={deleteFilter}
-                    updateFilter={updateFilter}
-                />)}
+            
+            <DataSourceFilter
+                selectedDataSource={dataSourceFilter}
+                dataSources={dropdownDataSources}
+                updateDataSourceFilter={(filter) => {updateDataSourceFilter(filter)}}
+            />
+
+            <MultiSelect key="objects"
+                title="Objects to Track"
+                itemName="object"
+                items={dropdownObjects}
+                selectedItems={objectFilter}
+                addToItemFilter={(filter) => {addToObjectFilter(filter)}}
+                updateItemFilter={(filter) => {updateObjectFilter(filter)}}
+                removeFromItemFilter={(filter) => {removeFromObjectFilter(filter)}}
+            />
+
+            <DateTimeRangeFilter
+                selectedDateTimeRange={dateTimeRangeFilter}
+                updateDateTimeRangeFilter={(recordingStartTime, startTime, endTime, interval) => {updateDateTimeRangeFilter(recordingStartTime, startTime, endTime, interval)}}
+            />
+
+            <MultiSelect key="startRegions"
+                title="Start Regions"
+                itemName="region"
+                items={dropdownRegions}
+                selectedItems={startRegionFilter}
+                addToItemFilter={(filter) => { addToStartRegionFilter(filter) }}
+                updateItemFilter={(filter) => { updateStartRegionFilter(filter) }}
+                removeFromItemFilter={(filter) => { removeFromStartRegionFilter(filter) }}
+            />
+
+            <MultiSelect key="endRegions"
+                title="End Regions"
+                itemName="region"
+                items={dropdownRegions}
+                selectedItems={endRegionFilter}
+                addToItemFilter={(filter) => { addToEndRegionFilter(filter) }}
+                updateItemFilter={(filter) => { updateEndRegionFilter(filter) }}
+                removeFromItemFilter={(filter) => { removeFromEndRegionFilter(filter) }}
+            />
         </div>
     );
 };
@@ -231,10 +332,10 @@ const SidebarStreamList = props => {
     const { streams, setStream, editStreamOpen, setEditMode, edit} = props;
 
     const deleteStream = values => {
-        const response = confirm(`Are you sure you want to delete ${values.name} ?`);
+        const response = window.confirm(`Are you sure you want to delete ${values.name} ?`);
         const name = values.name;
         if (response) {
-            const streamDetails = {"source": values.source};
+            const streamDetails = {"source": values.source, "name": name};
             axios
             .post("/api/streams/delete", streamDetails)
             .then(res => {
@@ -249,7 +350,7 @@ const SidebarStreamList = props => {
     }
 
     const deleteVideo = values => {
-        const response = confirm(`Are you sure you want to delete ${values.name} ?`);
+        const response = window.confirm(`Are you sure you want to delete ${values.name} ?`);
         const name = values.name;
         if (response) {
             const streamDetails = {"source": values.source};
@@ -341,7 +442,7 @@ const SidebarStreamList = props => {
                   
                     <div class="line"></div>
                 </div>
-                
+
             ))}
         </div>
     )
@@ -397,7 +498,7 @@ const SidebarStreams = props => {
 };
 
 const Sidebar = props => {
-    const { streams, setStream, setOpenExport, setOpenImport, setOpenAnalysis, editStreamOpen, setEditMode, edit, visible, setVisible} = props;
+    const { streams, setStream, setOpenExport, setOpenImport, setOpenAnalysis, editStreamOpen, setEditMode, edit, visible, setVisible, analytics, setAnalytics, filters, setFilters} = props;
 
     const [tab, setTab] = useState("STREAMS");
     //const [visible, setVisible] = useState(true);
@@ -474,7 +575,12 @@ const Sidebar = props => {
                                 setEditMode = {setEditMode}/>    
                         )}
                         {(tab == "FILTERS") && (
-                            <SidebarFilters streams={streams} />
+                            <SidebarFilters
+                                streams={streams}
+                                analytics={analytics}
+                                setAnalytics={setAnalytics}
+                                filters={filters}
+                                setFilters={setFilters}/>
                         )}
                         {(tab == "LIVE VIDEO") && (
                             <SidebarLiveVideo />
@@ -511,11 +617,13 @@ const Sidebar = props => {
 
 const mapStateToProps = state => {
     return {
-       stream: state.streams.stream
+       stream: state.streams.stream,
+       filters: state.filters.filters,
+       analytics: state.analytics.analytics
     };
 }
 
 export default connect(
     mapStateToProps,
-    { setStream }
+    { setStream, setFilters, setAnalytics }
 )(Sidebar);

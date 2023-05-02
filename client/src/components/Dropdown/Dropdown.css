@@ -43,6 +43,7 @@
     flex-direction: flex;
     align-items: center;
     cursor: pointer;
+    padding: 8px;
 }
 
 .dropdown-options__option:hover {

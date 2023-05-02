@@ -1,6 +1,54 @@
-[
-    {
-        "meta": "float",
-        "data": "time"
-    }
-]
+{
+    "objects": [
+        {
+            "meta": "object",
+            "data": {
+                "name": "car"
+            }
+        },
+        {
+            "meta": "object",
+            "data": {
+                "name": "hgv"
+            }
+        },
+        {
+            "meta": "object",
+            "data": {
+                "name": "bike"
+            }
+        },
+        {
+            "meta": "object",
+            "data": {
+                "name": "bus"
+            }
+        }
+    ],
+    "regions": [
+        {
+            "meta": "region",
+            "data": {
+                "name": "West Park"
+            }
+        },
+        {
+            "meta": "region",
+            "data": {
+                "name": "East Park"
+            }
+        },
+        {
+            "meta": "region",
+            "data": {
+                "name": "North Burnaby"
+            }
+        },
+        {
+            "meta": "region",
+            "data": {
+                "name": "South Burnaby"
+            }
+        }
+    ]
+}
