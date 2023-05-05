@@ -19,7 +19,7 @@ import {
 const initialState = {
     analytics: {
         interval: 1800,
-        objects: [],
+        objects: ["car", "person"],
         regions: [
             "North_Burnaby_Road",
             "East_Park_Road",
@@ -28,11 +28,21 @@ const initialState = {
         ],
         counts: [
             {
-                "start": "West_Park_Road",
-                "end": "East_Park_Road",
+                "start": "1",
+                "end": "2",
                 "counts": {
-                    "total": 1,
-                    "car": 1,
+                    "total": 21,
+                    "car": 8,
+                    "person": 30
+                }
+            },
+            {
+                "start": "2",
+                "end": "1",
+                "counts": {
+                    "total": 117,
+                    "car": 40,
+                    "person": 60
                 }
             },
             {
@@ -79,7 +89,80 @@ const initialState = {
                     "car": 1
                 }
             }
-        ]
+        ],
+        all: {
+            interval: 86400,
+            objects: ["car", "person", "bicycle", "hgv"],
+            regions: ["North_Burnaby_Road", "South_Burnaby_Road", "West_Park_Road", "East_Park_Road"],
+            counts: [
+                {
+                    "start": "1",
+                    "end": "2",
+                    "counts": {
+                        "total": 1188,
+                        "car": 8,
+                        "person": 30,
+                        "hgv": 123,
+                        "bicycle": 123
+                    }
+                },
+                {
+                    "start": "2",
+                    "end": "1",
+                    "counts": {
+                        "total": 6241,
+                        "car": 40,
+                        "person": 60,
+                        "hgv": 123,
+                        "bicycle": 123
+                    }
+                },
+                {
+                    "start": "South_Burnaby_Road",
+                    "end": "West_Park_Road",
+                    "counts": {
+                        "total": 3,
+                        "bicycle": 1,
+                        "person": 1,
+                        "car": 1
+                    }
+                },
+                {
+                    "start": "South_Burnaby_Road",
+                    "end": "North_Burnaby_Road",
+                    "counts": {
+                        "total": 1,
+                        "car": 1
+                    }
+                },
+                {
+                    "start": "East_Park_Road",
+                    "end": "West_Park_Road",
+                    "counts": {
+                        "total": 4,
+                        "car": 1,
+                        "person": 3
+                    }
+                },
+                {
+                    "start": "East_Park_Road",
+                    "end": "South_Burnaby_Road",
+                    "counts": {
+                        "total": 4,
+                        "person": 2,
+                        "car": 2
+                    }
+                },
+                {
+                    "start": "North_Burnaby_Road",
+                    "end": "South_Burnaby_Road",
+                    "counts": {
+                        "total": 1,
+                        "car": 1
+                    }
+                }
+            ]
+        }
     },
     analyticsLoading: false,
 };
