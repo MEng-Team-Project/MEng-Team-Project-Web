@@ -373,6 +373,8 @@ const Main = props => {
                 setOpenAddStream={setOpenAddStream}
                 editStreamOpen={editStreamOpen}
                 setEditMode = {setEditMode}
+                showMap={showMap}
+                setShowMap={setShowMap}
                 edit = {edit}
                 />
             <ExportModal

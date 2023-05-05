@@ -135,13 +135,15 @@ const SidebarLiveVideo = props => {
 }
 
 const SidebarFilters = props => {
-    const { streams, filters, setFilters, setAnalytics } = props;
+    const { streams, filters, setFilters, setAnalytics, setShowMap } = props;
     
     const [ dataSourceFilter, setDataSourceFilter ] = useState(filters.dataSourceFilter);
     const [ objectFilter, setObjectFilter ] = useState(filters.objectFilter);
     const [ dateTimeRangeFilter, setDateTimeRangeFilter ] = useState(filters.dateTimeRangeFilter);
     const [ startRegionFilter, setStartRegionFilter ] = useState(filters.startRegionFilter);
     const [ endRegionFilter, setEndRegionFilter ] = useState(filters.endRegionFilter);
+
+    setShowMap(true);
 
     const getAnalyticsFromBackend = useCallback(
         async () => {
@@ -498,7 +500,7 @@ const SidebarStreams = props => {
 };
 
 const Sidebar = props => {
-    const { analytics, setAnalytics, filters, setFilters, streams, setStream, setOpenExport, setOpenImport, setOpenAnalysis, editStreamOpen, setEditMode, edit } = props;
+    const { analytics, setAnalytics, filters, setFilters, streams, setStream, setOpenExport, setOpenImport, setOpenAnalysis, editStreamOpen, setEditMode, setShowMap, edit } = props;
 
     const [tab, setTab] = useState("STREAMS");
     const [visible, setVisible] = useState(true);
@@ -580,7 +582,8 @@ const Sidebar = props => {
                                 analytics={analytics}
                                 setAnalytics={setAnalytics}
                                 filters={filters}
-                                setFilters={setFilters}/>
+                                setFilters={setFilters}
+                                setShowMap={setShowMap}/>
                         )}
                         {(tab == "LIVE VIDEO") && (
                             <SidebarLiveVideo />
