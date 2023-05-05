@@ -176,7 +176,11 @@ const SidebarFilters = props => {
                     return err;
                 });
     
-            return response;
+            return {
+                interval: interval,
+                classes: classes,
+                response: response
+            };
         }, [dataSourceFilter, objectFilter, dateTimeRangeFilter, startRegionFilter, endRegionFilter] );
 
     const updateAnalytics = useCallback( async (dataSourceFilter) => {
@@ -184,12 +188,13 @@ const SidebarFilters = props => {
         if (Object.keys(dataSourceFilter).length === 0) { return; }
         // call backend
         const analyticsFromBackend = await getAnalyticsFromBackend();
-    
+
         // set analytics
-        if (analyticsFromBackend.status === 200) {
-            const data = analyticsFromBackend.data;
-            console.log("ANALYTICS SET", data);
+        if (analyticsFromBackend.response.status === 200) {
+            const data = analyticsFromBackend.response.data;
             setAnalytics({
+                interval: analyticsFromBackend.interval,
+                objects: analyticsFromBackend.classes,
                 regions: data.regions,
                 counts: data.countsAtTimes[0].routeCounts});
         } else {

@@ -18,6 +18,8 @@ import {
 
 const initialState = {
     analytics: {
+        interval: 1800,
+        objects: ["car", "bicycle", "person", "hgv"],
         regions: [
             "North_Burnaby_Road",
             "East_Park_Road",
