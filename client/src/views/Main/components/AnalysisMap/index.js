@@ -88,12 +88,7 @@ const AnalysisMap = (props) => {
       showRoute(i,"Route", start, end)
     }
   }, [analytics])
-
-  // useEffect(() => {
-  //   setAnalytics(props.analytics);
-  // }, [props.analytics]);
   
-
   const incomingCount = 5;
   const outgoingCount = 49;
 
@@ -136,16 +131,7 @@ const AnalysisMap = (props) => {
                 addWaypoints: false,
                 styles: [
                   {
-                    // color:
-                    //   congestion >= 50
-                    //     ? "red"
-                    //     : congestion >= 20
-                    //     ? "orange"
-                    //     : "green",
-
                     color:
-                      //!analytics || analytics.length === 0 ? "grey" :
-                      //1 === 1 ? "grey" :
                       calculateCongestion(roads[i], roads[j], "Route"),
                     opacity: 1,
                     weight: 5,
@@ -273,9 +259,8 @@ const showRoute = (index, type, startRoad, endRoad) => {
             break;
     }
     let congestionColor = congestion
-    //congestion >= 50 ? "red" : congestion >= 20 ? "orange" : "green";
     // if analytics store not empty use original route colour determined by function
-    if (route) {   //&& analytics.length != 0    -- add on test merge branch   CHANGE alter to use calculateCongestion function
+    if (route) { 
         let originalWaypoint = originalWaypoints[index];
         route.options.lineOptions.styles[0].color = congestionColor;
         route.setWaypoints(originalWaypoint);
@@ -356,7 +341,7 @@ const calculateCongestion = (startRoad, endRoad, direction) => { //add filters s
   }
   
   // change to routeCounts.interval -- seconds //
-  const timeInMinutes = localAnalytics.interval //- analytics.startTime   // CHANGE WHEN TIME FORMAT IS KNOWN
+  const timeInSeconds = localAnalytics.interval //- analytics.startTime   // CHANGE WHEN TIME FORMAT IS KNOWN
 
   // accomodate multiple vehicle being filtered for
   let fileteredTotal = 0
@@ -385,19 +370,17 @@ const calculateCongestion = (startRoad, endRoad, direction) => { //add filters s
   let congestionValue = 0;
 
   if(routeCounts2 != null){
-    congestionValue = ( ( (routeCounts.total + routeCounts2.total) / timeInMinutes) / (fileteredTotal * scaler / (24*60*60)) ) * 100
+    congestionValue = ( ( (routeCounts.total + routeCounts2.total) / timeInSeconds) / (fileteredTotal * scaler / (24*60*60)) ) * 100
   }
   else {
-    congestionValue = ( ( (routeCounts.total) / timeInMinutes) / (fileteredTotal * scaler / (24*60*60)) ) * 100
+    congestionValue = ( ( (routeCounts.total) / timeInSeconds) / (fileteredTotal * scaler / (24*60*60)) ) * 100
   }
 
   // output the congestion level string
   console.log(congestionValue)
   console.log(localAnalytics)
   let congestionLevel = "";
-  if(congestionValue === 0) { congestionLevel = "grey"
-  // if (!analytics) {congestionLevel = "grey"
-  } else if (congestionValue <= 33 && congestionValue > 0) {
+  if (congestionValue <= 33 && congestionValue > 0) {   // CHANGE - USE MINIMUM VALUE instead of 33?
     congestionLevel = "green";
   } else if (congestionValue <= 66) {
     congestionLevel = "orange";
