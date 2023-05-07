@@ -147,6 +147,37 @@ const SidebarFilters = props => {
         setShowMap(true);
     }, [setShowMap]);
 
+    const getAllAnalyticsFromBackend = useCallback(
+        async () => {
+            const streamName = dataSourceFilter?.data?.source.split('.').slice(0, -1).join('.');
+            const classes = ["car", "person", "bicycle", "hgv"];
+            const recordingStartTime = dateTimeRangeFilter?.data?.recordingStartTime;
+            const startTime = dateTimeRangeFilter?.data?.startTime;
+    
+            const analyticsDetails = {
+                "stream": streamName,
+                "regions" : {},
+                "classes": classes,
+                "time_of_recording": new Date(recordingStartTime ?? "2020-01-01T00:00").toISOString(),
+                "start_time": new Date(startTime ?? "2020-01-01T00:00").toISOString()
+            };
+    
+            const response = await axios.post("api/routeAnalytics/", analyticsDetails)
+                .then(res => {
+                    console.log("RES", res);
+                    return res;
+                })
+                .catch(err => {
+                    console.log(err);
+                    return err;
+                });
+    
+            return {
+                classes: classes,
+                response: response
+            };
+        }, [dataSourceFilter, dateTimeRangeFilter] );
+
     const getAnalyticsFromBackend = useCallback(
         async () => {
             const streamName = dataSourceFilter?.data?.source.split('.').slice(0, -1).join('.');
@@ -179,7 +210,6 @@ const SidebarFilters = props => {
                 });
     
             return {
-                interval: interval,
                 classes: classes,
                 response: response
             };
@@ -190,20 +220,28 @@ const SidebarFilters = props => {
         if (Object.keys(dataSourceFilter).length === 0) { return; }
         // call backend
         const analyticsFromBackend = await getAnalyticsFromBackend();
+        const allAnalyticsFromBackend = await getAllAnalyticsFromBackend();
 
         // set analytics
-        if (analyticsFromBackend.response.status === 200) {
+        if (analyticsFromBackend.response.status === 200 && allAnalyticsFromBackend.response.status === 200) {
             const data = analyticsFromBackend.response.data;
+            const allData = allAnalyticsFromBackend.response.data;
             setAnalytics({
-                interval: analyticsFromBackend.interval,
+                interval: data.intervalSpacing,
                 objects: analyticsFromBackend.classes,
                 regions: data.regions,
-                counts: data.countsAtTimes[0].routeCounts});
+                counts: data.countsAtTimes[0].routeCounts,
+                all: {
+                    interval: allData.intervalSpacing,
+                    objects: allAnalyticsFromBackend.classes,
+                    regions: allData.regions,
+                    counts: allData.countsAtTimes[0].routeCounts
+                }});
         } else {
             console.warn("ERROR IN RETRIEVING ANALYTICS");
             window.alert("There was an error in retrieving analytics. Please try again.");
         }
-    }, [getAnalyticsFromBackend, setAnalytics]);
+    }, [getAnalyticsFromBackend, getAllAnalyticsFromBackend, setAnalytics]);
 
     useEffect(() => {
         setFilters({

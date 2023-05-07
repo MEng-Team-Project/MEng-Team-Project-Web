@@ -79,7 +79,8 @@ const initialState = {
                     "car": 1
                 }
             }
-        ]
+        ],
+        all: {}
     },
     analyticsLoading: false,
 };
