@@ -143,7 +143,9 @@ const SidebarFilters = props => {
     const [ startRegionFilter, setStartRegionFilter ] = useState(filters.startRegionFilter);
     const [ endRegionFilter, setEndRegionFilter ] = useState(filters.endRegionFilter);
 
-    setShowMap(true);
+    useEffect(() => {
+        setShowMap(true);
+    }, [setShowMap]);
 
     const getAnalyticsFromBackend = useCallback(
         async () => {
