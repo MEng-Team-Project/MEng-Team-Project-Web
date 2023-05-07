@@ -288,7 +288,9 @@ const calculateCongestion = (startRoad, endRoad, direction) => { //add filters s
 
   console.log(analytics)
   if(analytics.counts){
-    console.log(analytics.counts.length)}
+    console.log(analytics.counts.length)
+    //console.log(totalAnalytics)
+  }
 
   // Get the counts object for the specified start and end points
   // check for direction paramater, if both combine values from both
@@ -315,7 +317,7 @@ const calculateCongestion = (startRoad, endRoad, direction) => { //add filters s
       }
     }
     for(let i = 0; i < localAnalytics.counts.length; i++){
-      if(analytics.counts[i].end === startRoad && analytics.counts[i].start === endRoad) {
+      if(localAnalytics.counts[i].end === startRoad && localAnalytics.counts[i].start === endRoad) {
         routeCounts2 = localAnalytics.counts[i].counts;
         break
       }
@@ -561,7 +563,6 @@ const mapStateToProps = state => {
   return {
     analytics: state.analytics.analytics, // subject to edit for specific values
     totalAnalytics: state.analytics.analytics.all
-    //filters: state.filters // objectype parameter
   }
 }
 
