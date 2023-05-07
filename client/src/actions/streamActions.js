@@ -10,7 +10,7 @@ import {
 
 // Get Streams
 export const getStreams = () => dispatch => {
-    console.log("CALLING GET STREAMS");
+    // console.log("CALLING GET STREAMS");
     dispatch(setStreamsLoading());
     axios
         .get('/api/streams/all')

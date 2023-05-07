@@ -58,7 +58,7 @@ const ExportModal = props => {
     const { open, exportClose, streams } = props;
     const [selectedStream, setSelectedStream ] = useState("");
 
-    console.log("streams:", streams)
+    // console.log("streams:", streams)
     /*
     useEffect(() => {
         props.getGames();

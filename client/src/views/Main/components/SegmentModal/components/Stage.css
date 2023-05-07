@@ -1,8 +1,12 @@
-.segment-modal-stage {
+.stage {
     display: flex;
+    justify-content: center;
 }
 
-.segment-modal-stage__canvas {
-    margin-left: auto;
-    margin-right: auto;
+.stage__sam-container {
+    border: 0;
+}
+
+.stage__hidden-canvas {
+    display: none;
 }

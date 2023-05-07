@@ -6,7 +6,7 @@ https://github.com/MiscellaneousStuff/meta-sam-demo
 */
 
 // React
-import React from 'react';
+import React, { useContext, useEffect, useState } from "react";
 
 // Material UI
 import Modal from '@mui/material/Modal';
@@ -38,7 +38,7 @@ const SegmentModal = props => {
     const { videoRef, open, segmentClose } = props;
 
     if (videoRef.current) {
-        console.log("SegmentModal:", videoRef.current.videoWidth, videoRef.current.videoHeight);
+        // console.log("SegmentModal:", videoRef.current.videoWidth, videoRef.current.videoHeight);
     }
 
     return (
@@ -58,7 +58,9 @@ const SegmentModal = props => {
                     </div>
                 </div>
                 <div className="modal-content">
-                    <Stage videoRef={videoRef} />
+                    <Stage
+                        videoRef={videoRef}
+                    />
                 </div>
             </Box>
         </Modal>
