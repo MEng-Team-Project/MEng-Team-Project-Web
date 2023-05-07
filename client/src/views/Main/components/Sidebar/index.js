@@ -135,13 +135,48 @@ const SidebarLiveVideo = props => {
 }
 
 const SidebarFilters = props => {
-    const { streams, filters, setFilters, setAnalytics } = props;
+    const { streams, filters, setFilters, setAnalytics, setShowMap } = props;
     
     const [ dataSourceFilter, setDataSourceFilter ] = useState(filters.dataSourceFilter);
     const [ objectFilter, setObjectFilter ] = useState(filters.objectFilter);
     const [ dateTimeRangeFilter, setDateTimeRangeFilter ] = useState(filters.dateTimeRangeFilter);
     const [ startRegionFilter, setStartRegionFilter ] = useState(filters.startRegionFilter);
     const [ endRegionFilter, setEndRegionFilter ] = useState(filters.endRegionFilter);
+
+    useEffect(() => {
+        setShowMap(true);
+    }, [setShowMap]);
+
+    const getAllAnalyticsFromBackend = useCallback(
+        async () => {
+            const streamName = dataSourceFilter?.data?.source.split('.').slice(0, -1).join('.');
+            const classes = ["car", "person", "bicycle", "hgv"];
+            const recordingStartTime = dateTimeRangeFilter?.data?.recordingStartTime;
+            const startTime = dateTimeRangeFilter?.data?.startTime;
+    
+            const analyticsDetails = {
+                "stream": streamName,
+                "regions" : {},
+                "classes": classes,
+                "time_of_recording": new Date(recordingStartTime ?? "2020-01-01T00:00").toISOString(),
+                "start_time": new Date(startTime ?? "2020-01-01T00:00").toISOString()
+            };
+    
+            const response = await axios.post("api/routeAnalytics/", analyticsDetails)
+                .then(res => {
+                    console.log("RES", res);
+                    return res;
+                })
+                .catch(err => {
+                    console.log(err);
+                    return err;
+                });
+    
+            return {
+                classes: classes,
+                response: response
+            };
+        }, [dataSourceFilter, dateTimeRangeFilter] );
 
     const getAnalyticsFromBackend = useCallback(
         async () => {
@@ -174,7 +209,10 @@ const SidebarFilters = props => {
                     return err;
                 });
     
-            return response;
+            return {
+                classes: classes,
+                response: response
+            };
         }, [dataSourceFilter, objectFilter, dateTimeRangeFilter, startRegionFilter, endRegionFilter] );
 
     const updateAnalytics = useCallback( async (dataSourceFilter) => {
@@ -182,19 +220,28 @@ const SidebarFilters = props => {
         if (Object.keys(dataSourceFilter).length === 0) { return; }
         // call backend
         const analyticsFromBackend = await getAnalyticsFromBackend();
-    
+        const allAnalyticsFromBackend = await getAllAnalyticsFromBackend();
+
         // set analytics
-        if (analyticsFromBackend.status === 200) {
-            const data = analyticsFromBackend.data;
-            console.log("ANALYTICS SET", data);
+        if (analyticsFromBackend.response.status === 200 && allAnalyticsFromBackend.response.status === 200) {
+            const data = analyticsFromBackend.response.data;
+            const allData = allAnalyticsFromBackend.response.data;
             setAnalytics({
+                interval: data.intervalSpacing,
+                objects: analyticsFromBackend.classes,
                 regions: data.regions,
-                counts: data.countsAtTimes[0].routeCounts});
+                counts: data.countsAtTimes[0].routeCounts,
+                all: {
+                    interval: allData.intervalSpacing,
+                    objects: allAnalyticsFromBackend.classes,
+                    regions: allData.regions,
+                    counts: allData.countsAtTimes[0].routeCounts
+                }});
         } else {
             console.warn("ERROR IN RETRIEVING ANALYTICS");
             window.alert("There was an error in retrieving analytics. Please try again.");
         }
-    }, [getAnalyticsFromBackend, setAnalytics]);
+    }, [getAnalyticsFromBackend, getAllAnalyticsFromBackend, setAnalytics]);
 
     useEffect(() => {
         setFilters({
@@ -498,7 +545,7 @@ const SidebarStreams = props => {
 };
 
 const Sidebar = props => {
-    const { streams, setStream, setOpenExport, setOpenImport, setOpenAnalysis, editStreamOpen, setEditMode, edit, visible, setVisible, analytics, setAnalytics, filters, setFilters} = props;
+    const { streams, setStream, setOpenExport, setOpenImport, setOpenAnalysis, editStreamOpen, setEditMode, setShowMap, edit, visible, setVisible, analytics, setAnalytics, filters, setFilters} = props;
 
     const [tab, setTab] = useState("STREAMS");
     //const [visible, setVisible] = useState(true);
@@ -580,7 +627,8 @@ const Sidebar = props => {
                                 analytics={analytics}
                                 setAnalytics={setAnalytics}
                                 filters={filters}
-                                setFilters={setFilters}/>
+                                setFilters={setFilters}
+                                setShowMap={setShowMap}/>
                         )}
                         {(tab == "LIVE VIDEO") && (
                             <SidebarLiveVideo />
