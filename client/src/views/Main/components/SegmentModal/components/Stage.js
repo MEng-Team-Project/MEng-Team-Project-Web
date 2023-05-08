@@ -27,6 +27,8 @@ const Stage = props => {
     const { videoRef } = props;
     const canvasRef = useRef(null);
     const iframeRef = useRef(null);
+    const [polygon, setPolygon] = useState(null);
+    const [scale, setScale] = useState(null);
 
     const sendMessageToIframe = (type, message) => {
         if (type == "SEND") {
@@ -77,6 +79,12 @@ const Stage = props => {
         const handleChildMessage = (event) => {
             if (event.data.type == "RECEIVE") {
               console.log("handleChildMessage:", event);
+              const polygon = event.data.data.svg;
+              const scale   = event.data.data.scale;
+              setPolygon(polygon);
+              setScale(scale);
+              console.log("SETTING POLYGON:", polygon);
+              console.log("SETTING SCALE:", scale);
             }
           };
       
@@ -86,24 +94,19 @@ const Stage = props => {
           };
     }, []);
 
-    const handleSend = () => {
-        console.log("Save Route Region")
-        sendMessageToIframe("SEND", frameURL);
-    };
-
-    const handleRetrieve = () => {
-        console.log("Save Route Region")
-        sendMessageToIframe("RECEIVE", frameURL);
-    };
+    useEffect(() => {
+        console.log("frameURL Effect")
+        if (frameURL) {
+            setTimeout(() => {
+                console.log("frameURL Effect, frameURL exists")
+                console.log("Save Route Region")
+                sendMessageToIframe("SEND", frameURL);
+            }, 2000);
+        }
+    }, [frameURL]);
 
     return (
         <div class="stage-container">
-            <button onClick={handleSend}>
-                Send to Annotator
-            </button>
-            <button onClick={handleRetrieve}>
-                Retrieve Masks
-            </button>
             <div class="stage">
                 <canvas
                     ref={canvasRef}
