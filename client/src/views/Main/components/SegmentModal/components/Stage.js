@@ -28,9 +28,22 @@ const Stage = props => {
     const canvasRef = useRef(null);
     const iframeRef = useRef(null);
 
-    const sendMessageToIframe = (message) => {
-        const iframeWindow = iframeRef.current.contentWindow;
-        iframeWindow.postMessage(message, '*');
+    const sendMessageToIframe = (type, message) => {
+        if (type == "SEND") {
+            const iframeWindow = iframeRef.current.contentWindow;
+            const msg = {
+                type: type,
+                data: message
+            }
+            iframeWindow.postMessage(msg, '*');
+        } else if (type == "RECEIVE") {
+            const iframeWindow = iframeRef.current.contentWindow;
+            const msg = {
+                type: type,
+                data: null
+            }
+            iframeWindow.postMessage(msg, '*');
+        }
     };
 
     useEffect(() => {
@@ -60,17 +73,36 @@ const Stage = props => {
 
             // sendMessageToIframe(dataURL);
         }
+
+        const handleChildMessage = (event) => {
+            if (event.data.type == "RECEIVE") {
+              console.log("handleChildMessage:", event);
+            }
+          };
+      
+          window.addEventListener('message', handleChildMessage);
+          return () => {
+            window.removeEventListener('message', handleChildMessage);
+          };
     }, []);
 
-    const handleClick = () => {
+    const handleSend = () => {
         console.log("Save Route Region")
-        sendMessageToIframe(frameURL);
-    }
+        sendMessageToIframe("SEND", frameURL);
+    };
+
+    const handleRetrieve = () => {
+        console.log("Save Route Region")
+        sendMessageToIframe("RECEIVE", frameURL);
+    };
 
     return (
         <div class="stage-container">
-            <button onClick={handleClick}>
-                Save Route Region
+            <button onClick={handleSend}>
+                Send to Annotator
+            </button>
+            <button onClick={handleRetrieve}>
+                Retrieve Masks
             </button>
             <div class="stage">
                 <canvas
