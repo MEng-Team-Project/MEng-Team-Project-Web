@@ -1,8 +1,8 @@
 /*
 <SegmentModal /> which uses Meta Segment-Anything model to allow the user
-to easily get the mask (i.e. polygon) of a route region. Relies on the
-public demo which was extracted to this url:
-https://github.com/MiscellaneousStuff/meta-sam-demo
+to easily get the mask (i.e. polygon) of a route region. Relies on a fork
+of the public demo which was extracted to this url:
+https://github.com/MEng-Team-Project/meta-sam-demo-controlled
 */
 
 // React
