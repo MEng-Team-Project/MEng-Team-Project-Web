@@ -24,11 +24,9 @@ const baseHeight = 700;
 const Stage = props => {
     const [frameURL, setFrameURL] = useState("");
 
-    const { videoRef } = props;
+    const { videoRef, setPolygon, setScale } = props;
     const canvasRef = useRef(null);
     const iframeRef = useRef(null);
-    const [polygon, setPolygon] = useState(null);
-    const [scale, setScale] = useState(null);
 
     const sendMessageToIframe = (type, message) => {
         if (type == "SEND") {

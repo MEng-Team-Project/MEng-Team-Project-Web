@@ -5,3 +5,9 @@
     padding-right: 4rem;
     margin-top: 0;
 }
+
+.modal-end {
+    margin-top: 1rem;
+    display: flex;
+    justify-content: flex-end;
+}

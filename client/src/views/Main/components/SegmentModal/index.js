@@ -20,6 +20,7 @@ import './SegmentModal.css';
 
 // Components
 import Stage from "./components/Stage";
+import Button from "../../../../components/Button";
 
 const style = {
     position: 'absolute',
@@ -35,11 +36,15 @@ const style = {
 };
 
 const SegmentModal = props => {
-    const { videoRef, open, segmentClose } = props;
+    const { videoRef, open, segmentClose, setPolygon, setScale } = props;
 
     if (videoRef.current) {
         // console.log("SegmentModal:", videoRef.current.videoWidth, videoRef.current.videoHeight);
     }
+
+    const handleDone = () => {
+        segmentClose()
+    };
 
     return (
         <Modal
@@ -60,7 +65,12 @@ const SegmentModal = props => {
                 <div className="modal-content">
                     <Stage
                         videoRef={videoRef}
+                        setScale={setScale}
+                        setPolygon={setPolygon}
                     />
+                    <div class="modal-end">
+                        <Button onClick={handleDone} title="Done" color="green" noAdd />
+                    </div>
                 </div>
             </Box>
         </Modal>

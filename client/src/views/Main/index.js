@@ -58,6 +58,8 @@ const Main = props => {
         protocol: ""
     });
     const [edit, setEdit] = useState(false);
+    const [polygon, setPolygon] = useState(null);
+    const [scale, setScale] = useState(null);
 
     const { streams, stream, ...rest } = props;
     const videoRef = useRef(null);
@@ -111,6 +113,16 @@ const Main = props => {
     const editorClose = () => {
         setShowEditor(false);
     }
+
+    const handleSetPolygon = polygon => {
+        console.log("MAIN->handleSetPolygon:", polygon);
+        setPolygon(polygon);
+    };
+
+    const handleSetScale = scale => {
+        console.log("MAIN->handleSetScale:", scale);
+        setScale(scale);
+    };
 
     useEffect(() => {
         const intervalId = setInterval(() => {
@@ -188,6 +200,8 @@ const Main = props => {
                 videoRef={videoRef}
                 open={showEditor}
                 segmentClose={editorClose}
+                setPolygon={handleSetPolygon}
+                setScale={handleSetScale}
                 />
             <Controls
                 stream={stream}
