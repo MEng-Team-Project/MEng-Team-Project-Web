@@ -24,7 +24,7 @@ const baseHeight = 700;
 const Stage = props => {
     const [frameURL, setFrameURL] = useState("");
 
-    const { videoRef, setPolygon, setScale } = props;
+    const { scale, polygon, videoRef, setPolygon, setScale } = props;
     const canvasRef = useRef(null);
     const iframeRef = useRef(null);
 
@@ -76,13 +76,13 @@ const Stage = props => {
 
         const handleChildMessage = (event) => {
             if (event.data.type == "RECEIVE") {
-              console.log("handleChildMessage:", event);
-              const polygon = event.data.data.svg;
-              const scale   = event.data.data.scale;
-              setPolygon(polygon);
-              setScale(scale);
-              console.log("SETTING POLYGON:", polygon);
-              console.log("SETTING SCALE:", scale);
+                console.log("handleChildMessage:", event);
+                const polygon = event.data.data.svg;
+                const scale   = event.data.data.scale;
+                setPolygon(polygon);
+                setScale(scale);
+                console.log("SETTING POLYGON:", polygon);
+                console.log("SETTING SCALE:", scale);
             }
           };
       
@@ -92,6 +92,21 @@ const Stage = props => {
           };
     }, []);
 
+    const convertToYolo = (x1, x2, y1, y2) => {
+        const left = x1;
+        const right = x2;
+        const up = y1;
+        const down = y2;
+      
+        const w = right - left;
+        const h = down - up;
+      
+        const centerX = left + w / 2;
+        const centerY = up + h / 2;
+      
+        return [centerX, centerY, w, h].map((val) => parseFloat(val));
+    }
+    
     useEffect(() => {
         console.log("frameURL Effect")
         if (frameURL) {
@@ -103,8 +118,68 @@ const Stage = props => {
         }
     }, [frameURL]);
 
+    const handleSave = () => {
+        // Create a link element
+        var link = document.createElement('a');
+        link.href = frameURL;
+        link.download = 'video_frame.png';
+
+        // Simulate a click on the link to trigger the download
+        link.click();
+    }
+
+    const handleAnnotation = () => {        
+        if (polygon) {
+            // 1. SVG Path Values *= scale.uploadScale
+            const polygonValues = polygon[0].split(" ").slice(4).map(
+                val => Number(val) / scale.uploadScale);
+            console.log("polygonValues:", polygonValues);
+
+            // 2. Get X1, X2 and Y1, Y2 for bounding box
+            // const filteredArray = polygonValues.filter((value) => !isNaN(value));
+            const xValues = [];
+            const yValues = [];
+
+            polygonValues.forEach((num, index) => {
+                if (index % 2 === 0) {
+                    xValues.push(num);
+                } else {
+                    yValues.push(num);
+                }
+            });
+
+            console.log("xValues, yValues:", xValues, yValues);
+            const x1      = Math.min(...xValues);
+            const x2      = Math.max(...xValues);
+            const y1      = Math.min(...yValues);
+            const y2      = Math.max(...yValues);
+            console.log("x1, x2, y1, y2:", x1, x2, y1, y2);
+
+            // 3. Convert co-ordinates into YOLOv8 format
+            const vals = convertToYolo(x1, x2, y1, y2);
+            const [ ax, ay, w, h ] = vals;
+
+            console.log("ax, ay, w, h:", ax, ay, w, h);
+            
+            const content = `0 ${ax} ${ay} ${w} ${h}`;
+
+            const blob = new Blob([content], { type: "text/plain" });
+        
+            const a = document.createElement("a");
+            a.href = URL.createObjectURL(blob);
+            a.download = "myfile.txt";
+            a.click();
+        }
+    };
+
     return (
         <div class="stage-container">
+            <button onClick={() => handleSave()}>
+                Save Image
+            </button>
+            <button onClick={() => handleAnnotation()}>
+                Save Annotation
+            </button>
             <div class="stage">
                 <canvas
                     ref={canvasRef}

@@ -72,7 +72,9 @@ const ExportModal = props => {
     }, [streams]);
 
     const downloadStream = (id) => {
-        if (id) {
+        const sourceId = id["source"];
+        console.log("id:", sourceId);
+        if (sourceId) {
             const fnameToId = s => {
                 s = s.split("/")
                 s = s[s.length - 1]
@@ -81,7 +83,7 @@ const ExportModal = props => {
                 s = s.join(".");
                 return s;
             }
-            const downloadId = fnameToId(id);
+            const downloadId = fnameToId(sourceId) + ".json";
             window.open(`http://localhost:5000/api/analysis/download?stream=${downloadId}`);
         }
     };

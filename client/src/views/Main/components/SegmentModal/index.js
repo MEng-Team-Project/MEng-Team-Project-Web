@@ -36,7 +36,7 @@ const style = {
 };
 
 const SegmentModal = props => {
-    const { videoRef, open, segmentClose, setPolygon, setScale } = props;
+    const { videoRef, open, segmentClose, scale, polygon, setPolygon, setScale } = props;
 
     if (videoRef.current) {
         // console.log("SegmentModal:", videoRef.current.videoWidth, videoRef.current.videoHeight);
@@ -67,6 +67,8 @@ const SegmentModal = props => {
                         videoRef={videoRef}
                         setScale={setScale}
                         setPolygon={setPolygon}
+                        polygon={polygon}
+                        scale={scale}
                     />
                     <div class="modal-end">
                         <Button onClick={handleDone} title="Done" color="green" noAdd />

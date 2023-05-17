@@ -38,8 +38,17 @@ import {
 import ReactHlsPlayer from 'react-hls-player';
 
 // Polygon Modules
+import DeckGL from "deck.gl";
 import {
-  ViewMode
+  SelectionLayer,
+  EditableGeoJsonLayer,
+  DrawLineStringMode,
+  DrawPolygonMode,
+  MeasureAngleMode,
+  MeasureAreaMode,
+  ViewMode,
+  ModifyMode,
+  TransformMode
 } from "nebula.gl";
 import {WebMercatorViewport} from '@deck.gl/core';
 
@@ -75,7 +84,58 @@ const Main = props => {
     const [currentTime,  setCurrentTime]  = useState(0);
 
     // Deck.GL parameters
+    const [features, setFeatures] = useState({
+        type: "FeatureCollection",
+        features: []
+    });
     const [mode, setMode] = useState(() => ViewMode);
+    const [selectedFeatureIndexes, setSelectedFeatureIndexes] = useState([]);
+
+    const initialViewState = {
+        longitude: -122.43,
+        latitude: 37.775,
+        zoom: 12
+    };
+
+    // Deck.GL editor layer
+    const layer = new EditableGeoJsonLayer({
+        // id: "geojson-layer",
+        // selectionType: "rectangle",
+        data: features,
+        pickable: true,
+        mode,
+        onClick: (info, event) => {
+            const coordCount = Array.from(info.object.geometry.coordinates)[0].length;
+            console.log(coordCount);
+            if (coordCount > 2) {
+                console.log('Clicked:', info, event, info.object.geometry.coordinates); // , vidCoords);
+                const regionIdx = info.index;
+                const existingLabel = routes[regionIdx];
+                const label = prompt("Set route region label", existingLabel);
+                let newRoutes = [...routes];
+                if (label) {
+                    newRoutes[regionIdx] = label;
+                } else {
+                    newRoutes[regionIdx] = existingLabel;
+                }
+                setRoutes(newRoutes);
+            }
+        },
+        onSelect: ({ pickingInfos }) => {
+            console.log("SELECT:", pickingInfos)
+            // use pickingInfos to set the SelectedFeatureIndexes
+            setSelectedFeatureIndexes(pickingInfos.map((pi) => pi.index));
+        
+            // any other functionality for selecting, like adding id's to state
+        },
+        selectedFeatureIndexes,
+        onEdit: ({ updatedData }) => {
+            setFeatures(updatedData);
+            const features    = updatedData.features;
+            console.log("updatedData:", updatedData)
+        },
+        getLineColor: (feature) => [255, 0, 0]
+    });
 
     const handleTimeUpdate = () => {
         setCurrentTime(videoRef.current.currentTime);
@@ -157,6 +217,7 @@ const Main = props => {
                             src={`/streams/${stream.source}`}
                             muted
                             loop
+                            controls
                             onContextMenu={e => e.preventDefault()}
                             onTimeUpdate={handleTimeUpdate}
                         >
@@ -164,6 +225,9 @@ const Main = props => {
                         </video>
                     )
                 }
+                 {(showEditor) && (
+                    <div></div>
+                )}
             </div>
             <Sidebar
                 streams={streams}
@@ -202,6 +266,8 @@ const Main = props => {
                 segmentClose={editorClose}
                 setPolygon={handleSetPolygon}
                 setScale={handleSetScale}
+                polygon={polygon}
+                scale={scale}
                 />
             <Controls
                 stream={stream}
