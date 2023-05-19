@@ -72,7 +72,7 @@ const CHECK_MODE = (mode) => {
 };
 
 const EditorControls = props => {
-    const { setMode, mode, showEditor, setShowEditor } = props;
+    const { setMode, mode, showEditor, setShowEditor, setShowControls, showControls } = props;
     const CUR_MODE = CHECK_MODE(mode);
 
     return (
@@ -102,6 +102,19 @@ const EditorControls = props => {
                 <ShapeLineOutlinedIcon />
             </EditorControl>
             */}
+            <EditorControl
+                onClick={() => {
+                    console.log("showControls:", showControls);
+                    setShowControls(!showControls)
+                }}
+                title={"Controls"}
+            >
+                {(showControls) ? (
+                    <VisibilityOutlinedIcon />
+                ) : (
+                    <VisibilityOffOutlinedIcon/>
+                )}
+            </EditorControl>
             <EditorControl
                 onClick={() => setShowEditor(!showEditor)}
                 title={(showEditor) ? "Hide" : "Show"}
@@ -205,7 +218,18 @@ const Analytics = props => {
 }
 
 const Controls = props => {
-    const { stream, currentTime, setMode, mode, showEditor, setShowEditor, showMap, setShowMap } = props;
+    const { 
+        stream,
+        currentTime,
+        setMode,
+        mode,
+        showEditor,
+        setShowEditor,
+        showMap,
+        setShowMap,
+        setShowControls,
+        showControls
+    } = props;
     const [showEditorControls, setShowEditorControls] = useState(false);
     const [showAnalytics, setShowAnalytics] = useState(false);
 
@@ -232,6 +256,8 @@ const Controls = props => {
                         mode={mode}
                         showEditor={showEditor}
                         setShowEditor={setShowEditor}
+                        setShowControls={setShowControls}
+                        showControls={showControls}
                         />
                 )}
                 <div className="controls">

@@ -75,6 +75,7 @@ const Main = props => {
 
     // Route editor toggle
     const [showEditor,   setShowEditor]   = useState(false);
+    const [showControls, setShowControls] = useState(false);
     const [showMap,      setShowMap]      = useState(false);
 
     // Route mapping
@@ -205,7 +206,7 @@ const Main = props => {
                             ref={videoRef}
                             src="./livestream/tes/output.m3u8"
                             autoPlay={true}
-                            controls={true}
+                            controls={showControls}
                             onContextMenu={e => e.preventDefault()}
                             className="feed"
                         />
@@ -214,10 +215,10 @@ const Main = props => {
                             autoPlay
                             ref={videoRef}
                             className="feed"
+                            controls={showControls}
                             src={`/streams/${stream.source}`}
                             muted
                             loop
-                            controls
                             onContextMenu={e => e.preventDefault()}
                             onTimeUpdate={handleTimeUpdate}
                         >
@@ -277,7 +278,9 @@ const Main = props => {
                 setShowEditor={setShowEditor}
                 showEditor={showEditor}
                 showMap={showMap}
-                setShowMap={setShowMap} />
+                setShowMap={setShowMap}
+                showControls={showControls}
+                setShowControls={setShowControls} />
             {(showMap) && (
                 <AnalysisMap
                     routes={routes}
