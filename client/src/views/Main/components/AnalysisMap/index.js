@@ -41,7 +41,7 @@ const AnalysisMap = props => {
     return (
         <div className="map">
             <div className="map-controls">
-                {routes.map((route, i) => (
+                {(routes) && (routes.map((route, i) => (
                     <Tooltip content="Mark Region" direction="top" >
                         <div className="map-marker">
                             <RoomIcon
@@ -59,7 +59,7 @@ const AnalysisMap = props => {
                             </span>
                         </div>
                     </Tooltip>
-                ))}
+                )))}
             </div>
             <Map
                 center={[

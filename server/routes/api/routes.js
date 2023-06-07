@@ -12,6 +12,7 @@ const router = express.Router();
 const fs = require("fs");
 const path = require("path");
 const sqlite3 = require('sqlite3').verbose();
+const fetch = require('node-fetch');
 
 /**
  * @route GET api/routes/
@@ -25,6 +26,16 @@ router.get("/", async (req, res) => {
     console.log("req.query.stream_name:", req.query.stream_name);
     try {
         let stream = req.query.stream_name;
+
+        // Ensure a recorded video is added to the DB if it hasn't already been (for livestreams this doesn't matter)
+        const livestreamDetails = {"directory": "", "ip": "", "port": 0, "streamName": stream.streamName, "protocol": ""};
+        fetch("/api/streams/add", {
+            method: 'POST',
+            body: livestreamDetails
+        })
+            .then(res => console.log(res))
+            .catch(err => console.error(err))
+
         const db = new sqlite3.Database(dbPath);
         const stmt = `SELECT polygon_json FROM routes WHERE stream_name=?;`;
         const rows = await new Promise((resolve, reject) => {

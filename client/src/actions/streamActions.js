@@ -10,7 +10,6 @@ import {
 
 // Get Streams
 export const getStreams = () => dispatch => {
-    // console.log("CALLING GET STREAMS");
     dispatch(setStreamsLoading());
     axios
         .get('/api/streams/all')
@@ -23,14 +22,13 @@ export const getStreams = () => dispatch => {
         .catch(err => 
             dispatch({
                 type: GET_STREAMS,
-                payload: null
+                payload: []
             })
         );
 };
 
 // Set Stream
 export const setStream = stream => dispatch => {
-    
     dispatch({
         type: SET_STREAM,
         payload: stream

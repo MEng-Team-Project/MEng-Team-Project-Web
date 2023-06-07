@@ -20,6 +20,8 @@ import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
 import VisibilityOffOutlinedIcon from '@mui/icons-material/VisibilityOffOutlined';
 import AnalyticsOutlinedIcon from '@mui/icons-material/AnalyticsOutlined';
 import MapOutlinedIcon from '@mui/icons-material/MapOutlined';
+import AddOutlinedIcon from '@mui/icons-material/AddOutlined';
+import DeleteOutlineOutlinedIcon from '@mui/icons-material/DeleteOutlineOutlined';
 
 // Global Components
 import {
@@ -58,32 +60,35 @@ const EditorControl = props => {
     )
 }
 
-const CHECK_MODE = (mode) => {
-    switch (mode.toString()) {
-        case (ModifyMode).toString():
-            return "SELECT";
-        case (DrawLineStringMode).toString():
-            return "LINE";
-        case (DrawPolygonMode).toString():
-            return "POLYGON"
-        default:
-            return ""
-    }
-};
+// const CHECK_MODE = (mode) => {
+//     switch (mode.toString()) {
+//         case (ModifyMode).toString():
+//             return "SELECT";
+//         case (DrawLineStringMode).toString():
+//             return "LINE";
+//         case (DrawPolygonMode).toString():
+//             return "POLYGON"
+//         default:
+//             return ""
+//     }
+// };
 
 const EditorControls = props => {
-    const { setMode, mode, showEditor, setShowEditor, setShowControls, showControls } = props;
-    const CUR_MODE = CHECK_MODE(mode);
+    const {
+        setMode,
+        mode,
+        showEditor,
+        setShowEditor,
+        setShowControls,
+        showControls,
+        deleteMode,
+        setDeleteMode,
+        showPolygons,
+        setShowPolygons
+    } = props;
 
     return (
         <div className="controls-editor">
-            <EditorControl
-                title="Select"
-                selected={CUR_MODE == "SELECT"}
-                onClick={() => setMode(() => ModifyMode)}
-            >
-                <HighlightAltOutlinedIcon/>
-            </EditorControl>
             {/*
             <EditorControl
                 title="Polygon"
@@ -104,12 +109,12 @@ const EditorControls = props => {
             */}
             <EditorControl
                 onClick={() => {
-                    console.log("showControls:", showControls);
-                    setShowControls(!showControls)
+                    setShowPolygons(!showPolygons)
                 }}
-                title={"Controls"}
+                title={"Show Regions"}
+                selected={showPolygons}
             >
-                {(showControls) ? (
+                {(showPolygons) ? (
                     <VisibilityOutlinedIcon />
                 ) : (
                     <VisibilityOffOutlinedIcon/>
@@ -117,13 +122,16 @@ const EditorControls = props => {
             </EditorControl>
             <EditorControl
                 onClick={() => setShowEditor(!showEditor)}
-                title={(showEditor) ? "Hide" : "Show"}
+                title={"Add Region"}
             >
-                {(showEditor) ? (
-                    <VisibilityOutlinedIcon />
-                ) : (
-                    <VisibilityOffOutlinedIcon/>
-                )}
+                <AddOutlinedIcon />
+            </EditorControl>
+            <EditorControl
+                title="Delete Region"
+                selected={deleteMode}
+                onClick={() => (setDeleteMode(!deleteMode))}
+            >
+                <DeleteOutlineOutlinedIcon />
             </EditorControl>
         </div>
     );
@@ -228,7 +236,11 @@ const Controls = props => {
         showMap,
         setShowMap,
         setShowControls,
-        showControls
+        showControls,
+        deleteMode,
+        setDeleteMode,
+        showPolygons,
+        setShowPolygons
     } = props;
     const [showEditorControls, setShowEditorControls] = useState(false);
     const [showAnalytics, setShowAnalytics] = useState(false);
@@ -258,10 +270,14 @@ const Controls = props => {
                         setShowEditor={setShowEditor}
                         setShowControls={setShowControls}
                         showControls={showControls}
+                        deleteMode={deleteMode}
+                        setDeleteMode={setDeleteMode}
+                        showPolygons={showPolygons}
+                        setShowPolygons={setShowPolygons}
                         />
                 )}
                 <div className="controls">
-                    <Tooltip content="Draw Routes" direction="left">
+                    <Tooltip content="Set Regions" direction="left">
                         <ModeEditOutlineOutlinedIcon
                             onClick={(stream) && toggleEdit}
                             className="icon controls-icon"

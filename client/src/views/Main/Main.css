@@ -28,3 +28,24 @@
     border: 1px solid red;
     box-sizing: border-box;
 }
+
+.svg-overlay {
+    position: absolute;
+    height: 100%;
+}
+
+.path {
+    width:  400px;
+    height: 400px;
+}
+
+.svg-outline {
+    stroke: #157eb3;
+    stroke-width: 3px;
+    fill: none;
+} 
+
+.svg-filled {
+    fill: black;
+    opacity: 0.4;
+}

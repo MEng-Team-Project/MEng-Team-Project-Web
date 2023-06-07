@@ -266,7 +266,7 @@ const SidebarStreamList = props => {
         }
     }
 
-    // console.log("streams: ", streams)
+    console.log("streams: ", streams)
     return (
         <div className="sidebar-tab__streams">
             {streams.map((stream, i) => ( 

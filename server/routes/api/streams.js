@@ -159,8 +159,8 @@ router.post('/add', (req, res) => {
     try {
         console.log(req.body);
         const db = new sqlite3.Database('main.db');
-        const streams_stmt = db.prepare(`INSERT INTO streams VALUES (?, ?, ?, ?, ?);`);
-        const livestream_stmt = db.prepare(`INSERT INTO livestream_times VALUES (?, ?, ?, ?);`);
+        const streams_stmt = db.prepare(`INSERT IGNORE INTO streams VALUES (?, ?, ?, ?, ?);`);
+        const livestream_stmt = db.prepare(`INSERT IGNORE INTO livestream_times VALUES (?, ?, ?, ?);`);
         const name = req.body.streamName;
         const port = (req.body.port) ? `:${req.body.port}` : ""
         const source = `${req.body.protocol}://${req.body.ip}${port}/${req.body.directory}`;
