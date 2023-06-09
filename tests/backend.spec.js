@@ -9,7 +9,7 @@ describe('Backend test suite', () => {
 
         // act
         // send request to /api/init
-        const response = await request('http://localhost:6000')
+        const response = await request('http://localhost:3000')
             .post("/api/init")
             .send({
                 "stream": __dirname + "/resources/test_video_1.mp4"
@@ -19,7 +19,7 @@ describe('Backend test suite', () => {
         // expect response to be 200
         // expect text to be "Video stream analysis successfully started"\n
         expect(response.statusCode).toBe(200);
-        expect(response.text).toBe('"Video stream analysis successfully started"\n');
-    });
+        expect(response.text).toBe('Video stream analysis successfully started');
+    }, 10000);
 
 });

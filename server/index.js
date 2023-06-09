@@ -38,6 +38,7 @@ app.use("/streams",    express.static(__dirname + "/streams"));
 app.use("/livestream", express.static(__dirname + "/livestream"));
 
 // Routes
+const init  = require("./routes/api/init");
 const streams  = require("./routes/api/streams");
 const analysis = require("./routes/api/analysis");
 const routeAnalytics = require("./routes/api/routeAnalytics");
@@ -47,6 +48,7 @@ const host = args.host; // "0.0.0.0";
 const port = args.port; // 5000;
 
 // Routes
+app.use("/api/init", init);
 app.use("/api/analysis", analysis);
 app.use("/api/streams",  streams);
 app.use("/api/routeAnalytics", routeAnalytics);
