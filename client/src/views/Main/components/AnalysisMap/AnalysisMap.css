@@ -8,6 +8,17 @@ GLOBAL
     right: 0;
     padding: 0.5rem;
     background-color: rgb(41, 50, 60);
+    transition: all 0.5s ease-in-out;
+}
+
+.map-expanded {
+    position: fixed;
+    bottom: 0;
+    right: 50%;
+    transform: translate(+50%, -0);
+    padding: 0.5rem;
+    background-color: rgb(41, 50, 60);
+    transition: all 0.5s ease-in-out;
 }
 
 .map-marker {
@@ -18,11 +29,57 @@ GLOBAL
     color: white;
 }
 
+.leaflet-routing-alt table{ /*hide route directions*/
+    display: none;
+}
+
 .map-marker__text {
     margin-left: 0.5rem;
     margin-right: 0.5rem;
     user-select: none;
 }
+
+.map-controls__checkbox-sublist {
+    list-style: none;
+    margin-top: 5px;
+    margin-bottom: 5px;
+    padding-left: 15px;
+
+  }
+
+.map-controls__checkboxes {
+    position: absolute;
+    right:calc(100% + 10px);
+    display: inline-block;
+    flex-direction: column;
+    justify-content: center;
+    margin-right: 0px;
+    width: 100px;
+    background-color: rgb(41, 50, 60);
+    border-radius: 8px;
+    max-height: 50vh;
+    overflow-y: scroll;
+  }
+
+.map-controls__checkboxes label {
+    align-items: center;
+    display: flex;
+    color: white;
+    font-size: 12px;
+    font-family: sans-serif;
+}
+  
+.map-controls__checkbox-label input {
+    margin-right: 5px;
+    width: 20px;
+    height: 20px;
+}
+
+.map-controls__checkbox-container {
+margin-bottom: 10px;
+}
+
+
 
 /*
 ICONS

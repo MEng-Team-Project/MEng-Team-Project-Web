@@ -184,13 +184,14 @@ const Main = props => {
     port: "",
     protocol: ""});
     const [edit, setEdit] = useState(false);
+    const [visible, setVisible] = useState(true);
 
     // Route editor toggle
     const [showEditor,   setShowEditor]   = useState(false);
     const [showMap,      setShowMap]      = useState(false);
 
     // Route mapping
-    const [routes, setRoutes]             = useState([]);
+    const [roads, setRoads]             = useState([]);
 
     // Video player tracking
     const [currentTime,  setCurrentTime]  = useState(0);
@@ -233,15 +234,16 @@ const Main = props => {
             if (coordCount > 2) {
                 console.log('Clicked:', info, event, info.object.geometry.coordinates); // , vidCoords);
                 const regionIdx = info.index;
-                const existingLabel = routes[regionIdx];
+                const existingLabel = roads[regionIdx];
                 const label = prompt("Set route region label", existingLabel);
-                let newRoutes = [...routes];
+                console.log('here');
+                let newRoads = [...roads];
                 if (label) {
-                    newRoutes[regionIdx] = label;
+                    newRoads[regionIdx] = label;
                 } else {
-                    newRoutes[regionIdx] = existingLabel;
+                    newRoads[regionIdx] = existingLabel;
                 }
-                setRoutes(newRoutes);
+                setRoads(newRoads);
             }
         },
         onSelect: ({ pickingInfos }) => {
@@ -373,7 +375,11 @@ const Main = props => {
                 setOpenAddStream={setOpenAddStream}
                 editStreamOpen={editStreamOpen}
                 setEditMode = {setEditMode}
+                showMap={showMap}
+                setShowMap={setShowMap}
                 edit = {edit}
+                setVisible = {setVisible}
+                visible = {visible}
                 />
             <ExportModal
                 open={openExport}
@@ -407,7 +413,9 @@ const Main = props => {
                 setShowMap={setShowMap} />
             {(showMap) && (
                 <AnalysisMap
-                    routes={routes}
+                    roads={roads}
+                    setVisible = {setVisible}
+                    visible = {visible}
                 />
             )}
         </div>

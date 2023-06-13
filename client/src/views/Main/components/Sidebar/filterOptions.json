@@ -9,19 +9,19 @@
         {
             "meta": "object",
             "data": {
+                "name": "person"
+            }
+        },
+        {
+            "meta": "object",
+            "data": {
+                "name": "bicycle"
+            }
+        },
+        {
+            "meta": "object",
+            "data": {
                 "name": "hgv"
-            }
-        },
-        {
-            "meta": "object",
-            "data": {
-                "name": "bike"
-            }
-        },
-        {
-            "meta": "object",
-            "data": {
-                "name": "bus"
             }
         }
     ],
@@ -29,25 +29,25 @@
         {
             "meta": "region",
             "data": {
-                "name": "West Park"
+                "name": "West_Park_Road"
             }
         },
         {
             "meta": "region",
             "data": {
-                "name": "East Park"
+                "name": "East_Park_Road"
             }
         },
         {
             "meta": "region",
             "data": {
-                "name": "North Burnaby"
+                "name": "North_Burnaby_Road"
             }
         },
         {
             "meta": "region",
             "data": {
-                "name": "South Burnaby"
+                "name": "South_Burnaby_Road"
             }
         }
     ]

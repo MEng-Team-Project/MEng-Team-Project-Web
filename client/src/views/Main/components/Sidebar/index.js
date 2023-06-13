@@ -18,7 +18,7 @@ As for the tabs, these are assumed to contain:
 */
 
 // React
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 
 // Redux
 import { connect } from "react-redux";
@@ -59,11 +59,11 @@ import { display } from '@mui/system';
 // Filter Options for Dropdown
 import filterOptions from './filterOptions.json';
 
-import TimeRangeSelector from '../../../../components/TimeRangeSelector';
 import DataSourceFilter from './Filters/DataSourceFilter';
 import DateTimeRangeFilter from './Filters/DateTimeRangeFilter';
 import MultiSelect from './Filters/MultiSelect';
 import { setFilters } from '../../../../actions/filterActions';
+import { setAnalytics } from '../../../../actions/analyticsActions';
 
 const SidebarLiveVideoLayer = props => {
     const { title, selected } = props;
@@ -135,7 +135,7 @@ const SidebarLiveVideo = props => {
 }
 
 const SidebarFilters = props => {
-    const { streams, filters, setFilters } = props;
+    const { streams, filters, setFilters, setAnalytics, setShowMap } = props;
     
     const [ dataSourceFilter, setDataSourceFilter ] = useState(filters.dataSourceFilter);
     const [ objectFilter, setObjectFilter ] = useState(filters.objectFilter);
@@ -144,14 +144,115 @@ const SidebarFilters = props => {
     const [ endRegionFilter, setEndRegionFilter ] = useState(filters.endRegionFilter);
 
     useEffect(() => {
-        setFilters(    {
+        setShowMap(true);
+    }, [setShowMap]);
+
+    const getAllAnalyticsFromBackend = useCallback(
+        async () => {
+            const streamName = dataSourceFilter?.data?.source.split('.').slice(0, -1).join('.');
+            const classes = ["car", "person", "bicycle", "hgv"];
+            const recordingStartTime = dateTimeRangeFilter?.data?.recordingStartTime;
+            const startTime = dateTimeRangeFilter?.data?.startTime;
+    
+            const analyticsDetails = {
+                "stream": streamName,
+                "regions" : {},
+                "classes": classes,
+                "time_of_recording": new Date(recordingStartTime ?? "2020-01-01T00:00").toISOString(),
+                "start_time": new Date(startTime ?? "2020-01-01T00:00").toISOString()
+            };
+    
+            const response = await axios.post("api/routeAnalytics/", analyticsDetails)
+                .then(res => {
+                    console.log("RES", res);
+                    return res;
+                })
+                .catch(err => {
+                    console.log(err);
+                    return err;
+                });
+    
+            return {
+                classes: classes,
+                response: response
+            };
+        }, [dataSourceFilter, dateTimeRangeFilter] );
+
+    const getAnalyticsFromBackend = useCallback(
+        async () => {
+            const streamName = dataSourceFilter?.data?.source.split('.').slice(0, -1).join('.');
+            const classes = objectFilter.map(object => object.data.name);
+            const recordingStartTime = dateTimeRangeFilter?.data?.recordingStartTime;
+            const startTime = dateTimeRangeFilter?.data?.startTime;
+            const endTime = dateTimeRangeFilter?.data?.endTime;
+            const interval = dateTimeRangeFilter?.data?.interval ?? 1800;
+    
+            const analyticsDetails = {
+                "stream": streamName,
+                "regions" : {},
+                "classes": classes,
+                "interval_spacing": interval,
+                "time_of_recording": new Date(recordingStartTime ?? "2020-01-01T00:00").toISOString(),
+                "start_time": new Date(startTime ?? "2020-01-01T00:00").toISOString(),
+                "end_time": new Date(endTime ?? "2020-01-01T00:30").toISOString(),
+                "start_regions": startRegionFilter.map(region => region.data.name),
+                "end_regions": endRegionFilter.map(region => region.data.name),
+            };
+    
+            const response = await axios.post("api/routeAnalytics/", analyticsDetails)
+                .then(res => {
+                    console.log("RES", res);
+                    return res;
+                })
+                .catch(err => {
+                    console.log(err);
+                    return err;
+                });
+    
+            return {
+                classes: classes,
+                response: response
+            };
+        }, [dataSourceFilter, objectFilter, dateTimeRangeFilter, startRegionFilter, endRegionFilter] );
+
+    const updateAnalytics = useCallback( async (dataSourceFilter) => {
+        console.log("UPDATE ANALYTICS", Object.keys(dataSourceFilter).length);
+        if (Object.keys(dataSourceFilter).length === 0) { return; }
+        // call backend
+        const analyticsFromBackend = await getAnalyticsFromBackend();
+        const allAnalyticsFromBackend = await getAllAnalyticsFromBackend();
+
+        // set analytics
+        if (analyticsFromBackend.response.status === 200 && allAnalyticsFromBackend.response.status === 200) {
+            const data = analyticsFromBackend.response.data;
+            const allData = allAnalyticsFromBackend.response.data;
+            setAnalytics({
+                interval: data.intervalSpacing,
+                objects: analyticsFromBackend.classes,
+                regions: data.regions,
+                counts: data.countsAtTimes[0].routeCounts,
+                all: {
+                    interval: allData.intervalSpacing,
+                    objects: allAnalyticsFromBackend.classes,
+                    regions: allData.regions,
+                    counts: allData.countsAtTimes[0].routeCounts
+                }});
+        } else {
+            console.warn("ERROR IN RETRIEVING ANALYTICS");
+            window.alert("There was an error in retrieving analytics. Please try again.");
+        }
+    }, [getAnalyticsFromBackend, getAllAnalyticsFromBackend, setAnalytics]);
+
+    useEffect(() => {
+        setFilters({
             dataSourceFilter: dataSourceFilter,
             objectFilter: objectFilter,
             dateTimeRangeFilter: dateTimeRangeFilter,
             startRegionFilter: startRegionFilter,
             endRegionFilter: endRegionFilter
         });
-    }, [ dataSourceFilter, objectFilter, dateTimeRangeFilter, startRegionFilter, endRegionFilter, setFilters ]);
+        updateAnalytics(dataSourceFilter);
+    }, [dataSourceFilter, objectFilter, dateTimeRangeFilter, startRegionFilter, endRegionFilter, setFilters, updateAnalytics]);
 
     const dropdownDataSources = streams.map(stream => ({
         "meta": "rgb(60, 97, 174)",
@@ -178,13 +279,15 @@ const SidebarFilters = props => {
         setObjectFilter(objectFilter.filter((object) => {return (object !== filter) ? true : false}));
     }
 
-    const updateDateTimeRangeFilter = (startTime, endTime) => {
+    const updateDateTimeRangeFilter = (recordingStartTime, startTime, endTime, interval) => {
         setDateTimeRangeFilter({
             meta: "dateTime",
             data: {
                 name: "dateTime",
+                recordingStartTime: recordingStartTime,
                 startTime: startTime,
-                endTime: endTime
+                endTime: endTime,
+                interval: interval
             }
         });
     }
@@ -246,7 +349,7 @@ const SidebarFilters = props => {
 
             <DateTimeRangeFilter
                 selectedDateTimeRange={dateTimeRangeFilter}
-                updateDateTimeRangeFilter={(startTime, endTime) => {updateDateTimeRangeFilter(startTime, endTime)}}
+                updateDateTimeRangeFilter={(recordingStartTime, startTime, endTime, interval) => {updateDateTimeRangeFilter(recordingStartTime, startTime, endTime, interval)}}
             />
 
             <MultiSelect key="startRegions"
@@ -442,10 +545,10 @@ const SidebarStreams = props => {
 };
 
 const Sidebar = props => {
-    const { filters, setFilters, streams, setStream, setOpenExport, setOpenImport, setOpenAnalysis, editStreamOpen, setEditMode, edit } = props;
+    const { streams, setStream, setOpenExport, setOpenImport, setOpenAnalysis, editStreamOpen, setEditMode, setShowMap, edit, visible, setVisible, analytics, setAnalytics, filters, setFilters} = props;
 
     const [tab, setTab] = useState("STREAMS");
-    const [visible, setVisible] = useState(true);
+    //const [visible, setVisible] = useState(true);
 
     return (
         <div className="sidebar-outermost">
@@ -519,7 +622,13 @@ const Sidebar = props => {
                                 setEditMode = {setEditMode}/>    
                         )}
                         {(tab == "FILTERS") && (
-                            <SidebarFilters streams={streams} filters={filters} setFilters={setFilters} />
+                            <SidebarFilters
+                                streams={streams}
+                                analytics={analytics}
+                                setAnalytics={setAnalytics}
+                                filters={filters}
+                                setFilters={setFilters}
+                                setShowMap={setShowMap}/>
                         )}
                         {(tab == "LIVE VIDEO") && (
                             <SidebarLiveVideo />
@@ -557,11 +666,12 @@ const Sidebar = props => {
 const mapStateToProps = state => {
     return {
        stream: state.streams.stream,
-       filters: state.filters.filters
+       filters: state.filters.filters,
+       analytics: state.analytics.analytics
     };
 }
 
 export default connect(
     mapStateToProps,
-    { setStream, setFilters }
+    { setStream, setFilters, setAnalytics }
 )(Sidebar);
