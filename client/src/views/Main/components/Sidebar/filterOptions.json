@@ -1,6 +1,54 @@
-[
-    {
-        "meta": "float",
-        "data": "time"
-    }
-]
+{
+    "objects": [
+        {
+            "meta": "object",
+            "data": {
+                "name": "car"
+            }
+        },
+        {
+            "meta": "object",
+            "data": {
+                "name": "person"
+            }
+        },
+        {
+            "meta": "object",
+            "data": {
+                "name": "bicycle"
+            }
+        },
+        {
+            "meta": "object",
+            "data": {
+                "name": "hgv"
+            }
+        }
+    ],
+    "regions": [
+        {
+            "meta": "region",
+            "data": {
+                "name": "West_Park_Road"
+            }
+        },
+        {
+            "meta": "region",
+            "data": {
+                "name": "East_Park_Road"
+            }
+        },
+        {
+            "meta": "region",
+            "data": {
+                "name": "North_Burnaby_Road"
+            }
+        },
+        {
+            "meta": "region",
+            "data": {
+                "name": "South_Burnaby_Road"
+            }
+        }
+    ]
+}

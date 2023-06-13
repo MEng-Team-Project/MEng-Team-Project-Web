@@ -74,6 +74,7 @@ const Main = props => {
 
     const { streams, stream, ...rest } = props;
     const videoRef = useRef(null);
+    const [visible, setVisible] = useState(true);
 
     // Route editor toggle
     const [showEditor,   setShowEditor]   = useState(false);
@@ -367,7 +368,11 @@ const Main = props => {
                 setOpenAddStream={setOpenAddStream}
                 editStreamOpen={editStreamOpen}
                 setEditMode = {setEditMode}
+                showMap={showMap}
+                setShowMap={setShowMap}
                 edit = {edit}
+                setVisible = {setVisible}
+                visible = {visible}
                 />
             <ExportModal
                 open={openExport}
@@ -416,7 +421,9 @@ const Main = props => {
                 setShowPolygons={setShowPolygons}/>
             {(showMap) && (
                 <AnalysisMap
-                    routes={routes}
+                    roads={roads}
+                    setVisible = {setVisible}
+                    visible = {visible}
                 />
             )}
         </div>
