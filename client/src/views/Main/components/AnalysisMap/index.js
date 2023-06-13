@@ -39,6 +39,10 @@ import {
   setAnalytics
 } from "../../../../actions/analyticsActions";
 
+/*
+roads     := labels
+*/
+
 const AnalysisMap = (props) => {
   const [positions, setPositions] = useState({});  
   //const {roads = Object.keys(positions), visible, setVisible } = props;
@@ -305,9 +309,9 @@ const calculateCongestion = (startRoad, endRoad, direction) => { //add filters s
     localAnalytics = totalAnalytics //analytics.all?
   } else { localAnalytics = analytics}
 
-  let routeCounts = null
-  let routeCounts2 = null
-  let scaler = 1
+  let routeCounts = null;
+  let routeCounts2 = null;
+  let scaler = 1;
   
   if(direction === "Route"){
     for(let i = 0; i < localAnalytics.counts.length; i++){
@@ -371,10 +375,12 @@ const calculateCongestion = (startRoad, endRoad, direction) => { //add filters s
   // Calculate the congestion value
   let congestionValue = 0;
 
-  if(routeCounts2 != null){
+  console.log("routeCounts1:", routeCounts)
+  console.log("routeCounts2:", routeCounts2)
+  if(routeCounts && routeCounts2){
     congestionValue = ( ( (routeCounts.total + routeCounts2.total) / timeInSeconds) / (fileteredTotal * scaler / (24*60*60)) ) * 100
   }
-  else {
+  else if (routeCounts) {
     congestionValue = ( ( (routeCounts.total) / timeInSeconds) / (fileteredTotal * scaler / (24*60*60)) ) * 100
   }
 
@@ -405,71 +411,158 @@ return congestionLevel;
     }
   };
 
-    return (
-        <div className="map">
-            <div className="map-controls">
-                {routes.map((route, i) => (
-                    <Tooltip content="Mark Region" direction="top" >
-                        <div className="map-marker">
-                            <RoomIcon
-                                onClick={() => handleTogglePlotting(route)}
-                                className="icon map-controls-icon"
-                                sx={{
-                                    color: (plotting && selected == route)
-                                           ? "white"
-                                           : "rgb(165, 168, 165)",
-                                    backgroundColor: "rgb(106, 116, 133)"
-                                }}
-                            />
-                            <span className="map-marker__text">
-                                {route}
-                            </span>
-                        </div>
-                    </Tooltip>
-                ))}
-            </div>
-            <Map
-                center={[
-                    50.796586,
-                    -1.098758
-                ]}
-                zoom={18}
-                scrollWheelZoom={true}
-                style={{
-                    width: "300px",
-                    height: "300px",
-                }}
-                onClick={e => {
-                    console.log("MAP CLICKED", e, plotting)
-                    if (plotting) {
-                        let newPositions = [...positions];
-                        let selectedIdx  = routes.indexOf(selected);
-                        newPositions[selectedIdx] = e.latlng;
-                        setPositions(newPositions);
-                        setPlotting(false);
-                    }
-                }}
-            >
-                <TileLayer
-                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+  const removePosition = () => {
+    const selectedIdx = roads.indexOf(selected);
+    const positionToRemove = positions[selected];
+    setPositions((prevState) => {
+      const newState = { ...prevState };
+      delete newState[selected];
+      return newState;
+    });
+
+    const newRoutes = routes.filter((route, index) => {
+      const routePositions = originalWaypoints[index];
+      // Check if the removed position exists in routePositions
+      const hasRemovedPosition = routePositions.includes(positionToRemove);
+      return !hasRemovedPosition;
+    });
+  
+    // Update mapCheckboxes based on the remaining routes
+    const newMapCheckboxes = newRoutes.reduce((acc, route, index) => {
+      acc[index] = mapCheckboxes[routes.indexOf(route)];
+      return acc;
+    }, {});
+  
+    // Update routeNames based on the remaining routes
+    const newRouteNames = newRoutes.map((route) => routeNames[routes.indexOf(route)]);
+  
+    setRoutes(newRoutes);
+    setMapCheckboxes(newMapCheckboxes);
+    setRouteNames(newRouteNames);
+    setSelected("");
+  };
+  
+  return (
+    <div className={mapClass}>
+      <div className="map-controls">
+        <div className="map-controls__checkboxes">
+          {routes.map((route, i) => (
+            <div key={i}>
+              <label
+                className="map-controls__checkbox-label"
+                id="routeCheckBox + {i}"
+              >
+                <input
+                  type="checkbox"
+                  name={`route_${i}`}
+                  checked={mapCheckboxes[`route_${i}`]} 
+                  onChange={(e) => handleMapCheckBoxes(e, i, "Route", routeNames[i])}
+                  defaultChecked
                 />
-                <FeatureGroup>
-                    {positions.map((position, i) => (
-                        <Marker
-                            key={i}
-                            position={position}
-                            label={routes[i]}
-                        >
-                            <Popup>
-                                <div>{routes[i]}</div>
-                            </Popup>
-                        </Marker>
-                    ))}
-                </FeatureGroup>
-            </Map>
+                Route {routeNames[i]}
+              </label>
+              <ul className="map-controls__checkbox-sublist">
+                <li>
+                  <label className="map-controls__checkbox-label_sub">
+                    <input
+                      type="checkbox"
+                      name={`incoming_${i}`}
+                      checked={mapCheckboxes[`incoming_${i}`]}
+                      onChange={(e) => handleMapCheckBoxes(e, i, "Incoming", routeNames[i])}
+                      disabled={!mapCheckboxes[`route_${i}`]}   
+                    />
+                    Incoming
+                  </label>
+                </li>
+                <li>
+                  <label className="map-controls__checkbox-label_sub">
+                    <input
+                     type="checkbox"
+                     name={`outgoing_${i}`}
+                     checked={mapCheckboxes[`outgoing_${i}`]}
+                     onChange={(e) => handleMapCheckBoxes(e, i, "Outgoing", routeNames[i])}
+                     disabled={!mapCheckboxes[`route_${i}`]}   
+                    />
+                    Outgoing
+                  </label>
+                </li>
+              </ul>
+            </div>
+          ))}
         </div>
-    );
+       {roads.map((road, i) => (
+          <Tooltip content="Mark Region" direction="top">
+            <div className="map-marker">
+              <RoomIcon
+                onClick={() => handleTogglePlotting(road)}
+                className="icon map-controls-icon"
+                sx={{
+                  color:
+                    plotting && selected == road
+                      ? "white"
+                      : "rgb(165, 168, 165)",
+                  backgroundColor: "rgb(106, 116, 133)",
+                }}
+              />
+              <span className="map-marker__text">{road}</span>
+            </div>
+          </Tooltip>
+        ))}
+      </div>
+      <Map
+        ref={mapRef}
+        center={center}
+        zoom={zoom}
+        scrollWheelZoom={true}
+        style={{
+          width: mapWidth,
+          height: mapHeight,
+        }}
+        onClick={(e) => {
+          console.log("MAP CLICKED", e, plotting);
+          console.log("routes", routeNames)
+          if (plotting) {
+            setPositions((prevState) => ({
+              ...prevState,
+              [selected]: e.latlng,
+            }));
+            setPlotting(false);
+          }
+        }}
+      >
+        <TileLayer
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+        />
+       <FeatureGroup>
+        {roads.map((road, i) => {
+          const position = positions[road];
+          if (position) {
+            return (
+              <Marker key={i} position={position} label={road}>
+                <Popup>
+                  <div>{road}</div>
+                </Popup>
+              </Marker>
+            );
+          } else {
+            return null;
+          }
+        })}
+      </FeatureGroup>
+      </Map>
+      <Tooltip title="Expand Map" arrow>
+        <IconButton className="map-expand" onClick={() => handleToggleExpand()}>
+          <AspectRatioIcon />
+        </IconButton>
+      </Tooltip>
+      <Tooltip title="Remove Selected Marker" arrow>
+        <IconButton className="map-expand" onClick={() => removePosition()}>
+          <CloseIcon />
+        </IconButton>
+      </Tooltip>
+    </div>
+  );
 };
 
 const mapStateToProps = state => {
@@ -480,5 +573,3 @@ const mapStateToProps = state => {
 }
 
 export default connect(mapStateToProps, {getAnalytics, setAnalytics}) (AnalysisMap);
-
-//export default AnalysisMap;

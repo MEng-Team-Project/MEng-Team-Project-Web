@@ -76,6 +76,9 @@ const Main = props => {
     const videoRef = useRef(null);
     const [visible, setVisible] = useState(true);
 
+    // Roads
+    const [roads,        setRoads]        = useState([]);
+
     // Route editor toggle
     const [showEditor,   setShowEditor]   = useState(false);
     const [showControls, setShowControls] = useState(false);
@@ -373,6 +376,7 @@ const Main = props => {
                 edit = {edit}
                 setVisible = {setVisible}
                 visible = {visible}
+                routes = {routes}
                 />
             <ExportModal
                 open={openExport}
@@ -421,7 +425,7 @@ const Main = props => {
                 setShowPolygons={setShowPolygons}/>
             {(showMap) && (
                 <AnalysisMap
-                    roads={roads}
+                    roads={(routes) ? Object.keys(routes) : []}
                     setVisible = {setVisible}
                     visible = {visible}
                 />

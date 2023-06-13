@@ -134,8 +134,27 @@ const SidebarLiveVideo = props => {
     );
 }
 
+const extractCoordinates = str => {
+    // regex pattern to match all coordinates (pairs of numbers)
+    const pattern = /\b(\d+(\.\d+)?)\s+(\d+(\.\d+)?)\b/g;
+
+    // find all matches
+    const matches = str.match(pattern);
+
+    if (matches) {
+        // split each match into x, y and convert them to float
+        return matches.map(pair => {
+            let [x, y] = pair.split(' ').map(parseFloat);
+            return [ x, y ];
+        });
+    }
+
+    // return empty array if no matches found
+    return [];
+}
+
 const SidebarFilters = props => {
-    const { streams, filters, setFilters, setAnalytics, setShowMap } = props;
+    const { routes, streams, filters, setFilters, setAnalytics, setShowMap } = props;
     
     const [ dataSourceFilter, setDataSourceFilter ] = useState(filters.dataSourceFilter);
     const [ objectFilter, setObjectFilter ] = useState(filters.objectFilter);
@@ -153,10 +172,20 @@ const SidebarFilters = props => {
             const classes = ["car", "person", "bicycle", "hgv"];
             const recordingStartTime = dateTimeRangeFilter?.data?.recordingStartTime;
             const startTime = dateTimeRangeFilter?.data?.startTime;
-    
+            
+            const regionData = Object.entries(routes).map(item => {
+                const polygonSVG     = item[0]["data"][0];
+                console.log("polygonSVG:", polygonSVG)
+                const rawPolygonData = extractCoordinates(polygonSVG).slice(1);
+                return item[0], rawPolygonData;
+            });
+            let regions = {};
+            regionData.forEach(item => regions[item[0]] = item[1]);
+            console.log("hopefulyl brav regions", regions, regionData);
+
             const analyticsDetails = {
-                "stream": streamName,
-                "regions" : {},
+                "stream":  streamName,
+                "regions": regions,
                 "classes": classes,
                 "time_of_recording": new Date(recordingStartTime ?? "2020-01-01T00:00").toISOString(),
                 "start_time": new Date(startTime ?? "2020-01-01T00:00").toISOString()
@@ -186,10 +215,20 @@ const SidebarFilters = props => {
             const startTime = dateTimeRangeFilter?.data?.startTime;
             const endTime = dateTimeRangeFilter?.data?.endTime;
             const interval = dateTimeRangeFilter?.data?.interval ?? 1800;
-    
+            
+            const regionData = Object.entries(routes).map(item => {
+                const polygonSVG     = item[0]["data"][0];
+                console.log("polygonSVG:", polygonSVG)
+                const rawPolygonData = extractCoordinates(polygonSVG).slice(1);
+                return item[0], rawPolygonData;
+            });
+            let regions = {};
+            regionData.forEach(item => regions[item[0]] = item[1]);
+            console.log("another one regions", regions, regionData);
+
             const analyticsDetails = {
                 "stream": streamName,
-                "regions" : {},
+                "regions" : regions,
                 "classes": classes,
                 "interval_spacing": interval,
                 "time_of_recording": new Date(recordingStartTime ?? "2020-01-01T00:00").toISOString(),
@@ -545,7 +584,7 @@ const SidebarStreams = props => {
 };
 
 const Sidebar = props => {
-    const { streams, setStream, setOpenExport, setOpenImport, setOpenAnalysis, editStreamOpen, setEditMode, setShowMap, edit, visible, setVisible, analytics, setAnalytics, filters, setFilters} = props;
+    const { routes, streams, setStream, setOpenExport, setOpenImport, setOpenAnalysis, editStreamOpen, setEditMode, setShowMap, edit, visible, setVisible, analytics, setAnalytics, filters, setFilters} = props;
 
     const [tab, setTab] = useState("STREAMS");
     //const [visible, setVisible] = useState(true);
@@ -623,12 +662,14 @@ const Sidebar = props => {
                         )}
                         {(tab == "FILTERS") && (
                             <SidebarFilters
+                                routes={routes}
                                 streams={streams}
                                 analytics={analytics}
                                 setAnalytics={setAnalytics}
                                 filters={filters}
                                 setFilters={setFilters}
-                                setShowMap={setShowMap}/>
+                                setShowMap={setShowMap}
+                                />
                         )}
                         {(tab == "LIVE VIDEO") && (
                             <SidebarLiveVideo />
