@@ -39,10 +39,6 @@ import {
   setAnalytics
 } from "../../../../actions/analyticsActions";
 
-/*
-roads     := labels
-*/
-
 const AnalysisMap = (props) => {
   const [positions, setPositions] = useState({});  
   //const {roads = Object.keys(positions), visible, setVisible } = props;
@@ -107,13 +103,26 @@ const AnalysisMap = (props) => {
       const newOriginalWaypoints = {};
       const newRouteNames = []
 
-      //let congestion = incomingCount + outgoingCount;
-
-      //const data = analytics
+      let localAnalytics = null
+      let routeCounts = null
   
       //routingControl was being created for every combination of i and j, Meaning n*(n-1)/2 lines drawn between all possible pairs of points.
       for (let i = 0; i < positionsArray.length; i++) {
         for (let j = i + 1; j < positionsArray.length; j++) {
+
+          if(totalAnalytics.counts.length === 0){
+            const message = "No data has been provided"
+          }
+          else {
+            localAnalytics = totalAnalytics
+            for(let i = 0; i < localAnalytics.counts.length; i++){
+              if(localAnalytics.counts[i].start === roads[i] && localAnalytics.counts[i].end === roads[j]) {
+                routeCounts = localAnalytics.counts[i].counts;
+                break
+              }
+            }
+          }
+
           if (positionsArray[i] && positionsArray[j]) {
             console.log("roads", roads)
             const routeName = `${roads[i]} to ${roads[j]}`
@@ -123,7 +132,11 @@ const AnalysisMap = (props) => {
               distanceTemplate: "",
               timeTemplate: "",
               //TODO: add route analytics below
-              summaryTemplate: `<h2>${routeName}</h2> Analytics info will be displayed here eg HGVs = 60 ...`,
+              summaryTemplate: `<h2>${routeName}</h2> All Route Analytics:<br>
+                                                Cars: ${routeCounts.car}<br>
+                                                Bicycles: ${routeCounts.bicycle}<br>
+                                                HGVs: ${routeCounts.hgv}<br>
+                                                People ${routeCounts.person}:`,
               fitSelectedRoutes: true,
               draggableWaypoints: false,
               routeWhileDragging: false,
@@ -220,12 +233,44 @@ const handleMapCheckBoxes = (event, i, type, routeName) => {
       
         return updatedState;
       });
- 
+
+    let outgoingCount = null
+    let incomingCount = null
+    let localAnalytics = analytics
+
+    if(analytics && totalAnalytics){
+      for(let i = 0; i < localAnalytics.counts.length; i++){
+        if(localAnalytics.counts[i].start === startRoad && localAnalytics.counts[i].end === endRoad) {
+          outgoingCount = localAnalytics.counts[i].counts;
+          break
+        }
+      }
+
+      for(let i = 0; i < localAnalytics.counts.length; i++){
+        if(localAnalytics.counts[i].end === startRoad && localAnalytics.counts[i].start === endRoad) {
+          incomingCount = localAnalytics.counts[i].counts;
+          break
+        }
+      }
+  }
     const route = routes[i]
     if(isChecked){
         showRoute(i, type, startRoad, endRoad);
-        if (name.includes("incoming_") || name.includes("outgoing_")) {
+        if (name.includes("incoming_")) {
           route.show()
+          route.options.summaryTemplate = `<h2>${routeName}</h2> Incoming Analytics:<br>
+                                            Cars: ${incomingCount.car}<br>
+                                            Bicycles: ${incomingCount.bicycle}<br>
+                                            HGVs: ${incomingCount.hgv}<br>
+                                            People ${incomingCount.person}:`
+        }
+        else if(name.includes("outgoing_")){
+          route.show()
+          route.options.summaryTemplate = `<h2>${routeName}</h2> Outgoing Analytics:<br>
+                                            Cars: ${outgoingCount.car}<br>
+                                            Bicycles: ${outgoingCount.bicycle}<br>
+                                            HGVs: ${outgoingCount.hgv}<br>
+                                            People ${outgoingCount.person}:`
         }
     }else{
         if (name.includes("incoming_") || name.includes("outgoing_")) {
@@ -303,15 +348,15 @@ const calculateCongestion = (startRoad, endRoad, direction) => { //add filters s
 
   let localAnalytics = null
 
-  if(analytics.counts.length === 0 && totalAnalytics.counts.length === 0){
+  if(totalAnalytics.counts.length === 0){ //analytics.counts.length === 0 && 
     return "grey"
   } else if (analytics.counts.length === 0){
     localAnalytics = totalAnalytics //analytics.all?
   } else { localAnalytics = analytics}
 
-  let routeCounts = null;
-  let routeCounts2 = null;
-  let scaler = 1;
+  let routeCounts = null
+  let routeCounts2 = null
+  let scaler = 1
   
   if(direction === "Route"){
     for(let i = 0; i < localAnalytics.counts.length; i++){
@@ -347,7 +392,7 @@ const calculateCongestion = (startRoad, endRoad, direction) => { //add filters s
   }
   
   // change to routeCounts.interval -- seconds //
-  const timeInSeconds = localAnalytics.interval //- analytics.startTime   // CHANGE WHEN TIME FORMAT IS KNOWN
+  const timeInSeconds = localAnalytics.interval //
 
   // accomodate multiple vehicle being filtered for
   let fileteredTotal = 0
@@ -375,13 +420,11 @@ const calculateCongestion = (startRoad, endRoad, direction) => { //add filters s
   // Calculate the congestion value
   let congestionValue = 0;
 
-  console.log("routeCounts1:", routeCounts)
-  console.log("routeCounts2:", routeCounts2)
   if(routeCounts && routeCounts2){
-    congestionValue = ( ( (routeCounts.total + routeCounts2.total) / timeInSeconds) / (fileteredTotal * scaler / (24*60*60)) ) * 100
+    congestionValue = ( ( (routeCounts.total + routeCounts2.total) ) / ((fileteredTotal * scaler / (24*60*60)) * timeInSeconds) ) * 100
   }
   else if (routeCounts) {
-    congestionValue = ( ( (routeCounts.total) / timeInSeconds) / (fileteredTotal * scaler / (24*60*60)) ) * 100
+    congestionValue = ( ( (routeCounts.total) ) / ((fileteredTotal * scaler / (24*60*60)) * timeInSeconds) ) * 100
   }
 
   // output the congestion level string
