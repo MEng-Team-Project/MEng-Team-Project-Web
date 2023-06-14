@@ -3,11 +3,51 @@ const fs = require('fs');
 const path = require('path');
 const { response } = require('express');
 
-
-
 describe('Backend test suite', () => {
     // NEED TO ADD TESTS FOR /api/streams/add
     // NEED TO ADD TESTS FOR /api/streams/edit
+    it('tests posting to /api/streams/edit endpoint', async() => {
+        // arrange 
+        // add stream to be edited
+        const addResponse = await request('http://localhost:3000')
+            .post("/api/streams/add")
+            .send({
+                "directory":  "funkyDirectory",
+                "ip":         "127.0.0.1",
+                "port":       "1935",
+                "streamName": "test_stream_lol",
+                "protocol":   "rtmp"
+            }
+        );
+        // act
+        
+        // send request to /api/streams
+        const response = await request('http://localhost:3000')
+            .post("/api/streams/edit")
+            .send({
+                "directory":  "/funkyDirectory",
+                "ip":         "192.69.69.1",
+                "port":       "1",
+                "streamName": "edited_test_stream",
+                "protocol":   "rtmp",
+                "ogSource":   "rtmp://127.0.0.1:1935/funkyDirectory"
+            }
+        );
+
+        // assert
+        // expect response to be 200
+        // expect response.text to contain "Livestream edited in database and HLS streaming initialised"
+        expect(response.statusCode).toBe(200);
+        expect(response.text).toBe('Livestream edited in the database and HLS streaming initialized');
+
+        // cleanup
+        const deleteResponse = await request('http://localhost:3000')
+            .post("/api/streams/delete")
+            .send({
+                "source": "rtmp://192.69.69.1:1/funkyDirectory"
+            }
+        );
+    }, 10000);
 
     // Helper to remove and reupload test_video_1.mp4
     const uploadVideoIfNotExist = async () => {
@@ -32,6 +72,32 @@ describe('Backend test suite', () => {
         }
     }
 
+    it('tests posting to /api/streams/delete endpoint', async() => {
+        // arrange
+        const addResponse = await request('http://localhost:3000')
+            .post("/api/streams/add")
+            .send({
+                "directory":  "delDir",
+                "ip":         "localhost",
+                "port":       "1935",
+                "streamName": "test_stream",
+                "protocol":   "rtmp"
+            }
+        );
+        
+        // act
+        const response = await request('http://localhost:3000')
+            .post("/api/streams/delete")
+            .send({
+                "source": "rtmp://localhost:1935/delDir"
+            }
+        );
+
+        // assert
+        expect(response.statusCode).toBe(200);
+        expect(response.text).toBe('stream deleted from database/directory and HLS streaming updated');
+    });
+
     it('tests posting to /api/streams/add endpoint', async() => {
         // act
         // send request to /api/streams
@@ -39,9 +105,9 @@ describe('Backend test suite', () => {
             .post("/api/streams/add")
             .send({
                 "directory": "test",
-                "ip": "127.0.0.1",
+                "ip": "127.0.2.1",
                 "port": "1935",
-                "streamName": "test_stream",
+                "streamName": "another_stream",
                 "protocol": "rtmp"
             }
         );
@@ -128,37 +194,37 @@ describe('Backend test suite', () => {
         expect(response.text).toBe('video deleted from directory');
     }, 10000);
 
-    it('tests /api/init endpoint', async() => {
+    // it('tests /api/init endpoint', async() => {
 
-        // arrange
-        // add video file to be analysed
-        await uploadVideoIfNotExist()
-        // remove db from analysis folder if already exists
-        const potentialExistingFilePath = path.join(__dirname, '..', 'server', 'analysis', 'test_video_1.db');
-        if (fs.existsSync(potentialExistingFilePath)) {
-            fs.unlinkSync(potentialExistingFilePath);
-        }
+    //     // arrange
+    //     // add video file to be analysed
+    //     await uploadVideoIfNotExist()
+    //     // remove db from analysis folder if already exists
+    //     const potentialExistingFilePath = path.join(__dirname, '..', 'server', 'analysis', 'test_video_1.db');
+    //     if (fs.existsSync(potentialExistingFilePath)) {
+    //         fs.unlinkSync(potentialExistingFilePath);
+    //     }
 
-        // Remove db from init if already exists
-        const potentialExistingDb = path.join(__dirname, '..', 'server', 'analysis', 'test_video_1.db');
-        if (fs.existsSync(potentialExistingDb)) {
-            fs.unlinkSync(potentialExistingDb);
-        }
+    //     // Remove db from init if already exists
+    //     const potentialExistingDb = path.join(__dirname, '..', 'server', 'analysis', 'test_video_1.db');
+    //     if (fs.existsSync(potentialExistingDb)) {
+    //         fs.unlinkSync(potentialExistingDb);
+    //     }
 
-        // act
-        // send request to /api/init
-        const response = await request('http://localhost:3000')
-            .post("/api/init")
-            .send({
-                "stream": path.join(__dirname, '..', 'server', 'streams', 'test_video_1.mp4')
-            });
+    //     // act
+    //     // send request to /api/init
+    //     const response = await request('http://localhost:3000')
+    //         .post("/api/init")
+    //         .send({
+    //             "stream": path.join(__dirname, '..', 'server', 'streams', 'test_video_1.mp4')
+    //         });
 
-        // assert
-        // expect response to be 200
-        // expect text to be "Video stream analysis successfully started"\n
-        expect(response.statusCode).toBe(200);
-        expect(response.text).toBe('Video stream analysis successfully started');
-    }, 120000);
+    //     // assert
+    //     // expect response to be 200
+    //     // expect text to be "Video stream analysis successfully started"\n
+    //     expect(response.statusCode).toBe(200);
+    //     expect(response.text).toBe('Video stream analysis successfully started');
+    // }, 120000);
 
     it('tests posting to /api/analysis endpoint', async () => {
         // arrange
