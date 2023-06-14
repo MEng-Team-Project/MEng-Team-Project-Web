@@ -4,51 +4,6 @@ const path = require('path');
 const { response } = require('express');
 
 describe('Backend test suite', () => {
-    // NEED TO ADD TESTS FOR /api/streams/add
-    // NEED TO ADD TESTS FOR /api/streams/edit
-    it('tests posting to /api/streams/edit endpoint', async() => {
-        // arrange 
-        // add stream to be edited
-        const addResponse = await request('http://localhost:3000')
-            .post("/api/streams/add")
-            .send({
-                "directory":  "funkyDirectory",
-                "ip":         "127.0.0.1",
-                "port":       "1935",
-                "streamName": "test_stream_lol",
-                "protocol":   "rtmp"
-            }
-        );
-        // act
-        
-        // send request to /api/streams
-        const response = await request('http://localhost:3000')
-            .post("/api/streams/edit")
-            .send({
-                "directory":  "/funkyDirectory",
-                "ip":         "192.69.69.1",
-                "port":       "1",
-                "streamName": "edited_test_stream",
-                "protocol":   "rtmp",
-                "ogSource":   "rtmp://127.0.0.1:1935/funkyDirectory"
-            }
-        );
-
-        // assert
-        // expect response to be 200
-        // expect response.text to contain "Livestream edited in database and HLS streaming initialised"
-        expect(response.statusCode).toBe(200);
-        expect(response.text).toBe('Livestream edited in the database and HLS streaming initialized');
-
-        // cleanup
-        const deleteResponse = await request('http://localhost:3000')
-            .post("/api/streams/delete")
-            .send({
-                "source": "rtmp://192.69.69.1:1/funkyDirectory"
-            }
-        );
-    }, 10000);
-
     // Helper to remove and reupload test_video_1.mp4
     const uploadVideoIfNotExist = async () => {
         const potentialExistingFilePath = path.join(__dirname, '..', 'server', 'streams', 'test_video_1.mp4');
@@ -72,42 +27,34 @@ describe('Backend test suite', () => {
         }
     }
 
-    it('tests posting to /api/streams/delete endpoint', async() => {
-        // arrange
-        const addResponse = await request('http://localhost:3000')
-            .post("/api/streams/add")
-            .send({
-                "directory":  "delDir",
-                "ip":         "localhost",
-                "port":       "1935",
-                "streamName": "test_stream",
-                "protocol":   "rtmp"
-            }
-        );
-        
-        // act
-        const response = await request('http://localhost:3000')
-            .post("/api/streams/delete")
-            .send({
-                "source": "rtmp://localhost:1935/delDir"
-            }
-        );
-
-        // assert
-        expect(response.statusCode).toBe(200);
-        expect(response.text).toBe('stream deleted from database/directory and HLS streaming updated');
-    });
-
     it('tests posting to /api/streams/add endpoint', async() => {
+        // arrange
+        // check if stream already exists in
+        // /api/streams/all
+        // if it does, delete it
+        const checkResponse = await request('http://localhost:3000')
+            .get("/api/streams/all")
+            .set('Accept', 'application/json');
+
+        const hasTestStream = checkResponse.body.some(obj => obj.stream_name === "test_stream");
+
+        if (hasTestStream) {
+            await request('http://localhost:3000')
+                .post("/api/streams/delete")
+                .send({
+                    "source": "rtmp://127.0.0.1:1935/test_stream"
+                });
+        }
+
         // act
         // send request to /api/streams
         const response = await request('http://localhost:3000')
             .post("/api/streams/add")
             .send({
-                "directory": "test",
-                "ip": "127.0.2.1",
+                "directory": "test_stream",
+                "ip": "127.0.0.1",
                 "port": "1935",
-                "streamName": "another_stream",
+                "streamName": "test_stream",
                 "protocol": "rtmp"
             }
         );
@@ -117,7 +64,113 @@ describe('Backend test suite', () => {
         // expect response.text to contain "Livestream added to database and HLS streaming initialised"
         expect(response.statusCode).toBe(200);
         expect(response.text).toBe('Livestream added to database and HLS streaming initialised');
-    }, 10000);    
+    }, 10000);
+
+    it('tests posting to /api/streams/edit endpoint', async() => {
+        // arrange 
+        // add stream to be edited
+
+        // check if stream already exists in
+        // /api/streams/all
+        // if it does, delete it
+
+        const checkIfExistsResponse = await request('http://localhost:3000')
+            .get("/api/streams/all")
+            .set('Accept', 'application/json');
+
+        const hasTestStreamToEdit = checkIfExistsResponse.body.some(obj => obj.stream_name === "test_stream_to_edit");
+        const hasEditedTestStream = checkIfExistsResponse.body.some(obj => obj.stream_name === "edited_test_stream");
+
+        if (hasTestStreamToEdit) {
+            await request('http://localhost:3000')
+                .post("/api/streams/delete")
+                .send({
+                    "source": "rtmp://127.0.0.1:1935/test_stream_to_edit"
+                });
+        }
+
+        if (hasEditedTestStream) {
+            await request('http://localhost:3000')
+                .post("/api/streams/delete")
+                .send({
+                    "source": "rtmp://127.0.0.1:1935/edited_test_stream"
+                });
+        }
+
+        const addResponse = await request('http://localhost:3000')
+            .post("/api/streams/add")
+            .send({
+                "directory":  "test_stream_to_edit",
+                "ip":         "127.0.0.1",
+                "port":       "1935",
+                "streamName": "test_stream_to_edit",
+                "protocol":   "rtmp"
+            }
+        );
+        
+
+        // act
+        // send request to /api/streams
+        const response = await request('http://localhost:3000')
+            .post("/api/streams/edit")
+            .send({
+                "directory":  "/edited_test_stream",
+                "ip":         "127.0.0.1",
+                "port":       "1935",
+                "streamName": "edited_test_stream",
+                "protocol":   "rtmp",
+                "ogSource":   "rtmp://127.0.0.1:1935/test_stream_to_edit"
+            }
+        );
+
+        // assert
+        // expect response to be 200
+        // expect response.text to contain "Livestream edited in database and HLS streaming initialised"
+        expect(response.statusCode).toBe(200);
+        expect(response.text).toBe('Livestream edited in the database and HLS streaming initialized');
+    }, 10000);
+
+    it('tests posting to /api/streams/delete endpoint', async() => {
+        // arrange
+        const checkIfExistsResponse = await request('http://localhost:3000')
+            .get("/api/streams/all")
+            .set('Accept', 'application/json');
+
+        const hasTestStreamToDelete = checkIfExistsResponse.body.some(obj => obj.stream_name === "test_stream_to_delete");
+
+        if (hasTestStreamToDelete) {
+            await request('http://localhost:3000')
+                .post("/api/streams/delete")
+                .send({
+                    "source": "rtmp://127.0.0.1:1935/test_stream_to_delete"
+                });
+        }
+
+        const addResponse = await request('http://localhost:3000')
+            .post("/api/streams/add")
+            .send({
+                "directory":  "test_stream_to_delete",
+                "ip":         "127.0.0.1",
+                "port":       "1935",
+                "streamName": "test_stream_to_delete",
+                "protocol":   "rtmp"
+            }
+        );
+        
+        // act
+        const response = await request('http://localhost:3000')
+            .post("/api/streams/delete")
+            .send({
+                "source": "rtmp://127.0.0.1:1935/test_stream_to_delete"
+            }
+        );
+
+        // assert
+        expect(response.statusCode).toBe(200);
+        expect(response.text).toBe('stream deleted from database/directory and HLS streaming updated');
+    });
+
+
 
     it('tests putting to /api/streams/upload endpoint', async () => {
         // arrange
@@ -150,7 +203,7 @@ describe('Backend test suite', () => {
 
       }, 10000);
 
-      it('tests retrieving from /api/streams/all endpoint', async() => {
+      it('tests getting from /api/streams/all endpoint', async() => {
 
         // arrange
         // add stream to streams
@@ -194,37 +247,37 @@ describe('Backend test suite', () => {
         expect(response.text).toBe('video deleted from directory');
     }, 10000);
 
-    // it('tests /api/init endpoint', async() => {
+    it('tests posting to /api/init endpoint', async() => {
 
-    //     // arrange
-    //     // add video file to be analysed
-    //     await uploadVideoIfNotExist()
-    //     // remove db from analysis folder if already exists
-    //     const potentialExistingFilePath = path.join(__dirname, '..', 'server', 'analysis', 'test_video_1.db');
-    //     if (fs.existsSync(potentialExistingFilePath)) {
-    //         fs.unlinkSync(potentialExistingFilePath);
-    //     }
+        // arrange
+        // add video file to be analysed
+        await uploadVideoIfNotExist()
+        // remove db from analysis folder if already exists
+        const potentialExistingFilePath = path.join(__dirname, '..', 'server', 'analysis', 'test_video_1.db');
+        if (fs.existsSync(potentialExistingFilePath)) {
+            fs.unlinkSync(potentialExistingFilePath);
+        }
 
-    //     // Remove db from init if already exists
-    //     const potentialExistingDb = path.join(__dirname, '..', 'server', 'analysis', 'test_video_1.db');
-    //     if (fs.existsSync(potentialExistingDb)) {
-    //         fs.unlinkSync(potentialExistingDb);
-    //     }
+        // Remove db from init if already exists
+        const potentialExistingDb = path.join(__dirname, '..', 'server', 'analysis', 'test_video_1.db');
+        if (fs.existsSync(potentialExistingDb)) {
+            fs.unlinkSync(potentialExistingDb);
+        }
 
-    //     // act
-    //     // send request to /api/init
-    //     const response = await request('http://localhost:3000')
-    //         .post("/api/init")
-    //         .send({
-    //             "stream": path.join(__dirname, '..', 'server', 'streams', 'test_video_1.mp4')
-    //         });
+        // act
+        // send request to /api/init
+        const response = await request('http://localhost:3000')
+            .post("/api/init")
+            .send({
+                "stream": path.join(__dirname, '..', 'server', 'streams', 'test_video_1.mp4')
+            });
 
-    //     // assert
-    //     // expect response to be 200
-    //     // expect text to be "Video stream analysis successfully started"\n
-    //     expect(response.statusCode).toBe(200);
-    //     expect(response.text).toBe('Video stream analysis successfully started');
-    // }, 120000);
+        // assert
+        // expect response to be 200
+        // expect text to be "Video stream analysis successfully started"\n
+        expect(response.statusCode).toBe(200);
+        expect(response.text).toBe('Video stream analysis successfully started');
+    }, 120000);
 
     it('tests posting to /api/analysis endpoint', async () => {
         // arrange
@@ -323,29 +376,4 @@ describe('Backend test suite', () => {
         );
                 
     }, 30000);
-
-    // it('tests posting to /api/streams/add endpoint', async() => {
-    //     // arrange
-    //     // add stream to streams
-
-
-    //     // act
-    //     // send request to /api/streams
-    //     const response = await request('http://localhost:3000')
-    //         .post("/api/streams/add")
-    //         .send({
-    //             "directory": directoryValue,
-    //             "ip": ipValue,
-    //             "port": numericValue,
-    //             "streamName": streamName,
-    //             "protocol": protocolValue
-    //         }
-    //     );
-
-    //     // assert
-    //     // expect response to be 200
-    //     // expect response.text to contain "Livestream added to database and HLS streaming initialised"
-    //     expect(response.statusCode).toBe(200);
-    //     expect(response.text).toBe('Livestream added to database and HLS streaming initialised');
-    // }, 10000);
 });
