@@ -6,10 +6,9 @@ const createTables = (fileName) => {
     const db = new sqlite3.Database(fileName)
     const stmtPath = path.join(__dirname, "..", '/models/create_tables.sql')
     const sqlStatement = fs.readFileSync(stmtPath, encoding = "utf-8");
-    db.run(sqlStatement);
+    db.exec(sqlStatement, (err) => console.error(err));
     db.close();
 }  
 
-//createTables("main.db");
-//export default createTables;
+// createTables("main.db");
 module.exports = createTables;

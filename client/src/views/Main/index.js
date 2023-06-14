@@ -10,6 +10,7 @@ livestreams to process for analysis, etc.
 
 // React
 import React, { useState, useEffect, useRef } from 'react';
+import axios from "axios";
 
 // Redux
 import { connect } from "react-redux";
@@ -31,6 +32,7 @@ import {
     EditStreamModal,
     Controls,
     AnalysisMap,
+    SegmentModal
 } from "./components";
 
 // HLS Player
@@ -51,219 +53,102 @@ import {
 } from "nebula.gl";
 import {WebMercatorViewport} from '@deck.gl/core';
 
-/*
-// x1, y1, x2, y2
-const boundingBoxes = [
-    [266.0, 74.0, 275.0, 99.0],
-    [257.0, 42.0, 264.0, 62.0],
-    [292.0, 225.0, 302.0, 260.0],
-    [222.0, 8.0, 242.0, 37.0],
-    [251.0, 104.0, 263.0, 141.0],
-    [157.0, 73.0, 169.0, 104.0],
-    [290.0, 150.0, 309.0, 193.0],
-];
-<video src={stream + "#t=0.04"} />
-style={{
-    top:    videoRef.current.offsetLeft + (bbox[1] * videoRef.current.clientHeight / height),
-    left:   videoRef.current.offsetLeft + (bbox[0] * videoRef.current.clientWidth / width),
-    width:  (bbox[2] - bbox[0]) * videoRef.current.clientWidth / width,
-    height: (bbox[3] - bbox[1]) * videoRef.current.clientHeight / height
-}}
-
-{(videoRef.current) && (boundingBoxes.map((bbox, i) => (
-    <BoundingBox
-        key={i}
-        x1={videoRef.current.offsetLeft + bbox[0]}
-        y1={videoRef.current.offsetTop  + bbox[1]}
-        x2={bbox[2]}
-        y2={bbox[3]}
-    />
-)))}
-
-const BoundingBox = props => {
-    const {x1, y1, x2, y2} = props;
-    return (
-        <div
-            className="bounding-box"
-            style={{
-                top: y1,
-                left: x1,
-                width: x2 - x1,
-                height: y2 - y1
-            }}
-        />
-    )
-};
-
-/*
-style={{
-    width: 352,
-    height: 288
-}}
-const width  = 352;
-const height = 288;
-*/
-
-const initialViewState = {
-    longitude: -122.43,
-    latitude: 37.775,
-    zoom: 12
-};
-
-const geoToVid = (width, height, videoWidth, videoHeight, data) => {
-    console.log("geoToVid.data:", data);
-
-    // Get Orientation (landscape/square, portrait)
-    const orientation = (width >= height) ? "landscape" : "portrait";
-
-    // Get Ratio Between Source Video Width and Displayed Width (and same for Height)
-    let widthFactor=1, heightFactor=1;
-    if (orientation == "landscape") {
-        if (videoWidth > width) {
-            widthFactor  = width / videoWidth;
-            heightFactor = widthFactor;
-        }
-    } else {
-        if (videoHeight > height) {
-            heightFactor = height / videoHeight;
-            widthFactor  = heightFactor;
-        }
-    }
-
-    // Step 1. Get Map to Screen Viewport Calculator
-    const viewport = new WebMercatorViewport({
-        width: width,
-        height: height,
-        longitude: -122.43,
-        latitude: 37.775,
-        zoom: 12
-    });
-
-    // Step 2. Project Map Points to Screen Points
-    let screenPoints = data[0].map(point => viewport.project(point));
-
-    // Step 3. Translate Screen Coordinates to Video-Relative Coordinates
-    const videoElemContentWidth  = videoWidth  * widthFactor;
-    const videoElemContentHeight = videoHeight * heightFactor;
-    const videoXoffset = (width  - videoElemContentWidth) / 2;
-    const videoYoffset = (height - videoElemContentHeight) / 2;
-    const videoPoints  = screenPoints.map(point => [
-        (point[0] - (videoXoffset)) / widthFactor,
-        (point[1] - (videoYoffset)) / heightFactor]);
-
-    /*
-    console.log(`CONV:
-        orientation: ${orientation},
-        data: ${data},
-        screenPoints: ${screenPoints},
-        width: ${width},
-        videoWidth: ${videoWidth},
-        videoWidth: ${videoHeight},
-        videoElemContentWidth: ${videoElemContentWidth},
-        videoElemContentHeight: ${videoElemContentHeight},
-        videoXoffset: ${videoXoffset},
-        videoYoffset: ${videoYoffset},
-        widthFactor: ${widthFactor},
-        heightFactor: ${heightFactor},
-        videoPoints: ${videoPoints}`);
-    */
-
-    return videoPoints;
-}
-
 const Main = props => {
     // Modal toggles
-    const [openExport,   setOpenExport]   = useState(false);
-    const [openImport,   setOpenImport]   = useState(false);
-    const [openAnalysis, setOpenAnalysis] = useState(false);
-    const [openAddStreams, setOpenAddStream]  = useState(false);
-    const [openEditStreams, setOpenEditStream]  = useState(false);
-    const [streamDetails, setStreamDetails] = useState({directory: "",
-    streamName: "",
-    ipValue: "",
-    port: "",
-    protocol: ""});
+    const [openExport,      setOpenExport]     = useState(false);
+    const [openImport,      setOpenImport]     = useState(false);
+    const [openAnalysis,    setOpenAnalysis]   = useState(false);
+    const [openAddStreams,  setOpenAddStream]  = useState(false);
+    const [openEditStreams, setOpenEditStream] = useState(false);
+    const [streamDetails,   setStreamDetails]  = useState({
+        directory: "",
+        streamName: "",
+        ipValue: "",
+        port: "",
+        protocol: ""
+    });
     const [edit, setEdit] = useState(false);
+    const [polygon, setPolygon] = useState(null);
+    const [scale, setScale] = useState(null);
+    const [polygonLabel, setPolygonLabel] = useState(null);
+
+    const { streams, stream, ...rest } = props;
+    const videoRef = useRef(null);
     const [visible, setVisible] = useState(true);
+
+    // Roads
+    const [roads,        setRoads]        = useState([]);
 
     // Route editor toggle
     const [showEditor,   setShowEditor]   = useState(false);
+    const [showControls, setShowControls] = useState(false);
     const [showMap,      setShowMap]      = useState(false);
+    const [showPolygons, setShowPolygons] = useState(true);
+    const [deleteMode,   setDeleteMode]   = useState(false);
 
-    // Route mapping
-    const [roads, setRoads]             = useState([]);
+    // Route mapping (route region labels)
+    const [routes, setRoutes]             = useState({});
 
     // Video player tracking
     const [currentTime,  setCurrentTime]  = useState(0);
 
-    // Deck.GL parameters
-    const [features, setFeatures] = useState({
-        type: "FeatureCollection",
-        features: []
-    });
-    const [mode, setMode] = useState(() => ViewMode);
-    const [selectedFeatureIndexes, setSelectedFeatureIndexes] = useState([]);
+    // SVG sizes
+    const [svgWidth,     setSvgWidth]     = useState(0);
+    const [svgHeight,    setSvgHeight]    = useState(0);
 
-    /*
-    const selectLayer = new SelectionLayer({
-        id: 'selection',
-        selectionType: 'rectangle',
-        mode: ViewMode,
-        pickable: true,
-        onSelect: ({ pickingInfos }) => {
-            console.log("SELECT:", pickingInfos)
-            // use pickingInfos to set the SelectedFeatureIndexes
-            setSelectedFeatureIndexes(pickingInfos.map((pi) => pi.index));
-        
-            // any other functionality for selecting, like adding id's to state
-        },
-        layerIds: ['geojson'],
-    });
-    */
+    // Deck.GL parameters
+    // const [features, setFeatures] = useState({
+    //     type: "FeatureCollection",
+    //     features: []
+    // });
+    const [mode, setMode] = useState(() => ViewMode);
+    // const [selectedFeatureIndexes, setSelectedFeatureIndexes] = useState([]);
+
+    // const initialViewState = {
+    //     longitude: -122.43,
+    //     latitude: 37.775,
+    //     zoom: 12
+    // };
 
     // Deck.GL editor layer
-    const layer = new EditableGeoJsonLayer({
-        // id: "geojson-layer",
-        // selectionType: "rectangle",
-        data: features,
-        pickable: true,
-        mode,
-        onClick: (info, event) => {
-            const coordCount = Array.from(info.object.geometry.coordinates)[0].length;
-            console.log(coordCount);
-            if (coordCount > 2) {
-                console.log('Clicked:', info, event, info.object.geometry.coordinates); // , vidCoords);
-                const regionIdx = info.index;
-                const existingLabel = roads[regionIdx];
-                const label = prompt("Set route region label", existingLabel);
-                console.log('here');
-                let newRoads = [...roads];
-                if (label) {
-                    newRoads[regionIdx] = label;
-                } else {
-                    newRoads[regionIdx] = existingLabel;
-                }
-                setRoads(newRoads);
-            }
-        },
-        onSelect: ({ pickingInfos }) => {
-            console.log("SELECT:", pickingInfos)
-            // use pickingInfos to set the SelectedFeatureIndexes
-            setSelectedFeatureIndexes(pickingInfos.map((pi) => pi.index));
+    // const layer = new EditableGeoJsonLayer({
+    //     // id: "geojson-layer",
+    //     // selectionType: "rectangle",
+    //     data: features,
+    //     pickable: true,
+    //     mode,
+    //     onClick: (info, event) => {
+    //         const coordCount = Array.from(info.object.geometry.coordinates)[0].length;
+    //         console.log(coordCount);
+    //         if (coordCount > 2) {
+    //             console.log('Clicked:', info, event, info.object.geometry.coordinates); // , vidCoords);
+    //             const regionIdx = info.index;
+    //             const existingLabel = routes[regionIdx];
+    //             const label = prompt("Set route region label", existingLabel);
+    //             let newRoutes = [...routes];
+    //             if (label) {
+    //                 newRoutes[regionIdx] = label;
+    //             } else {
+    //                 newRoutes[regionIdx] = existingLabel;
+    //             }
+    //             setRoutes(newRoutes);
+    //         }
+    //     },
+    //     onSelect: ({ pickingInfos }) => {
+    //         console.log("SELECT:", pickingInfos)
+    //         // use pickingInfos to set the SelectedFeatureIndexes
+    //         setSelectedFeatureIndexes(pickingInfos.map((pi) => pi.index));
         
-            // any other functionality for selecting, like adding id's to state
-        },
-        selectedFeatureIndexes,
-        onEdit: ({ updatedData }) => {
-            setFeatures(updatedData);
-            const features    = updatedData.features;
-            console.log("updatedData:", updatedData)
-        },
-        getLineColor: (feature) => [255, 0, 0]
-    });
-
-    const { streams, stream, ...rest } = props;
-    const videoRef = useRef(null);
+    //         // any other functionality for selecting, like adding id's to state
+    //     },
+    //     selectedFeatureIndexes,
+    //     onEdit: ({ updatedData }) => {
+    //         setFeatures(updatedData);
+    //         const features    = updatedData.features;
+    //         console.log("updatedData:", updatedData)
+    //     },
+    //     getLineColor: (feature) => [255, 0, 0]
+    // });
 
     const handleTimeUpdate = () => {
         setCurrentTime(videoRef.current.currentTime);
@@ -296,19 +181,138 @@ const Main = props => {
 
     const setEditMode = (value) => {
         setEdit(value);
+    };
+
+    const editorClose = () => {
+        setShowEditor(false);
     }
 
+    const handleSetPolygon = polygon => {
+        console.log("MAIN->handleSetPolygon:", polygon);
+        setPolygon(polygon);
+    };
 
+    const handleSetScale = scale => {
+        console.log("MAIN->handleSetScale:", scale);
+        setScale(scale);
+    };
+
+    // Sidebar stream periodic refreshing (every 3 seconds)
     useEffect(() => {
         const intervalId = setInterval(() => {
           props.getStreams();
         }, 3000);
       
         return () => clearInterval(intervalId);
-      }, []);
-      
+    }, []);
 
-    const isLivestream = (stream.is_livestream) //check /livestream or /stream
+    // Adjust SVG polygon display on init and whenever page size changes
+    useEffect(() => {
+        const adjustSize = () => {
+            let width = 0, height = 0;
+            if (videoRef.current) {
+                width = videoRef.current.videoWidth * (videoRef.current.offsetHeight / videoRef.current.videoHeight);
+                height = videoRef.current.videoHeight * (videoRef.current.offsetWidth / videoRef.current.videoWidth);
+            }
+            setSvgWidth(width);
+            setSvgHeight(height);
+        }
+        window.addEventListener('resize', adjustSize);
+        setTimeout(() => adjustSize(), 1000);
+        return () => {
+            window.removeEventListener('resize', adjustSize);
+        };
+    }, []);
+
+    // Load polygons on init
+    useEffect(() => {
+        console.log("Stream:", stream.name);
+        if (stream) {
+            axios
+                .get(`/api/routes?stream_name=${stream.name}`)
+                .then(res => {
+                        try {
+                            const data = res.data[0].polygon_json;
+                            console.log("GET /api/routes/ response:", data, typeof(data));
+                            setRoutes(JSON.parse(data));
+                        } catch {
+                            console.log("GET /api/routes/ response: err")
+                        }
+                })
+                .catch(err => console.error(`Error loading existing polygons for stream: ${stream.name}`, err))
+        }
+    }, [stream]);
+
+    //check /livestream or /stream
+    const isLivestream = (stream.is_livestream);
+    
+    // Wrapper function around set routes, this will also update it in the backend simultaneously
+    const handleSetRoutes = data => {
+        // Send new route data to backend
+        const payload = {
+            "stream_name": stream.name,
+            "polygon_json": routes
+        }
+
+        // Make a POST request using Axios
+        axios.post('/api/routes/set', payload)
+            .then(response => {
+                console.log('Response:', response.data);
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+
+        // Set routes
+        setRoutes(data);
+    };
+
+    // Either allow renaming of an existing polygon or handle deleting of it
+    const handleSAMPolygonClick = (e, oldLabel, polygonData) => {
+        if (!deleteMode) {
+            const label = prompt(`Set new route region label. The current label is "${oldLabel}".`, oldLabel);
+            const newLabel = (label) ? label : oldLabel;
+            let newRoutes = routes;
+            delete newRoutes[oldLabel];
+            newRoutes[newLabel] = polygonData;
+            handleSetRoutes(newRoutes);
+        } else {
+            const result = window.confirm(`Do you want to delete the ${oldLabel} route region?`);
+            if (result) {
+                let newRoutes = routes;
+                delete newRoutes[oldLabel];
+                handleSetRoutes(newRoutes);
+            }
+        }
+    };
+
+    // Handle changing of showEditor, as displaying the SAM model implicitly means creating a new polygon
+    // As we're storing the polygons in a dictionary, it's more convenient to force the user to label the
+    // route region before we store it
+    const handleSetShowEditor = (val) => {
+        // Set value regardless
+        setShowEditor(val);
+
+        // If true, then we're creating a new value and we'll store that in a temp variable
+        const label = prompt("Set route region label", "");
+        setPolygonLabel(label);
+    };
+
+    // When the SAM modal is closed, we need to handle properly adding the new route region polygon data to the `routes`
+    const handleSAMClose = val => {
+        // Close the SAM modal
+        editorClose(val);
+
+        // Add route region to `routes`. Do this after 1 second to be safe, this is a scuffed solution but should be fine.
+        setTimeout(() => {
+            let newRoutes = routes;
+            routes[polygonLabel] = {
+                "data": polygon,
+                "scale": scale
+            };
+            handleSetRoutes(newRoutes);
+        }, 1000);
+    }
 
     return (
         <div className="main-root">
@@ -316,9 +320,10 @@ const Main = props => {
                 {
                     (isLivestream) ? ( 
                         <ReactHlsPlayer
+                            ref={videoRef}
                             src="./livestream/tes/output.m3u8"
                             autoPlay={true}
-                            controls={true}
+                            controls={showControls}
                             onContextMenu={e => e.preventDefault()}
                             className="feed"
                         />
@@ -327,6 +332,7 @@ const Main = props => {
                             autoPlay
                             ref={videoRef}
                             className="feed"
+                            controls={true}
                             src={`/streams/${stream.source}`}
                             muted
                             loop
@@ -337,34 +343,24 @@ const Main = props => {
                         </video>
                     )
                 }
-                {/*
-                if (features.features.length > 0) {
-                    for (let i=0; i<features.features.length; i++) {
-                        console.log(
-                            //features.features[0].geometry.coordinates,
-                            routes[i],
-                            geoToVid(
-                                window.innerWidth,
-                                window.innerHeight,
-                                videoRef.current.videoWidth,
-                                videoRef.current.videoHeight,
-                                features.features[i].geometry.coordinates
-                            )
-                        );
-                    }
-                }
-                */}
-                {(showEditor) && (
-                    <DeckGL
-                        initialViewState={initialViewState}
-                        controller={{
-                            doubleClickZoom: false,
-                            scrollZoom: false,
-                            dragPan: false
-                        }}
-                        layers={[layer]}
-                        getCursor={layer.getCursor.bind(layer)}
-                    />
+                {(showPolygons) && (
+                    <svg
+                        className="svg-overlay"
+                        width={parseInt(svgWidth)}
+                        height={parseInt(svgHeight)}
+                        viewBox="0 0 1024 576"
+                        xmlns="http://www.w3.org/2000/svg"
+                    >
+                        {/* polygon data and scale needs to be extracted from each dict entry (polygon && scale && svgWidth && svgHeight) && ( */}
+                        {(routes && svgWidth && svgHeight) && Object.entries(routes).map((polygon, i) => (
+                            <path
+                                key={i}
+                                onClick={(e) => handleSAMPolygonClick(e, polygon[0], polygon[1])}
+                                className="svg-outline svg-filled"
+                                d={polygon[1].data}
+                            />
+                        ))}
+                    </svg>
                 )}
             </div>
             <Sidebar
@@ -380,6 +376,7 @@ const Main = props => {
                 edit = {edit}
                 setVisible = {setVisible}
                 visible = {visible}
+                routes = {routes}
                 />
             <ExportModal
                 open={openExport}
@@ -402,18 +399,33 @@ const Main = props => {
                 setEditMode = {setEditMode}
                 edit = {edit}
                 />
+            <SegmentModal
+                videoRef={videoRef}
+                open={showEditor}
+                segmentClose={handleSAMClose}
+                setPolygon={handleSetPolygon}
+                setScale={handleSetScale}
+                polygon={polygon}
+                scale={scale}
+                />
             <Controls
                 stream={stream}
                 currentTime={currentTime}
                 setMode={setMode}
                 mode={mode}
-                setShowEditor={setShowEditor}
+                setShowEditor={handleSetShowEditor}
                 showEditor={showEditor}
                 showMap={showMap}
-                setShowMap={setShowMap} />
+                setShowMap={setShowMap}
+                showControls={showControls}
+                setShowControls={setShowControls}
+                deleteMode={deleteMode}
+                setDeleteMode={setDeleteMode}
+                showPolygons={showPolygons}
+                setShowPolygons={setShowPolygons}/>
             {(showMap) && (
                 <AnalysisMap
-                    roads={roads}
+                    roads={(routes) ? Object.keys(routes) : []}
                     setVisible = {setVisible}
                     visible = {visible}
                 />

@@ -58,6 +58,7 @@ const ExportModal = props => {
     const { open, exportClose, streams } = props;
     const [selectedStream, setSelectedStream ] = useState("");
 
+    // console.log("streams:", streams)
     /*
     useEffect(() => {
         props.getGames();
@@ -71,7 +72,9 @@ const ExportModal = props => {
     }, [streams]);
 
     const downloadStream = (id) => {
-        if (id) {
+        const sourceId = id["source"];
+        console.log("id:", sourceId);
+        if (sourceId) {
             const fnameToId = s => {
                 s = s.split("/")
                 s = s[s.length - 1]
@@ -80,7 +83,7 @@ const ExportModal = props => {
                 s = s.join(".");
                 return s;
             }
-            const downloadId = fnameToId(id);
+            const downloadId = fnameToId(sourceId) + ".json";
             window.open(`http://localhost:5000/api/analysis/download?stream=${downloadId}`);
         }
     };
@@ -115,14 +118,9 @@ const ExportModal = props => {
                             <select
                                 onChange={e => setSelectedStream(e.target.value)}
                             >
-                                {/*
-                                <option key={0} value="all">
-                                    All
-                                </option>
-                                */}
                                 {streams.map((stream, i) => (
-                                    <option key={i+1} value={stream}>
-                                        {stream}
+                                    <option key={i+1} value={stream.name}>
+                                        {stream.name}
                                     </option>
                                 ))}
                             </select>

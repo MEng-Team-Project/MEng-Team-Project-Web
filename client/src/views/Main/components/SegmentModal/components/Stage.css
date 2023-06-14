@@ -1,0 +1,12 @@
+.stage {
+    display: flex;
+    justify-content: center;
+}
+
+.stage__sam-container {
+    border: 0;
+}
+
+.stage__hidden-canvas {
+    display: none;
+}

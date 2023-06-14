@@ -39,6 +39,10 @@ import {
   setAnalytics
 } from "../../../../actions/analyticsActions";
 
+/*
+roads     := labels
+*/
+
 const AnalysisMap = (props) => {
   const [positions, setPositions] = useState({});  
   //const {roads = Object.keys(positions), visible, setVisible } = props;
@@ -305,9 +309,9 @@ const calculateCongestion = (startRoad, endRoad, direction) => { //add filters s
     localAnalytics = totalAnalytics //analytics.all?
   } else { localAnalytics = analytics}
 
-  let routeCounts = null
-  let routeCounts2 = null
-  let scaler = 1
+  let routeCounts = null;
+  let routeCounts2 = null;
+  let scaler = 1;
   
   if(direction === "Route"){
     for(let i = 0; i < localAnalytics.counts.length; i++){
@@ -371,10 +375,12 @@ const calculateCongestion = (startRoad, endRoad, direction) => { //add filters s
   // Calculate the congestion value
   let congestionValue = 0;
 
-  if(routeCounts2 != null){
+  console.log("routeCounts1:", routeCounts)
+  console.log("routeCounts2:", routeCounts2)
+  if(routeCounts && routeCounts2){
     congestionValue = ( ( (routeCounts.total + routeCounts2.total) / timeInSeconds) / (fileteredTotal * scaler / (24*60*60)) ) * 100
   }
-  else {
+  else if (routeCounts) {
     congestionValue = ( ( (routeCounts.total) / timeInSeconds) / (fileteredTotal * scaler / (24*60*60)) ) * 100
   }
 
@@ -567,5 +573,3 @@ const mapStateToProps = state => {
 }
 
 export default connect(mapStateToProps, {getAnalytics, setAnalytics}) (AnalysisMap);
-
-//export default AnalysisMap;

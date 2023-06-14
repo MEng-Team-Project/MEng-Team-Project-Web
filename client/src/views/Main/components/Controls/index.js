@@ -20,6 +20,8 @@ import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
 import VisibilityOffOutlinedIcon from '@mui/icons-material/VisibilityOffOutlined';
 import AnalyticsOutlinedIcon from '@mui/icons-material/AnalyticsOutlined';
 import MapOutlinedIcon from '@mui/icons-material/MapOutlined';
+import AddOutlinedIcon from '@mui/icons-material/AddOutlined';
+import DeleteOutlineOutlinedIcon from '@mui/icons-material/DeleteOutlineOutlined';
 
 // Global Components
 import {
@@ -58,32 +60,36 @@ const EditorControl = props => {
     )
 }
 
-const CHECK_MODE = (mode) => {
-    switch (mode.toString()) {
-        case (ModifyMode).toString():
-            return "SELECT";
-        case (DrawLineStringMode).toString():
-            return "LINE";
-        case (DrawPolygonMode).toString():
-            return "POLYGON"
-        default:
-            return ""
-    }
-};
+// const CHECK_MODE = (mode) => {
+//     switch (mode.toString()) {
+//         case (ModifyMode).toString():
+//             return "SELECT";
+//         case (DrawLineStringMode).toString():
+//             return "LINE";
+//         case (DrawPolygonMode).toString():
+//             return "POLYGON"
+//         default:
+//             return ""
+//     }
+// };
 
 const EditorControls = props => {
-    const { setMode, mode, showEditor, setShowEditor } = props;
-    const CUR_MODE = CHECK_MODE(mode);
+    const {
+        setMode,
+        mode,
+        showEditor,
+        setShowEditor,
+        setShowControls,
+        showControls,
+        deleteMode,
+        setDeleteMode,
+        showPolygons,
+        setShowPolygons
+    } = props;
 
     return (
         <div className="controls-editor">
-            <EditorControl
-                title="Select"
-                selected={CUR_MODE == "SELECT"}
-                onClick={() => setMode(() => ModifyMode)}
-            >
-                <HighlightAltOutlinedIcon/>
-            </EditorControl>
+            {/*
             <EditorControl
                 title="Polygon"
                 selected={CUR_MODE == "POLYGON"}
@@ -91,6 +97,8 @@ const EditorControls = props => {
             >
                 <PolylineOutlinedIcon />
             </EditorControl>
+            */}
+            {/*
             <EditorControl
                 title="Line"
                 selected={CUR_MODE == "LINE"}
@@ -98,15 +106,32 @@ const EditorControls = props => {
             >
                 <ShapeLineOutlinedIcon />
             </EditorControl>
+            */}
             <EditorControl
-                onClick={() => setShowEditor(!showEditor)}
-                title={(showEditor) ? "Hide" : "Show"}
+                onClick={() => {
+                    setShowPolygons(!showPolygons)
+                }}
+                title={"Show Regions"}
+                selected={showPolygons}
             >
-                {(showEditor) ? (
+                {(showPolygons) ? (
                     <VisibilityOutlinedIcon />
                 ) : (
                     <VisibilityOffOutlinedIcon/>
                 )}
+            </EditorControl>
+            <EditorControl
+                onClick={() => setShowEditor(!showEditor)}
+                title={"Add Region"}
+            >
+                <AddOutlinedIcon />
+            </EditorControl>
+            <EditorControl
+                title="Delete Region"
+                selected={deleteMode}
+                onClick={() => (setDeleteMode(!deleteMode))}
+            >
+                <DeleteOutlineOutlinedIcon />
             </EditorControl>
         </div>
     );
@@ -201,7 +226,22 @@ const Analytics = props => {
 }
 
 const Controls = props => {
-    const { stream, currentTime, setMode, mode, showEditor, setShowEditor, showMap, setShowMap } = props;
+    const { 
+        stream,
+        currentTime,
+        setMode,
+        mode,
+        showEditor,
+        setShowEditor,
+        showMap,
+        setShowMap,
+        setShowControls,
+        showControls,
+        deleteMode,
+        setDeleteMode,
+        showPolygons,
+        setShowPolygons
+    } = props;
     const [showEditorControls, setShowEditorControls] = useState(false);
     const [showAnalytics, setShowAnalytics] = useState(false);
 
@@ -217,6 +257,8 @@ const Controls = props => {
         setShowMap(!showMap);
     }
 
+    // console.log("<Controls/> -> stream:", stream);
+
     return (
         <div className="controls-outermost">
             <div className="controls-outer">
@@ -226,12 +268,18 @@ const Controls = props => {
                         mode={mode}
                         showEditor={showEditor}
                         setShowEditor={setShowEditor}
+                        setShowControls={setShowControls}
+                        showControls={showControls}
+                        deleteMode={deleteMode}
+                        setDeleteMode={setDeleteMode}
+                        showPolygons={showPolygons}
+                        setShowPolygons={setShowPolygons}
                         />
                 )}
                 <div className="controls">
-                    <Tooltip content="Draw Routes" direction="left">
+                    <Tooltip content="Set Regions" direction="left">
                         <ModeEditOutlineOutlinedIcon
-                            onClick={toggleEdit}
+                            onClick={(stream) && toggleEdit}
                             className="icon controls-icon"
                             sx={{
                                 color: (showEditor) ? "white" : "rgb(106, 116, 133)"
@@ -239,7 +287,8 @@ const Controls = props => {
                     </Tooltip>
                     <Tooltip content="Toggle Map" direction="left">
                         <MapOutlinedIcon
-                            onClick={toggleMap}
+                            style={{display: (stream) ? "block" : "hidden"}}
+                            onClick={(stream) && toggleMap}
                             className="icon controls-icon"
                             sx={{
                                 color: (showMap) ? "white" : "rgb(106, 116, 133)"
@@ -247,7 +296,8 @@ const Controls = props => {
                     </Tooltip>
                     <Tooltip content="Analytics" direction="left">
                         <AnalyticsOutlinedIcon
-                            onClick={toggleAnalytics}
+                            style={{display: (stream) ? "block" : "hidden"}}
+                            onClick={(stream) && toggleAnalytics}
                             className="icon controls-icon"
                             sx={{
                                 color: (showAnalytics) ? "white" : "rgb(106, 116, 133)"
@@ -256,6 +306,7 @@ const Controls = props => {
                 </div>
                 {(showAnalytics) && (
                     <Analytics
+                        style={{display: (stream) ? "block" : "hidden"}}
                         stream={stream}
                         currentTime={currentTime}/>
                 )}

@@ -134,8 +134,27 @@ const SidebarLiveVideo = props => {
     );
 }
 
+const extractCoordinates = str => {
+    // regex pattern to match all coordinates (pairs of numbers)
+    const pattern = /\b(\d+(\.\d+)?)\s+(\d+(\.\d+)?)\b/g;
+
+    // find all matches
+    const matches = str.match(pattern);
+
+    if (matches) {
+        // split each match into x, y and convert them to float
+        return matches.map(pair => {
+            let [x, y] = pair.split(' ').map(parseFloat);
+            return [ x, y ];
+        });
+    }
+
+    // return empty array if no matches found
+    return [];
+}
+
 const SidebarFilters = props => {
-    const { streams, filters, setFilters, setAnalytics, setShowMap } = props;
+    const { routes, streams, filters, setFilters, setAnalytics, setShowMap } = props;
     
     const [ dataSourceFilter, setDataSourceFilter ] = useState(filters.dataSourceFilter);
     const [ objectFilter, setObjectFilter ] = useState(filters.objectFilter);
@@ -153,10 +172,27 @@ const SidebarFilters = props => {
             const classes = ["car", "person", "bicycle", "hgv"];
             const recordingStartTime = dateTimeRangeFilter?.data?.recordingStartTime;
             const startTime = dateTimeRangeFilter?.data?.startTime;
-    
+            
+            const regionData = Object.entries(routes).map(item => {
+                const polygonSVG     = item[1]["data"][0];
+                console.log("polygonSVG:", polygonSVG)
+                const rawPolygonData = extractCoordinates(polygonSVG).slice(1);
+
+                // NOTE: THIS IS FLIPPED AS IT GOT FLIPPED ELSEWHERE, DO NOT TOUCH!
+                const scaledRawPolygonData = rawPolygonData.map(coords => [
+                    coords[1] * (1920/1024),
+                    coords[0] * (1080/576)
+                ]);
+                return scaledRawPolygonData;
+                // return rawPolygonData;
+            });
+            let regions = {};
+            Object.keys(routes).forEach((key, i) => regions[key] = regionData[i]);
+            console.log("hopefulyl brav regions", regions, regionData);
+
             const analyticsDetails = {
-                "stream": streamName,
-                "regions" : {},
+                "stream":  streamName,
+                "regions": regions,
                 "classes": classes,
                 "time_of_recording": new Date(recordingStartTime ?? "2020-01-01T00:00").toISOString(),
                 "start_time": new Date(startTime ?? "2020-01-01T00:00").toISOString()
@@ -186,10 +222,24 @@ const SidebarFilters = props => {
             const startTime = dateTimeRangeFilter?.data?.startTime;
             const endTime = dateTimeRangeFilter?.data?.endTime;
             const interval = dateTimeRangeFilter?.data?.interval ?? 1800;
-    
+            
+            const regionData = Object.entries(routes).map(item => {
+                const polygonSVG     = item[1]["data"][0];
+                console.log("polygonSVG:", polygonSVG)
+                const rawPolygonData = extractCoordinates(polygonSVG).slice(1);
+                const scaledRawPolygonData = rawPolygonData.map(coords => [
+                    coords[1] * (1920/1024),
+                    coords[0] * (1080/576)
+                ]);
+                return scaledRawPolygonData;
+            });
+            let regions = {};
+            Object.keys(routes).forEach((key, i) => regions[key] = regionData[i]);
+            console.log("another one regions", regions, regionData);
+
             const analyticsDetails = {
                 "stream": streamName,
-                "regions" : {},
+                "regions" : regions,
                 "classes": classes,
                 "interval_spacing": interval,
                 "time_of_recording": new Date(recordingStartTime ?? "2020-01-01T00:00").toISOString(),
@@ -223,20 +273,28 @@ const SidebarFilters = props => {
         const allAnalyticsFromBackend = await getAllAnalyticsFromBackend();
 
         // set analytics
+        console.log("astro scammer:", analyticsFromBackend);
         if (analyticsFromBackend.response.status === 200 && allAnalyticsFromBackend.response.status === 200) {
             const data = analyticsFromBackend.response.data;
             const allData = allAnalyticsFromBackend.response.data;
+
+            const interval    = data.intervalSpacing;
+            const allInterval = allData.intervalSpacing;
+            const minInterval = Math.min(interval, allInterval);
+            
+            console.log("MY CURRENT INTERVAL?!??!?!:", minInterval);
             setAnalytics({
-                interval: data.intervalSpacing,
                 objects: analyticsFromBackend.classes,
                 regions: data.regions,
-                counts: data.countsAtTimes[0].routeCounts,
+                counts: (data.countsAtTimes[0]) ? data.countsAtTimes[0].routeCounts : [],
                 all: {
-                    interval: allData.intervalSpacing,
                     objects: allAnalyticsFromBackend.classes,
                     regions: allData.regions,
-                    counts: allData.countsAtTimes[0].routeCounts
-                }});
+                    counts: (allData.countsAtTimes[0]) ? allData.countsAtTimes[0].routeCounts : [],
+                    interval: minInterval, // allData.intervalSpacing,
+                },
+                interval: minInterval, // data.intervalSpacing,
+            });
         } else {
             console.warn("ERROR IN RETRIEVING ANALYTICS");
             window.alert("There was an error in retrieving analytics. Please try again.");
@@ -244,6 +302,7 @@ const SidebarFilters = props => {
     }, [getAnalyticsFromBackend, getAllAnalyticsFromBackend, setAnalytics]);
 
     useEffect(() => {
+        console.log("ello r u actually updating u scam", dataSourceFilter)
         setFilters({
             dataSourceFilter: dataSourceFilter,
             objectFilter: objectFilter,
@@ -545,7 +604,7 @@ const SidebarStreams = props => {
 };
 
 const Sidebar = props => {
-    const { streams, setStream, setOpenExport, setOpenImport, setOpenAnalysis, editStreamOpen, setEditMode, setShowMap, edit, visible, setVisible, analytics, setAnalytics, filters, setFilters} = props;
+    const { routes, streams, setStream, setOpenExport, setOpenImport, setOpenAnalysis, editStreamOpen, setEditMode, setShowMap, edit, visible, setVisible, analytics, setAnalytics, filters, setFilters} = props;
 
     const [tab, setTab] = useState("STREAMS");
     //const [visible, setVisible] = useState(true);
@@ -623,12 +682,14 @@ const Sidebar = props => {
                         )}
                         {(tab == "FILTERS") && (
                             <SidebarFilters
+                                routes={routes}
                                 streams={streams}
                                 analytics={analytics}
                                 setAnalytics={setAnalytics}
                                 filters={filters}
                                 setFilters={setFilters}
-                                setShowMap={setShowMap}/>
+                                setShowMap={setShowMap}
+                                />
                         )}
                         {(tab == "LIVE VIDEO") && (
                             <SidebarLiveVideo />

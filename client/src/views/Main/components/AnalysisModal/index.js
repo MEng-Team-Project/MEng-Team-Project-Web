@@ -52,8 +52,6 @@ const style = {
     borderRadius: '5px'
 };
 
-
-
 const ModalTable = props => {
     const { data } = props;
     const [switches, setSwitches] = React.useState(data.map((row) => Boolean(row.running)));
@@ -177,7 +175,7 @@ const ModalTable = props => {
 
 const AnalysisModal = props => {
     const { open, analysisClose, streams, ...rest  } = props;
-    console.log( "time>>>> ", moment(moment().format('YYYY/MM/DD HH:mm:ss')).format("YYYY-MM-DD HH:mm:ss"));
+    // console.log( "time>>>> ", moment(moment().format('YYYY/MM/DD HH:mm:ss')).format("YYYY-MM-DD HH:mm:ss"));
     const data = streams.map((stream, i) => ({
         "stream": stream.name,
         "running": stream.running,
