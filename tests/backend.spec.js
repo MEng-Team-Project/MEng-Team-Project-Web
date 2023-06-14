@@ -32,7 +32,26 @@ describe('Backend test suite', () => {
         }
     }
 
-    
+    it('tests posting to /api/streams/add endpoint', async() => {
+        // act
+        // send request to /api/streams
+        const response = await request('http://localhost:3000')
+            .post("/api/streams/add")
+            .send({
+                "directory": "test",
+                "ip": "127.0.0.1",
+                "port": "1935",
+                "streamName": "test_stream",
+                "protocol": "rtmp"
+            }
+        );
+
+        // assert
+        // expect response to be 200
+        // expect response.text to contain "Livestream added to database and HLS streaming initialised"
+        expect(response.statusCode).toBe(200);
+        expect(response.text).toBe('Livestream added to database and HLS streaming initialised');
+    }, 10000);    
 
     it('tests putting to /api/streams/upload endpoint', async () => {
         // arrange
