@@ -174,13 +174,20 @@ const SidebarFilters = props => {
             const startTime = dateTimeRangeFilter?.data?.startTime;
             
             const regionData = Object.entries(routes).map(item => {
-                const polygonSVG     = item[0]["data"][0];
+                const polygonSVG     = item[1]["data"][0];
                 console.log("polygonSVG:", polygonSVG)
                 const rawPolygonData = extractCoordinates(polygonSVG).slice(1);
-                return item[0], rawPolygonData;
+
+                // NOTE: THIS IS FLIPPED AS IT GOT FLIPPED ELSEWHERE, DO NOT TOUCH!
+                const scaledRawPolygonData = rawPolygonData.map(coords => [
+                    coords[1] * (1920/1024),
+                    coords[0] * (1080/576)
+                ]);
+                return scaledRawPolygonData;
+                // return rawPolygonData;
             });
             let regions = {};
-            regionData.forEach(item => regions[item[0]] = item[1]);
+            Object.keys(routes).forEach((key, i) => regions[key] = regionData[i]);
             console.log("hopefulyl brav regions", regions, regionData);
 
             const analyticsDetails = {
@@ -217,13 +224,17 @@ const SidebarFilters = props => {
             const interval = dateTimeRangeFilter?.data?.interval ?? 1800;
             
             const regionData = Object.entries(routes).map(item => {
-                const polygonSVG     = item[0]["data"][0];
+                const polygonSVG     = item[1]["data"][0];
                 console.log("polygonSVG:", polygonSVG)
                 const rawPolygonData = extractCoordinates(polygonSVG).slice(1);
-                return item[0], rawPolygonData;
+                const scaledRawPolygonData = rawPolygonData.map(coords => [
+                    coords[1] * (1920/1024),
+                    coords[0] * (1080/576)
+                ]);
+                return scaledRawPolygonData;
             });
             let regions = {};
-            regionData.forEach(item => regions[item[0]] = item[1]);
+            Object.keys(routes).forEach((key, i) => regions[key] = regionData[i]);
             console.log("another one regions", regions, regionData);
 
             const analyticsDetails = {
@@ -262,20 +273,28 @@ const SidebarFilters = props => {
         const allAnalyticsFromBackend = await getAllAnalyticsFromBackend();
 
         // set analytics
+        console.log("astro scammer:", analyticsFromBackend);
         if (analyticsFromBackend.response.status === 200 && allAnalyticsFromBackend.response.status === 200) {
             const data = analyticsFromBackend.response.data;
             const allData = allAnalyticsFromBackend.response.data;
+
+            const interval    = data.intervalSpacing;
+            const allInterval = allData.intervalSpacing;
+            const minInterval = Math.min(interval, allInterval);
+            
+            console.log("MY CURRENT INTERVAL?!??!?!:", minInterval);
             setAnalytics({
-                interval: data.intervalSpacing,
                 objects: analyticsFromBackend.classes,
                 regions: data.regions,
-                counts: data.countsAtTimes[0].routeCounts,
+                counts: (data.countsAtTimes[0]) ? data.countsAtTimes[0].routeCounts : [],
                 all: {
-                    interval: allData.intervalSpacing,
                     objects: allAnalyticsFromBackend.classes,
                     regions: allData.regions,
-                    counts: allData.countsAtTimes[0].routeCounts
-                }});
+                    counts: (allData.countsAtTimes[0]) ? allData.countsAtTimes[0].routeCounts : [],
+                    interval: minInterval, // allData.intervalSpacing,
+                },
+                interval: minInterval, // data.intervalSpacing,
+            });
         } else {
             console.warn("ERROR IN RETRIEVING ANALYTICS");
             window.alert("There was an error in retrieving analytics. Please try again.");
@@ -283,6 +302,7 @@ const SidebarFilters = props => {
     }, [getAnalyticsFromBackend, getAllAnalyticsFromBackend, setAnalytics]);
 
     useEffect(() => {
+        console.log("ello r u actually updating u scam", dataSourceFilter)
         setFilters({
             dataSourceFilter: dataSourceFilter,
             objectFilter: objectFilter,
