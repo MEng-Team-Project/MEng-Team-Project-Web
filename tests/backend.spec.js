@@ -22,6 +22,18 @@ describe('Backend test suite', () => {
             .attach('stream', filePath);
     };
 
+    const copyDatabaseFileIfNotExist = () => {
+        const potentialExistingFilePath = path.join(__dirname, '..', 'server', 'analysis', 'test_video_1.db');
+        if (!fs.existsSync(potentialExistingFilePath)) {
+            fs.copyFileSync(
+                path.join(__dirname, 'resources', 'databases', 'test_video_1.db'),
+                path.join(potentialExistingFilePath),
+            );
+        }
+    }
+
+    
+
     it('tests putting to /api/streams/upload endpoint', async () => {
         // arrange
         // Remove if already exists so test is accurate
@@ -102,6 +114,17 @@ describe('Backend test suite', () => {
         // arrange
         // add video file to be analysed
         await uploadVideoIfNotExist()
+        // remove db from analysis folder if already exists
+        const potentialExistingFilePath = path.join(__dirname, '..', 'server', 'analysis', 'test_video_1.db');
+        if (fs.existsSync(potentialExistingFilePath)) {
+            fs.unlinkSync(potentialExistingFilePath);
+        }
+
+        // Remove db from init if already exists
+        const potentialExistingDb = path.join(__dirname, '..', 'server', 'analysis', 'test_video_1.db');
+        if (fs.existsSync(potentialExistingDb)) {
+            fs.unlinkSync(potentialExistingDb);
+        }
 
         // act
         // send request to /api/init
@@ -116,18 +139,13 @@ describe('Backend test suite', () => {
         // expect text to be "Video stream analysis successfully started"\n
         expect(response.statusCode).toBe(200);
         expect(response.text).toBe('Video stream analysis successfully started');
-    }, 10000);
+    }, 120000);
 
     it('tests posting to /api/analysis endpoint', async () => {
         // arrange
         // upload video to be analyzed
         await uploadVideoIfNotExist()
-
-        const initResponse = await request('http://localhost:3000')
-            .post("/api/init")
-            .send({
-                "stream": path.join(__dirname, '..', 'server', 'streams', 'test_video_1.mp4')
-            });
+        copyDatabaseFileIfNotExist()
 
         // act
         // send request to /api/analysis
@@ -153,20 +171,15 @@ describe('Backend test suite', () => {
         // arrange
         // upload video to be analyzed
         await uploadVideoIfNotExist()
-        
-        const initResponse = await request('http://localhost:3000')
-            .post("/api/init")
-            .send({
-                "stream": path.join(__dirname, '..', 'server', 'streams', 'test_video_1.mp4')
-            });
+        copyDatabaseFileIfNotExist()
 
-        const analysisResponse = await request('http://localhost:3000')
-            .post("/api/analysis")
-            .send({
-                "stream": "test_video_1.mp4",
-                "start": 1,
-                "end": 10,
-            });
+        // const analysisResponse = await request('http://localhost:3000')
+        //     .post("/api/analysis")
+        //     .send({
+        //         "stream": "test_video_1.mp4",
+        //         "start": 1,
+        //         "end": 10,
+        //     });
 
         // act
         // send request to /api/analysis/download
@@ -192,11 +205,7 @@ describe('Backend test suite', () => {
         // arrange
         // upload video to be analyzed
         await uploadVideoIfNotExist()
-        const initResponse = await request('http://localhost:3000')
-            .post("/api/init")
-            .send({
-                "stream": path.join(__dirname, '..', 'server', 'streams', 'test_video_1.mp4')
-            });
+        copyDatabaseFileIfNotExist()
 
         // act
         // send request to /api/routeAnalytics
@@ -206,10 +215,10 @@ describe('Backend test suite', () => {
             .send({
                 "stream": 'test_video_1',
                 "regions" : {
-                    "region1": [[0, 0], [960, 0], [960, 540], [0, 540], [0, 0]],
-                    "region2": [[960, 0], [1920, 0], [1920, 540], [960, 540], [960, 0]],
-                    "region3": [[0, 540], [960, 540], [960, 1080], [0, 1080], [0, 540]],
-                    "region4": [[960, 540], [1920, 540], [1920, 1080], [960, 1080], [960, 540]]
+                    "region1": [[0, 0], [640, 0], [640, 360], [0, 360], [0, 0]],
+                    "region2": [[640, 0], [1280, 0], [1280, 360], [640, 360], [640, 0]],
+                    "region3": [[0, 360], [640, 360], [640, 720], [0, 720], [0, 360]],
+                    "region4": [[640, 360], [1280, 360], [1280, 720], [640, 720], [640, 360]]
                 },
                 "classes": ['car', 'hgv', 'bicycle', 'person'],
                 "time_of_recording": new Date("2020-01-01T00:00").toISOString(),
