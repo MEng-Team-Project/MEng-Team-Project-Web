@@ -132,11 +132,11 @@ const AnalysisMap = (props) => {
               distanceTemplate: "",
               timeTemplate: "",
               //TODO: add route analytics below
-              summaryTemplate: `<h2>${routeName}</h2> All Route Analytics:<br>
-                                                Cars: ${routeCounts.car}<br>
-                                                Bicycles: ${routeCounts.bicycle}<br>
-                                                HGVs: ${routeCounts.hgv}<br>
-                                                People ${routeCounts.person}:`,
+              summaryTemplate: (routeCounts) ? `<h2>${routeName}</h2> All Route Analytics:<br>
+                                                Cars: ${routeCounts.car??0}<br>
+                                                Bicycles: ${routeCounts.bicycle??0}<br>
+                                                HGVs: ${routeCounts.hgv??0}<br>
+                                                People ${routeCounts.person??0}` : '',
               fitSelectedRoutes: true,
               draggableWaypoints: false,
               routeWhileDragging: false,
