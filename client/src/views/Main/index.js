@@ -332,7 +332,7 @@ const Main = props => {
                             autoPlay
                             ref={videoRef}
                             className="feed"
-                            controls={true}
+                            controls={false}
                             src={`/streams/${stream.source}`}
                             muted
                             loop
