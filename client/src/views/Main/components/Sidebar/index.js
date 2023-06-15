@@ -406,7 +406,7 @@ const SidebarFilters = props => {
                     objects: allAnalyticsFromBackend.classes,
                     regions: allData.regions,
                     counts: (allData.countsAtTimes[0]) ? allData.countsAtTimes[0].routeCounts : [],
-                    interval: minInterval, // allData.intervalSpacing,
+                    interval: allInterval, // allData.intervalSpacing,
                 },
                 interval: minInterval, // data.intervalSpacing,
             });
@@ -466,7 +466,9 @@ const SidebarFilters = props => {
         });
     }
 
-    const dropdownRegions = filterOptions.regions;
+    const dropdownRegions = Object.keys(routes).map(region => {
+        return { meta:'region', data: {name: region} }
+    });;
 
     const updateStartRegionFilter = (filter) => {
         setStartRegionFilter(filter);
