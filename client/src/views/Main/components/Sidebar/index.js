@@ -30,6 +30,8 @@ import {
 
 //from '../../actions/streamActions';
 
+
+
 // Icons
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import KeyboardArrowLeftOutlinedIcon from '@mui/icons-material/KeyboardArrowLeftOutlined';
@@ -64,6 +66,116 @@ import DateTimeRangeFilter from './Filters/DateTimeRangeFilter';
 import MultiSelect from './Filters/MultiSelect';
 import { setFilters } from '../../../../actions/filterActions';
 import { setAnalytics } from '../../../../actions/analyticsActions';
+
+const TEST_ROUTES_BABY = {"North_Burnaby_Road": [
+    [
+        1074.9999999999611,
+        759.0000000004657
+    ],
+    [
+        1395.9999999999611,
+        1060.0000000006207
+    ],
+    [
+        1903.999999999573,
+        1067
+    ],
+    [
+        1903.999999999573,
+        584
+    ],
+    [
+        1515.9999999998836,
+        495.00000000046566
+    ],
+    [
+        1074.9999999999611,
+        759.0000000004657
+    ]
+],
+"East_Park_Road": [
+    [
+        732.9999999999611,
+        456.00000000062084
+    ],
+    [
+        492.9999999998836,
+        314
+    ],
+    [
+        490.99999999972835,
+        7.000000000931323
+    ],
+    [
+        0.9999999999611948,
+        3.0000000003104406
+    ],
+    [
+        0.9999999999611948,
+        1075.9999999996894
+    ],
+    [
+        1378.9999999997283,
+        1067
+    ],
+    [
+        732.9999999999611,
+        456.00000000062084
+    ]
+],
+"South_Burnaby_Road": [
+    [
+        1107.9999999998058,
+        376.00000000124174
+    ],
+    [
+        1120.9999999996508,
+        1.0000000012417634
+    ],
+    [
+        501.9999999998836,
+        7.000000000931323
+    ],
+    [
+        504.9999999998836,
+        309.0000000003104
+    ],
+    [
+        748.9999999996508,
+        450.00000000062084
+    ],
+    [
+        1107.9999999998058,
+        376.00000000124174
+    ]
+],
+"West_Park_Road": [
+    [
+        1127.9999999998058,
+        391.0000000009313
+    ],
+    [
+        1911.9999999998058,
+        575
+    ],
+    [
+        1907.9999999998836,
+        165.00000000046566
+    ],
+    [
+        1864.9999999997672,
+        11
+    ],
+    [
+        1137.9999999998836,
+        7.000000000931323
+    ],
+    [
+        1127.9999999998058,
+        391.0000000009313
+    ]
+]
+}
 
 const SidebarLiveVideoLayer = props => {
     const { title, selected } = props;
@@ -190,9 +302,10 @@ const SidebarFilters = props => {
             Object.keys(routes).forEach((key, i) => regions[key] = regionData[i]);
             console.log("hopefulyl brav regions", regions, regionData);
 
+            console.log("brav astro hacked ROUTES:", routes)
             const analyticsDetails = {
                 "stream":  streamName,
-                "regions": regions,
+                "regions": TEST_ROUTES_BABY,
                 "classes": classes,
                 "time_of_recording": new Date(recordingStartTime ?? "2020-01-01T00:00").toISOString(),
                 "start_time": new Date(startTime ?? "2020-01-01T00:00").toISOString()
@@ -237,9 +350,11 @@ const SidebarFilters = props => {
             Object.keys(routes).forEach((key, i) => regions[key] = regionData[i]);
             console.log("another one regions", regions, regionData);
 
+
+            console.log("astro hacked ROUTES:", routes)
             const analyticsDetails = {
                 "stream": streamName,
-                "regions" : regions,
+                "regions": TEST_ROUTES_BABY, // regions,
                 "classes": classes,
                 "interval_spacing": interval,
                 "time_of_recording": new Date(recordingStartTime ?? "2020-01-01T00:00").toISOString(),

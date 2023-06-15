@@ -258,19 +258,19 @@ const handleMapCheckBoxes = (event, i, type, routeName) => {
         showRoute(i, type, startRoad, endRoad);
         if (name.includes("incoming_")) {
           route.show()
-          route.options.summaryTemplate = `<h2>${routeName}</h2> Incoming Analytics:<br>
-                                            Cars: ${incomingCount.car}<br>
-                                            Bicycles: ${incomingCount.bicycle}<br>
-                                            HGVs: ${incomingCount.hgv}<br>
-                                            People ${incomingCount.person}:`
+          route.options.summaryTemplate = (incomingCount) ? `<h2>${routeName}</h2> All Route Analytics:<br>
+                                                            Cars: ${incomingCount.car??0}<br>
+                                                            Bicycles: ${incomingCount.bicycle??0}<br>
+                                                            HGVs: ${incomingCount.hgv??0}<br>
+                                                            People ${incomingCount.person??0}` : '';
         }
         else if(name.includes("outgoing_")){
           route.show()
-          route.options.summaryTemplate = `<h2>${routeName}</h2> Outgoing Analytics:<br>
-                                            Cars: ${outgoingCount.car}<br>
-                                            Bicycles: ${outgoingCount.bicycle}<br>
-                                            HGVs: ${outgoingCount.hgv}<br>
-                                            People ${outgoingCount.person}:`
+          route.options.summaryTemplate = (outgoingCount) ? `<h2>${routeName}</h2> All Route Analytics:<br>
+                                                            Cars: ${outgoingCount.car??0}<br>
+                                                            Bicycles: ${outgoingCount.bicycle??0}<br>
+                                                            HGVs: ${outgoingCount.hgv??0}<br>
+                                                            People ${outgoingCount.person??0}` : '';
         }
     }else{
         if (name.includes("incoming_") || name.includes("outgoing_")) {
