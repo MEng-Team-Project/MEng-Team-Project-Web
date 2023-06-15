@@ -4,7 +4,7 @@
   "description": "(Industrial Project) React Frontend and Node.js Backend for Traffic Analysis.",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "jest",
     "start": "node server/index.js",
     "server": "nodemon --legacy-watch server/index.js",
     "client": "npm start --prefix client",
@@ -65,7 +65,9 @@
   },
   "devDependencies": {
     "electron-rebuild": "^3.2.9",
+    "jest": "^29.5.0",
     "json-loader": "^0.5.7",
+    "supertest": "^6.3.3",
     "transform-loader": "^0.2.4",
     "webworkify-webpack": "^1.0.6"
   }
