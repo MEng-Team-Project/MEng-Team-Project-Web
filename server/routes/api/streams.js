@@ -186,26 +186,75 @@ router.post('/edit', (req, res) => {
         console.log(req.body);
         const db = new sqlite3.Database('main.db');
         const ogSource = req.body.ogSource;
-        const streams_stmt = db.prepare(`UPDATE streams SET name=(?), source=(?), running=(?), is_livestream=(?), creation_date=(?) WHERE source=(?);`);
-        const livestream_stmt =  db.prepare(`UPDATE livestream_times SET stream_name=(?), stream_source=(?), start_time=(?), end_time=(?), WHERE stream_source=(?);`);
         const name = req.body.streamName;
-        const port = (req.body.port) ? `:${req.body.port}` : ""
+        const port = (req.body.port) ? `:${req.body.port}` : "";
         const source = `${req.body.protocol}://${req.body.ip}${port}${req.body.directory}`;
         const isRunning = Number(1);
         const isLivestream = Number(1);
         const creation_date = moment(moment().format('YYYY/MM/DD HH:mm:ss')).format("YYYY-MM-DD HH:mm:ss");
         const end_time = null;
-        streams_stmt.run(name, source, isRunning, isLivestream, creation_date, ogSource);
-        livestream_stmt.run(name, source, creation_date, end_time, ogSource);
-        streams_stmt.finalize();
-        livestream_stmt.finalize();
-        db.close();
-        updateLiveStreams();
-        res.send("Livestream edited in database and HLS streaming initialised");
+    
+        const updateStream = new Promise((resolve, reject) => {
+            db.run('UPDATE streams SET name=?, source=?, running=?, is_livestream=?, creation_date=? WHERE source=?',
+                name, source, isRunning, isLivestream, creation_date, ogSource, function(err) {
+                    if (err) {
+                        reject(err);
+                    } else {
+                        resolve();
+                    }
+                });
+        });
+    
+        const updateLivestream = new Promise((resolve, reject) => {
+            db.run('UPDATE livestream_times SET stream_name=?, stream_source=?, start_time=?, end_time=? WHERE stream_source=?',
+                name, source, creation_date, end_time, ogSource, function(err) {
+                    if (err) {
+                        reject(err);
+                    } else {
+                        resolve();
+                    }
+                });
+        });
+    
+        (async() => {
+            await Promise.all([updateStream, updateLivestream]);
+            db.close();
+            updateLiveStreams();
+            res.send("Livestream edited in the database and HLS streaming initialized");
+        })();
     } catch (err) {
         console.error(err);
         res.status(400).send(`Error: ${err}`);
     }
+    
+    // try {
+    //     console.log(req.body);
+    //     const db = new sqlite3.Database('main.db');
+    //     const ogSource = req.body.ogSource;
+    //     // const streams_stmt = db.prepare(`UPDATE streams SET name=(?), source=(?), running=(?), is_livestream=(?), creation_date=(?) WHERE source=(?);`);
+    //     // const livestream_stmt =  db.prepare(`UPDATE livestream_times SET stream_name=(?), stream_source=(?), start_time=(?), end_time=(?), WHERE stream_source=(?);`);
+
+    //     // const streams_livestreams_stmt = db.prepare('UPDATE streams SET name=(?), source=(?), running=(?), is_livestream=(?), creation_date=(?) WHERE source=(?); UPDATE livestream_times SET stream_name=(?), stream_source=(?), start_time=(?), end_time=(?), WHERE stream_source=(?);');
+    //     const name = req.body.streamName;
+    //     const port = (req.body.port) ? `:${req.body.port}` : ""
+    //     const source = `${req.body.protocol}://${req.body.ip}${port}${req.body.directory}`;
+    //     const isRunning = Number(1);
+    //     const isLivestream = Number(1);
+    //     const creation_date = moment(moment().format('YYYY/MM/DD HH:mm:ss')).format("YYYY-MM-DD HH:mm:ss");
+    //     const end_time = null;
+    //     streams_stmt.run(name, source, isRunning, isLivestream, creation_date, ogSource);
+    //      streams_stmt.finalize();
+    //     livestream_stmt.run(name, source, creation_date, end_time, ogSource);
+    //     livestream_stmt.finalize();
+    //     // streams_livestreams_stmt.run(name, source, isRunning, isLivestream, creation_date, ogSource, name, source, creation_date, end_time, ogSource);
+    //     /// streams_livestreams_stmt.finalize();
+    //     db.close();
+    //     updateLiveStreams();
+    //     res.send("Livestream edited in database and HLS streaming initialised");
+    // } catch (err) {
+    //     console.error(err);
+    //     res.status(400).send(`Error: ${err}`);
+    // }
 });
 
 
