@@ -340,7 +340,7 @@ const SidebarFilters = props => {
             const recordingStartTime = dateTimeRangeFilter?.data?.recordingStartTime;
             const startTime = dateTimeRangeFilter?.data?.startTime;
             const endTime = dateTimeRangeFilter?.data?.endTime;
-            const interval = (streamName=="mock_long") ? 1800 : dateTimeRangeFilter?.data?.interval ?? 1800;
+            const interval = dateTimeRangeFilter?.data?.interval ?? 1800;
             
             console.log("pre screwed stuff");
 
