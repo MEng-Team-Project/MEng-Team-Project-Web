@@ -67,7 +67,13 @@ import MultiSelect from './Filters/MultiSelect';
 import { setFilters } from '../../../../actions/filterActions';
 import { setAnalytics } from '../../../../actions/analyticsActions';
 
-const TEST_ROUTES_BABY = {"North_Burnaby_Road": [
+const MOCK_TEST_ROUTES = 
+{'South_Burnaby_Road': [[-10, -10], [10, -10], [10, 10], [-10, 10], [-10, -10]],
+'North_Burnaby_Road': [[40, 40], [60, 40], [60, 60], [40, 60], [40, 40]],
+'West_Park_Road': [[10, 10], [30, 10], [30, 30], [10, 30], [10, 10]],
+'East_Park_Road': [[60, 60], [80, 60], [80, 80], [60, 80], [60, 60]]}
+
+const BURNABY_TEST_ROUTES = {"North_Burnaby_Road": [
     [
         1074.9999999999611,
         759.0000000004657
@@ -285,27 +291,27 @@ const SidebarFilters = props => {
             const recordingStartTime = dateTimeRangeFilter?.data?.recordingStartTime;
             const startTime = dateTimeRangeFilter?.data?.startTime;
             
-            const regionData = Object.entries(routes).map(item => {
-                const polygonSVG     = item[1]["data"][0];
-                console.log("polygonSVG:", polygonSVG)
-                const rawPolygonData = extractCoordinates(polygonSVG).slice(1);
+            // const regionData = Object.entries(routes).map(item => {
+            //     const polygonSVG     = item[1]["data"][0];
+            //     console.log("polygonSVG:", polygonSVG)
+            //     const rawPolygonData = extractCoordinates(polygonSVG).slice(1);
 
-                // NOTE: THIS IS FLIPPED AS IT GOT FLIPPED ELSEWHERE, DO NOT TOUCH!
-                const scaledRawPolygonData = rawPolygonData.map(coords => [
-                    coords[1] * (1920/1024),
-                    coords[0] * (1080/576)
-                ]);
-                return scaledRawPolygonData;
-                // return rawPolygonData;
-            });
-            let regions = {};
-            Object.keys(routes).forEach((key, i) => regions[key] = regionData[i]);
-            console.log("hopefulyl brav regions", regions, regionData);
+            //     // NOTE: THIS IS FLIPPED AS IT GOT FLIPPED ELSEWHERE, DO NOT TOUCH!
+            //     const scaledRawPolygonData = rawPolygonData.map(coords => [
+            //         coords[1] * (1920/1024),
+            //         coords[0] * (1080/576)
+            //     ]);
+            //     return scaledRawPolygonData;
+            //     // return rawPolygonData;
+            // });
+            // let regions = {};
+            // Object.keys(routes).forEach((key, i) => regions[key] = regionData[i]);
 
-            console.log("brav astro hacked ROUTES:", routes)
+            const curRegion = (streamName=="mock_long") ? MOCK_TEST_ROUTES : BURNABY_TEST_ROUTES;
+            console.log("curRegion", streamName, curRegion);
             const analyticsDetails = {
                 "stream":  streamName,
-                "regions": TEST_ROUTES_BABY,
+                "regions": curRegion,
                 "classes": classes,
                 "time_of_recording": new Date(recordingStartTime ?? "2020-01-01T00:00").toISOString(),
                 "start_time": new Date(startTime ?? "2020-01-01T00:00").toISOString()
@@ -334,27 +340,33 @@ const SidebarFilters = props => {
             const recordingStartTime = dateTimeRangeFilter?.data?.recordingStartTime;
             const startTime = dateTimeRangeFilter?.data?.startTime;
             const endTime = dateTimeRangeFilter?.data?.endTime;
-            const interval = dateTimeRangeFilter?.data?.interval ?? 1800;
+            const interval = (streamName=="mock_long") ? 1800 : dateTimeRangeFilter?.data?.interval ?? 1800;
             
-            const regionData = Object.entries(routes).map(item => {
-                const polygonSVG     = item[1]["data"][0];
-                console.log("polygonSVG:", polygonSVG)
-                const rawPolygonData = extractCoordinates(polygonSVG).slice(1);
-                const scaledRawPolygonData = rawPolygonData.map(coords => [
-                    coords[1] * (1920/1024),
-                    coords[0] * (1080/576)
-                ]);
-                return scaledRawPolygonData;
-            });
-            let regions = {};
-            Object.keys(routes).forEach((key, i) => regions[key] = regionData[i]);
-            console.log("another one regions", regions, regionData);
+            console.log("pre screwed stuff");
+
+            // const regionData = Object.entries(routes).map(item => {
+            //     const polygonSVG     = item[1]["data"][0];
+            //     console.log("polygonSVG:", polygonSVG)
+            //     const rawPolygonData = extractCoordinates(polygonSVG).slice(1);
+            //     const scaledRawPolygonData = rawPolygonData.map(coords => [
+            //         coords[1] * (1920/1024),
+            //         coords[0] * (1080/576)
+            //     ]);
+            //     return scaledRawPolygonData;
+            // });
+            // let regions = {};
+            // Object.keys(routes).forEach((key, i) => regions[key] = regionData[i]);
+            console.log("another one regions"); //, regions, regionData);
 
 
             console.log("astro hacked ROUTES:", routes)
+
+            const curRegion = (streamName=="mock_long") ? MOCK_TEST_ROUTES : BURNABY_TEST_ROUTES;
+            console.log("curRegion", streamName, curRegion);
+
             const analyticsDetails = {
                 "stream": streamName,
-                "regions": TEST_ROUTES_BABY, // regions,
+                "regions": curRegion, // regions,
                 "classes": classes,
                 "interval_spacing": interval,
                 "time_of_recording": new Date(recordingStartTime ?? "2020-01-01T00:00").toISOString(),
@@ -781,12 +793,14 @@ const Sidebar = props => {
                                     onClick={() => setTab("FILTERS")}
                                 />
                             </Tooltip>
+                            {/*
                             <Tooltip content="Live Video" direction="bottom">
                                 <NearMeOutlinedIcon
                                     className={tab == "LIVE VIDEO" ? "icon-selected tab" : "icon tab"}
                                     onClick={() => setTab("LIVE VIDEO")}
                                 />
                             </Tooltip>
+                            */}
                         </div>
                     </div>
                     <div className="sidebar-tabs">
@@ -808,9 +822,9 @@ const Sidebar = props => {
                                 setShowMap={setShowMap}
                                 />
                         )}
-                        {(tab == "LIVE VIDEO") && (
+                        {/*(tab == "LIVE VIDEO") && (
                             <SidebarLiveVideo />
-                        )}
+                        )*/}
                     </div>
                 </div>
             </div>)}

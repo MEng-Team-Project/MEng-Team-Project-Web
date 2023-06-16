@@ -64,6 +64,186 @@ const AnalysisMap = (props) => {
   const [originalWaypoints, setOriginalWaypoints] = useState([]);
   const [routeNames, setRouteNames] = useState([])
 
+  const calculateCongestion = (startRoad, endRoad, direction) => { //add filters store as a parameter
+
+    //const standardisedCarMin = 4012 
+    const standardisedCarMax = 4595
+    //const standardisedHGVMin = 42
+    const standardisedHGVMax = 55
+    //const standardisedBicycleMin = 552 
+    const standardisedBicycleMax = 779
+    //const standardisedPersonMin = 1000    // CHANGE - find actual value
+    const standardisedPersonMax = 2000    // CHANGE - find actual value
+  
+    console.log(analytics)
+    if(analytics.counts){
+      console.log(analytics.counts.length)
+      //console.log(totalAnalytics)
+    }
+  
+    // Get the counts object for the specified start and end points
+    // check for direction paramater, if both combine values from both
+    // if incoming switch stand and end road parameters
+    // if either incoming or outgoing - half the max value
+  
+    let localAnalytics = null
+  
+    console.log("congestion update")
+    console.log("analytics.counts", analytics.counts)
+    if(totalAnalytics.counts.length === 0){ //analytics.counts.length === 0 && 
+      return "grey"
+    } else if (analytics.counts.length === 0){
+      
+      localAnalytics = totalAnalytics //analytics.all?
+    } else { localAnalytics = analytics}
+    
+    console.log("localAnalytics.counts", localAnalytics.counts);
+  
+    let routeCounts = null
+    let routeCounts2 = null
+    let scaler = 1
+    
+    if(direction === "Route"){
+      for(let i = 0; i < localAnalytics.counts.length; i++){
+        if(localAnalytics.counts[i].start === startRoad && localAnalytics.counts[i].end === endRoad) {
+          routeCounts = localAnalytics.counts[i].counts;
+          break
+        }
+      }
+      for(let i = 0; i < localAnalytics.counts.length; i++){
+        if(localAnalytics.counts[i].end === startRoad && localAnalytics.counts[i].start === endRoad) {
+          routeCounts2 = localAnalytics.counts[i].counts;
+          break
+        }
+      }
+    }
+    else if(direction === "Outgoing"){
+      for(let i = 0; i < localAnalytics.counts.length; i++){
+        if(localAnalytics.counts[i].start === startRoad && localAnalytics.counts[i].end === endRoad) {
+          routeCounts = localAnalytics.counts[i].counts;
+          break
+        }
+      }
+      for(let i = 0; i < localAnalytics.counts.length; i++){
+        if(localAnalytics.counts[i].end === startRoad && localAnalytics.counts[i].start === endRoad) {
+          routeCounts2 = localAnalytics.counts[i].counts;
+          break
+        }
+      }
+      scaler = 0.5
+    }
+    else if(direction === "Incoming"){
+      for(let i = 0; i < localAnalytics.counts.length; i++){
+        if(localAnalytics.counts[i].end === startRoad && localAnalytics.counts[i].start === endRoad) {
+          routeCounts = localAnalytics.counts[i].counts;
+          break
+        }
+      }
+      for(let i = 0; i < localAnalytics.counts.length; i++){
+        if(localAnalytics.counts[i].end === startRoad && localAnalytics.counts[i].start === endRoad) {
+          routeCounts2 = localAnalytics.counts[i].counts;
+          break
+        }
+      }
+      scaler = 0.5
+    }
+    
+    console.log("myRouteCounts:", routeCounts);
+
+    // change to routeCounts.interval -- seconds //
+    const timeInSeconds = localAnalytics.interval //
+  
+    // accomodate multiple vehicle being filtered for
+    let fileteredTotal = 0
+  
+    for (let i = 0; i < localAnalytics.objects.length; i++) {
+      switch (localAnalytics.objects[i]) {
+        case "car":
+          fileteredTotal += standardisedCarMax;
+          break;
+        case "hgv":
+          fileteredTotal += standardisedHGVMax;
+          break;
+        case "person":
+          fileteredTotal += standardisedPersonMax;
+          break;
+        case "bicycle":
+          fileteredTotal += standardisedBicycleMax;
+          break;
+        default:
+          // Handle any other cases
+          break;
+      }
+    }
+    console.log(fileteredTotal)
+    // Calculate the congestion value
+    let congestionValue = 0;
+  
+    if(routeCounts && routeCounts2){
+      congestionValue = ( ( (routeCounts.total + routeCounts2.total) ) / ((fileteredTotal * scaler / (24*60*60)) * timeInSeconds) ) * 100
+    }
+    else if (routeCounts) {
+      congestionValue = ( ( (routeCounts.total) ) / ((fileteredTotal * scaler / (24*60*60)) * timeInSeconds) ) * 100
+    }
+  
+    // output the congestion level string
+    console.log(congestionValue)
+    console.log(localAnalytics)
+    let congestionLevel = "";
+    if (congestionValue <= 33 && congestionValue > 0) {   // CHANGE - USE MINIMUM VALUE instead of 33?
+      congestionLevel = "green";
+    } else if (congestionValue <= 66) {
+      congestionLevel = "orange";
+    } else if (congestionValue > 66){
+      congestionLevel = "red";
+    }
+  
+  return congestionLevel;
+  }
+  
+    const handleTogglePlotting = (road) => {
+      if (road == selected) {
+        setPlotting(false);
+        setSelected("");
+        console.log("SELECTED: ''");
+      } else if (road != selected) {
+        setPlotting(true);
+        setSelected(road);
+        console.log(`SELECTED: '${road}'`);
+      }
+    };
+  
+    const removePosition = () => {
+      const selectedIdx = roads.indexOf(selected);
+      const positionToRemove = positions[selected];
+      setPositions((prevState) => {
+        const newState = { ...prevState };
+        delete newState[selected];
+        return newState;
+      });
+  
+      const newRoutes = routes.filter((route, index) => {
+        const routePositions = originalWaypoints[index];
+        // Check if the removed position exists in routePositions
+        const hasRemovedPosition = routePositions.includes(positionToRemove);
+        return !hasRemovedPosition;
+      });
+    
+      // Update mapCheckboxes based on the remaining routes
+      const newMapCheckboxes = newRoutes.reduce((acc, route, index) => {
+        acc[index] = mapCheckboxes[routes.indexOf(route)];
+        return acc;
+      }, {});
+    
+      // Update routeNames based on the remaining routes
+      const newRouteNames = newRoutes.map((route) => routeNames[routes.indexOf(route)]);
+    
+      setRoutes(newRoutes);
+      setMapCheckboxes(newMapCheckboxes);
+      setRouteNames(newRouteNames);
+      setSelected("");
+    };
+
   const handleToggleExpand = () => {
     switch (expanded){
         case true:
@@ -80,14 +260,48 @@ const AnalysisMap = (props) => {
     }, 200);
   };
 
+  // console.log("analytics live update:", analytics)
+
+  const showRoute = (index, type, startRoad, endRoad) => {
+    let congestion;
+    const route = routes[index];
+    switch (type) {
+        case "Route":
+            //const objectTypes = filter.asdasd
+            congestion = calculateCongestion(startRoad, endRoad, "Route");
+            break;
+        case "Incoming":
+            congestion = calculateCongestion(startRoad, endRoad, "Incoming");
+            break;
+        case "Outgoing":
+            congestion = calculateCongestion(startRoad, endRoad, "Outgoing");
+            break;
+    }
+    let congestionColor = congestion
+    // if analytics store not empty use original route colour determined by function
+    if (route) { 
+        let originalWaypoint = originalWaypoints[index];
+        route.options.lineOptions.styles[0].color = congestionColor;
+        route.setWaypoints(originalWaypoint);
+    }
+    // otherwise use grey colour to indicate lack of data.
+    // else {
+    //   let originalWaypoint = originalWaypoints[index];
+    //     route.options.lineOptions.styles[0].color = "grey";
+    //     route.setWaypoints(originalWaypoint);
+    // }
+}
+
+  // when analytics is updated, draw routes with predetermined values
+  
   useEffect(() => {
-    // when analytics is updated, draw routes with predetermined values
+    console.log("UPDATE ELLO BIG BOI")
     for(let i = 0; i < routes.length; i++){
       const routeName = routeNames[i]
       const [start, end] = routeName.split(" to ")
-      showRoute(i,"Route", start, end)
+      showRoute(i,"Route", start, end);
     }
-  }, [analytics])
+  }, [analytics]);
   
   const incomingCount = 5;
   const outgoingCount = 49;
@@ -105,6 +319,7 @@ const AnalysisMap = (props) => {
 
       let localAnalytics = null
       let routeCounts = null
+      let routeCounts2 = null
   
       //routingControl was being created for every combination of i and j, Meaning n*(n-1)/2 lines drawn between all possible pairs of points.
       for (let i = 0; i < positionsArray.length; i++) {
@@ -115,28 +330,85 @@ const AnalysisMap = (props) => {
           }
           else {
             localAnalytics = totalAnalytics
-            for(let i = 0; i < localAnalytics.counts.length; i++){
-              if(localAnalytics.counts[i].start === roads[i] && localAnalytics.counts[i].end === roads[j]) {
-                routeCounts = localAnalytics.counts[i].counts;
+
+            for(let k = 0; k < localAnalytics.counts.length; k++){
+              if(localAnalytics.counts[k].start === roads[i] && localAnalytics.counts[k].end === roads[j]) {
+                routeCounts = localAnalytics.counts[k].counts??0;
+                break
+              }
+            }
+            for(let k = 0; k < localAnalytics.counts.length; k++){
+              if(localAnalytics.counts[k].end === roads[i] && localAnalytics.counts[k].start === roads[j]) {
+                routeCounts2 = localAnalytics.counts[k].counts??0;
                 break
               }
             }
           }
 
+          if(analytics.counts.length === 0){
+            const message = "No data has been provided"
+          }
+          else {
+            localAnalytics = analytics
+            for(let k = 0; k < localAnalytics.counts.length; k++){
+              if(localAnalytics.counts[k].start === roads[i] && localAnalytics.counts[k].end === roads[j]) {
+                routeCounts = localAnalytics.counts[k].counts??0;
+                break
+              }
+            }
+            for(let k = 0; k < localAnalytics.counts.length; k++){
+              if(localAnalytics.counts[k].end === roads[i] && localAnalytics.counts[k].start === roads[j]) {
+                routeCounts2 = localAnalytics.counts[k].counts??0;
+                break
+              }
+            }
+          }
+
+          
+            
+          // console.log("positionsArray:", positionsArray, localAnalytics, analytics, localAnalytics.counts, analytics.counts, totalAnalytics.counts.length, roads);
+
+          // console.log("ROUTE COUNTS:", conts)
           if (positionsArray[i] && positionsArray[j]) {
             console.log("roads", roads)
             const routeName = `${roads[i]} to ${roads[j]}`
             // Check if both positions are non-null
+
+            console.log("myRouteCounts->pre show:", routeCounts);
+            
+            let carCount = 0, bicycleCount = 0, hgvCount = 0, personCount = 0;
+            
+            if (routeCounts) {
+              if (routeCounts.car) 
+                carCount += routeCounts.car;
+              if (routeCounts.bicycle != null) 
+                bicycleCount += routeCounts.bicycle;
+              if (routeCounts.hgv != null) 
+                hgvCount += routeCounts.hgv;
+              if (routeCounts.person != null) 
+                personCount += routeCounts.person;
+            }
+            if (routeCounts2) {
+              if (routeCounts2.car != null) 
+                carCount += routeCounts2.car;
+              if (routeCounts2.bicycle != null) 
+                bicycleCount += routeCounts2.bicycle;
+              if (routeCounts2.hgv != null) 
+                hgvCount += routeCounts2.hgv;
+              if (routeCounts2.person != null) 
+                personCount += routeCounts2.person;
+            }
+
             const route = L.Routing.control({
               waypoints: [L.latLng(positionsArray[i]), L.latLng(positionsArray[j])],
               distanceTemplate: "",
               timeTemplate: "",
               //TODO: add route analytics below
               summaryTemplate: (routeCounts) ? `<h2>${routeName}</h2> All Route Analytics:<br>
-                                                Cars: ${routeCounts.car??0}<br>
-                                                Bicycles: ${routeCounts.bicycle??0}<br>
-                                                HGVs: ${routeCounts.hgv??0}<br>
-                                                People ${routeCounts.person??0}` : '',
+                                                Cars: ${carCount}<br>
+                                                Bicycles: ${bicycleCount}<br>
+                                                HGVs: ${hgvCount}<br>
+                                                People ${personCount}` : '',
               fitSelectedRoutes: true,
               draggableWaypoints: false,
               routeWhileDragging: false,
@@ -258,19 +530,33 @@ const handleMapCheckBoxes = (event, i, type, routeName) => {
         showRoute(i, type, startRoad, endRoad);
         if (name.includes("incoming_")) {
           route.show()
-          route.options.summaryTemplate = (incomingCount) ? `<h2>${routeName}</h2> All Route Analytics:<br>
-                                                            Cars: ${incomingCount.car??0}<br>
-                                                            Bicycles: ${incomingCount.bicycle??0}<br>
-                                                            HGVs: ${incomingCount.hgv??0}<br>
-                                                            People ${incomingCount.person??0}` : '';
+          let incomingCar = 0, incomingBicycle = 0, incomingHgv = 0, incomingPerson = 0;
+          if (incomingCount) {
+            incomingCar += incomingCount.car??0;
+            incomingBicycle += incomingCount.bicycle??0;
+            incomingHgv += incomingCount.hgv??0;
+            incomingPerson += incomingCount.person??0;
+          }
+          route.options.summaryTemplate = `<h2>${routeName}</h2> Incoming Analytics:<br>
+                                                            Cars: ${incomingCar}<br>
+                                                            Bicycles: ${incomingBicycle}<br>
+                                                            HGVs: ${incomingHgv}<br>
+                                                            People: ${incomingPerson}`;
         }
         else if(name.includes("outgoing_")){
           route.show()
-          route.options.summaryTemplate = (outgoingCount) ? `<h2>${routeName}</h2> All Route Analytics:<br>
-                                                            Cars: ${outgoingCount.car??0}<br>
-                                                            Bicycles: ${outgoingCount.bicycle??0}<br>
-                                                            HGVs: ${outgoingCount.hgv??0}<br>
-                                                            People ${outgoingCount.person??0}` : '';
+          let outgoingCar = 0, outgoingBicycle = 0, outgoingHgv = 0, outgoingPerson = 0;
+          if (outgoingCount) {
+            outgoingCar += outgoingCount.car??0;
+            outgoingBicycle += outgoingCount.bicycle??0;
+            outgoingHgv += outgoingCount.hgv??0;
+            outgoingPerson += outgoingCount.person??0;
+          }
+          route.options.summaryTemplate = `<h2>${routeName}</h2> Outgoing Analytics:<br>
+                                                            Cars: ${outgoingCar??0}<br>
+                                                            Bicycles: ${outgoingBicycle??0}<br>
+                                                            HGVs: ${outgoingHgv??0}<br>
+                                                            People: ${outgoingPerson??0}`;
         }
     }else{
         if (name.includes("incoming_") || name.includes("outgoing_")) {
@@ -291,199 +577,6 @@ const hideRoute = (index) => {
         route.setWaypoints(originalWaypoint);
     }
 }
-
-const showRoute = (index, type, startRoad, endRoad) => {
-    let congestion;
-    const route = routes[index];
-    switch (type) {
-        case "Route":
-            //const objectTypes = filter.asdasd
-            congestion = calculateCongestion(startRoad, endRoad, "Route");
-            break;
-        case "Incoming":
-            congestion = calculateCongestion(startRoad, endRoad, "Incoming");
-            break;
-        case "Outgoing":
-            congestion = calculateCongestion(startRoad, endRoad, "Outgoing");
-            break;
-    }
-    let congestionColor = congestion
-    // if analytics store not empty use original route colour determined by function
-    if (route) { 
-        let originalWaypoint = originalWaypoints[index];
-        route.options.lineOptions.styles[0].color = congestionColor;
-        route.setWaypoints(originalWaypoint);
-    }
-    // otherwise use grey colour to indicate lack of data.
-    // else {
-    //   let originalWaypoint = originalWaypoints[index];
-    //     route.options.lineOptions.styles[0].color = "grey";
-    //     route.setWaypoints(originalWaypoint);
-    // }
-}
-
-// Calculate and congestion against standardised values for a route (both directions)
-
-const calculateCongestion = (startRoad, endRoad, direction) => { //add filters store as a parameter
-
-  //const standardisedCarMin = 4012 
-  const standardisedCarMax = 4595
-  //const standardisedHGVMin = 42
-  const standardisedHGVMax = 55
-  //const standardisedBicycleMin = 552 
-  const standardisedBicycleMax = 779
-  //const standardisedPersonMin = 1000    // CHANGE - find actual value
-  const standardisedPersonMax = 2000    // CHANGE - find actual value
-
-  console.log(analytics)
-  if(analytics.counts){
-    console.log(analytics.counts.length)
-    //console.log(totalAnalytics)
-  }
-
-  // Get the counts object for the specified start and end points
-  // check for direction paramater, if both combine values from both
-  // if incoming switch stand and end road parameters
-  // if either incoming or outgoing - half the max value
-
-  let localAnalytics = null
-
-  if(totalAnalytics.counts.length === 0){ //analytics.counts.length === 0 && 
-    return "grey"
-  } else if (analytics.counts.length === 0){
-    localAnalytics = totalAnalytics //analytics.all?
-  } else { localAnalytics = analytics}
-
-  let routeCounts = null
-  let routeCounts2 = null
-  let scaler = 1
-  
-  if(direction === "Route"){
-    for(let i = 0; i < localAnalytics.counts.length; i++){
-      if(localAnalytics.counts[i].start === startRoad && localAnalytics.counts[i].end === endRoad) {
-        routeCounts = localAnalytics.counts[i].counts;
-        break
-      }
-    }
-    for(let i = 0; i < localAnalytics.counts.length; i++){
-      if(localAnalytics.counts[i].end === startRoad && localAnalytics.counts[i].start === endRoad) {
-        routeCounts2 = localAnalytics.counts[i].counts;
-        break
-      }
-    }
-  }
-  else if(direction === "Outgoing"){
-    for(let i = 0; i < localAnalytics.counts.length; i++){
-      if(localAnalytics.counts[i].start === startRoad && localAnalytics.counts[i].end === endRoad) {
-        routeCounts = localAnalytics.counts[i].counts;
-        break
-      }
-    }
-    scaler = 0.5
-  }
-  else if(direction === "Incoming"){
-    for(let i = 0; i < localAnalytics.counts.length; i++){
-      if(localAnalytics.counts[i].end === startRoad && localAnalytics.counts[i].start === endRoad) {
-        routeCounts = localAnalytics.counts[i].counts;
-        break
-      }
-    }
-    scaler = 0.5
-  }
-  
-  // change to routeCounts.interval -- seconds //
-  const timeInSeconds = localAnalytics.interval //
-
-  // accomodate multiple vehicle being filtered for
-  let fileteredTotal = 0
-
-  for (let i = 0; i < localAnalytics.objects.length; i++) {
-    switch (localAnalytics.objects[i]) {
-      case "car":
-        fileteredTotal += standardisedCarMax;
-        break;
-      case "hgv":
-        fileteredTotal += standardisedHGVMax;
-        break;
-      case "person":
-        fileteredTotal += standardisedPersonMax;
-        break;
-      case "bicycle":
-        fileteredTotal += standardisedBicycleMax;
-        break;
-      default:
-        // Handle any other cases
-        break;
-    }
-  }
-  console.log(fileteredTotal)
-  // Calculate the congestion value
-  let congestionValue = 0;
-
-  if(routeCounts && routeCounts2){
-    congestionValue = ( ( (routeCounts.total + routeCounts2.total) ) / ((fileteredTotal * scaler / (24*60*60)) * timeInSeconds) ) * 100
-  }
-  else if (routeCounts) {
-    congestionValue = ( ( (routeCounts.total) ) / ((fileteredTotal * scaler / (24*60*60)) * timeInSeconds) ) * 100
-  }
-
-  // output the congestion level string
-  console.log(congestionValue)
-  console.log(localAnalytics)
-  let congestionLevel = "";
-  if (congestionValue <= 33 && congestionValue > 0) {   // CHANGE - USE MINIMUM VALUE instead of 33?
-    congestionLevel = "green";
-  } else if (congestionValue <= 66) {
-    congestionLevel = "orange";
-  } else if (congestionValue > 66){
-    congestionLevel = "red";
-  }
-
-return congestionLevel;
-}
-
-  const handleTogglePlotting = (road) => {
-    if (road == selected) {
-      setPlotting(false);
-      setSelected("");
-      console.log("SELECTED: ''");
-    } else if (road != selected) {
-      setPlotting(true);
-      setSelected(road);
-      console.log(`SELECTED: '${road}'`);
-    }
-  };
-
-  const removePosition = () => {
-    const selectedIdx = roads.indexOf(selected);
-    const positionToRemove = positions[selected];
-    setPositions((prevState) => {
-      const newState = { ...prevState };
-      delete newState[selected];
-      return newState;
-    });
-
-    const newRoutes = routes.filter((route, index) => {
-      const routePositions = originalWaypoints[index];
-      // Check if the removed position exists in routePositions
-      const hasRemovedPosition = routePositions.includes(positionToRemove);
-      return !hasRemovedPosition;
-    });
-  
-    // Update mapCheckboxes based on the remaining routes
-    const newMapCheckboxes = newRoutes.reduce((acc, route, index) => {
-      acc[index] = mapCheckboxes[routes.indexOf(route)];
-      return acc;
-    }, {});
-  
-    // Update routeNames based on the remaining routes
-    const newRouteNames = newRoutes.map((route) => routeNames[routes.indexOf(route)]);
-  
-    setRoutes(newRoutes);
-    setMapCheckboxes(newMapCheckboxes);
-    setRouteNames(newRouteNames);
-    setSelected("");
-  };
   
   return (
     <div className={mapClass}>

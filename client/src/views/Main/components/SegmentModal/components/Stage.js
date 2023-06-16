@@ -174,13 +174,14 @@ const Stage = props => {
 
     return (
         <div class="stage-container">
-            
+            {/*
             <button onClick={() => handleSave()}>
                 Save Image
             </button>
             <button onClick={() => handleAnnotation()}>
                 Save Annotation
             </button>
+            */}
             
             <div class="stage">
                 <canvas

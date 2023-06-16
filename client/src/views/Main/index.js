@@ -314,6 +314,11 @@ const Main = props => {
         }, 1000);
     }
 
+    console.log("STREAM DETAILS:", stream)
+    if (stream) {
+        var livestreamURL = `./livestream/${stream.source.split("/").slice(-1)[0]}/output.m3u8`;
+    }
+
     return (
         <div className="main-root">
             <div className="feed-outer">
@@ -321,7 +326,7 @@ const Main = props => {
                     (isLivestream) ? ( 
                         <ReactHlsPlayer
                             ref={videoRef}
-                            src="./livestream/tes/output.m3u8"
+                            src={livestreamURL}
                             autoPlay={true}
                             controls={showControls}
                             onContextMenu={e => e.preventDefault()}

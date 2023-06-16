@@ -54,10 +54,11 @@ router.post("/", async (req, res) => {
  * @access Public
  */
  router.get("/download", async (req, res) => {
-    console.log("GET /api/analysis/download", req.query);
+    console.log("GET /api/analysis/download", req.query, req.query.stream);
     try {
         let stream = req.query.stream;
-        const downloadPath = `./server/analysis/${stream}.json`;
+        // const downloadPath = `./server/analysis/${stream}.json`;
+        const downloadPath = `./server/analysis/${stream}`;
         const destination = path.join(process.cwd(), `./server/analysis/${stream}.json`);
         if (fs.existsSync(downloadPath)) {
             return res.download(downloadPath);
@@ -74,7 +75,7 @@ router.post("/", async (req, res) => {
                 })
             });
             const data = await response.json();
-            console.log(response);
+            console.log("analytics json res:", stream, response);
             if (response.status == 400) {
                 return res.status(400).send("Can't download file.")
             } else {

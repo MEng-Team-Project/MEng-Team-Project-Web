@@ -66,26 +66,35 @@ const ExportModal = props => {
     */
     
     useEffect(() => {
-        if (streams.length > 0) {
-            setSelectedStream(streams[0]);
-        }
+        // if (selectedStream == "" && streams.length > 0) {
+        //     setSelectedStream(streams[0]);
+        // }
+        // if (streams.length > 0) {
+        //     setSelectedStream(streams[0]);
+        // }
     }, [streams]);
 
     const downloadStream = (id) => {
-        const sourceId = id["source"];
-        console.log("id:", sourceId);
-        if (sourceId) {
-            const fnameToId = s => {
-                s = s.split("/")
-                s = s[s.length - 1]
-                s = s.split(".")
-                s = s.slice(0, s.length - 1)
-                s = s.join(".");
-                return s;
-            }
-            const downloadId = fnameToId(sourceId) + ".json";
-            window.open(`http://localhost:5000/api/analysis/download?stream=${downloadId}`);
-        }
+        console.log("downloadStream:", id)
+        const downloadId = id.replace(".mp4", ".json")
+        const destUrl = `http://localhost:5000/api/analysis/download?stream=${downloadId}`;
+        console.log("destUrl:", destUrl);
+        window.open(destUrl);
+
+        // const sourceId = id["source"];
+        // console.log("id:", sourceId);
+        // if (sourceId) {
+        //     const fnameToId = s => {
+        //         s = s.split("/")
+        //         s = s[s.length - 1]
+        //         s = s.split(".")
+        //         s = s.slice(0, s.length - 1)
+        //         s = s.join(".");
+        //         return s;
+        //     }
+        //     const downloadId = fnameToId(sourceId) + ".json";
+            
+        // }
     };
 
     return (
