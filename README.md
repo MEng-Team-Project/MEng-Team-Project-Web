@@ -48,6 +48,10 @@ docker run \
     traffic-web npm run dev
 ```
 
+This repository also relies on a Meta SAM iFrame page which can be
+found [here](https://github.com/MEng-Team-Project/meta-sam-demo-controlled). Follow the instructions on that repository, run it simulatenously as
+this one, wait for port conflict to 3001.
+
 <!--
 ```bash
 docker run -p 3000:3000 -p 5000:5000 traffic-web
