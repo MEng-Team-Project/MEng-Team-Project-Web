@@ -118,7 +118,7 @@ Then run, the ml repo using the code contained within
 Finally, run the backend unit tests:
 
 ```bash
-npm run test
+npm run test    
 ```
 
 ## Livestream Testing
