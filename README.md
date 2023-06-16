@@ -104,6 +104,23 @@ If you only want to run the client without the server, run:
 npm run client
 ```
 
+## Unit Testing (Backend)
+
+To perform the unit tests, run the web repo first using:
+
+```bash
+npm run dev
+```
+
+Then run, the ml repo using the code contained within
+[here](https://github.com/MEng-Team-Project/MEng-Team-Project-ML):
+
+Finally, run the backend unit tests:
+
+```bash
+npm run test
+```
+
 ## Livestream Testing
 
 ### Local Test
